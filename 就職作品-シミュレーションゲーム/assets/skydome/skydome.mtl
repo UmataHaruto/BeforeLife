@@ -1,0 +1,9 @@
+newmtl skydome:blinn1SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd aaddb2fa7b6d4e200b5a2b567cf6cc08_t.jpeg
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 0.06

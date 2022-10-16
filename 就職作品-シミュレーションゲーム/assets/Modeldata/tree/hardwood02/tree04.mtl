@@ -1,0 +1,16 @@
+newmtl tree05SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd T_Pine_Tree_Leaves_D.png
+Ni 1.00
+newmtl tree05SG1
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd T_Pine_Tree_Trunk_D.png
+Ni 1.00
+Ks 0.20 0.20 0.20
+Ns 18.00

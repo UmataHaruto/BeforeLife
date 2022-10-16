@@ -1,0 +1,9 @@
+newmtl Cloud:blinn2SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd 86f71e84-533c-4ec2-b3ce-968c18a68a31-x4.png
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 0.06
