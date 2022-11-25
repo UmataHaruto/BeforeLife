@@ -31,29 +31,29 @@
 #include "Terrain.h"
 #include <thread>
 #include "BuildingMgr.h"
-//GIT TEST
+//GIT TEST RECEVE
 
 
-Skydome g_skybox;       // ƒXƒJƒCƒh[ƒ€
-Terrain g_terrain;    //’nŒ`(ŠO‘¤)
+Skydome g_skybox;       // ã‚¹ã‚«ã‚¤ãƒ‰ãƒ¼ãƒ 
+Terrain g_terrain;    //åœ°å½¢(å¤–å´)
 XMFLOAT4X4 FirstCameraPos;
 
-//ŠÔŒv‘ª
+//æ™‚é–“è¨ˆæ¸¬
 DWORD starttime;
 DWORD endtime;
 DWORD timer;
 
-//Œ±“IƒŒƒ“ƒ_ƒŠƒ“ƒO
+//è©¦é¨“çš„ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°
 const DXGI_SURFACE_DESC* pDesc;
 ID3D11Device* pDevice;
 ID3D11Texture2D* mpTex;
 ID3D11SamplerState* mpSmp;
-ID3D11Buffer* mpQuadVB;		//ƒfƒoƒbƒO•`‰æ—p’¸“_ƒoƒbƒtƒ@
+ID3D11Buffer* mpQuadVB;		//ãƒ‡ãƒãƒƒã‚°æç”»ç”¨é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡
 ID3D11RenderTargetView* targetview;
 ID3D11Resource*	g_TexResource;
 
-ID3D11VertexShader* m_pVertexShader = nullptr;		// ’¸“_ƒVƒF[ƒ_[“ü‚ê•¨
-ID3D11PixelShader* m_pPixelShader = nullptr;		// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[“ü‚ê•¨
+ID3D11VertexShader* m_pVertexShader = nullptr;		// é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼å…¥ã‚Œç‰©
+ID3D11PixelShader* m_pPixelShader = nullptr;		// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼å…¥ã‚Œç‰©
 uint32_t mQuadStride;
 ID3D11ShaderResourceView* SRV;
 
@@ -67,10 +67,10 @@ enum class CAMERAMODE
 
 CAMERAMODE cameratype = CAMERAMODE::TPS;
 
-//Œ»İ‚ÌˆÚ“®”
+//ç¾åœ¨ã®ç§»å‹•æ•°
 int nowcnt;
 
-//üŒ`•âŠÔ‚Ì‰ñ”
+//ç·šå½¢è£œé–“ã®å›æ•°
 int lerpcnt = 20;
 
 void InitThred00()
@@ -124,14 +124,14 @@ void InitThred03()
 
 void InitThred04()
 {
-	//–¼‘O¶¬‚Ì‰Šú‰»
+	//åå‰ç”Ÿæˆã®åˆæœŸåŒ–
 	NameGenerator::GetInstance().Init();
 	SoundMgr::GetInstance().XA_Initialize();
 
-	//ƒXƒvƒ‰ƒCƒgƒ}ƒl[ƒWƒƒ[‚Ì‰Šú‰»
+	//ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã®åˆæœŸåŒ–
 	Sprite2DMgr::GetInstance().Init();
 
-	// IMGUI‰Šú‰»
+	// IMGUIåˆæœŸåŒ–
 	imguiInit();
 }
 void SearchMousePosThread()
@@ -143,7 +143,7 @@ void SearchMousePosThread()
 }
 void  SimulationInit() {
 
-	//‰Šúƒ[ƒh‚ğƒ}ƒ‹ƒ`ƒXƒŒƒbƒh‚Ås‚¤
+	//åˆæœŸãƒ­ãƒ¼ãƒ‰ã‚’ãƒãƒ«ãƒã‚¹ãƒ¬ãƒƒãƒ‰ã§è¡Œã†
 	std::thread thr1(InitThred00);
 	std::thread thr2(InitThred01);
 	std::thread thr3(InitThred02);
@@ -156,33 +156,33 @@ void  SimulationInit() {
 	thr4.join();
 	thr5.join();
 
-	//ƒQ[ƒ€ƒ{ƒ^ƒ“‰Šú‰»
+	//ã‚²ãƒ¼ãƒ ãƒœã‚¿ãƒ³åˆæœŸåŒ–
 	GameButton::GetInstance().Init();
 
 
-	// ASSIMP‚ğg—p‚µ‚½ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì“Ç‚İ‚İ
+	// ASSIMPã‚’ä½¿ç”¨ã—ãŸã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®èª­ã¿è¾¼ã¿
 	bool sts = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::PLAYER)].modelname)->LoadAnimation("assets/ModelData/male_adult/animation/male_adult_ver1.1.fbx");
 	sts = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::CONIFER00)].modelname)->LoadAnimation("assets/Modeldata/tree/conifer00/conifer01.fbx");
 	
-	//ƒXƒe[ƒW‚ğƒ[ƒh
+	//ã‚¹ãƒ†ãƒ¼ã‚¸ã‚’ãƒ­ãƒ¼ãƒ‰
 	Stage::GetInstance().RoadStageData();
 
 
-	//ƒŠƒ\[ƒX‰Šú‰»
+	//ãƒªã‚½ãƒ¼ã‚¹åˆæœŸåŒ–
 	ResourceManager::GetInstance().Init();
 
-	//Œš’z•¨‰Šú‰»
+	//å»ºç¯‰ç‰©åˆæœŸåŒ–
 	BuildingMgr::GetInstance().Init();
 
-	//ƒXƒe[ƒWƒRƒŠƒWƒ‡ƒ“‚ğì¬
+	//ã‚¹ãƒ†ãƒ¼ã‚¸ã‚³ãƒªã‚¸ãƒ§ãƒ³ã‚’ä½œæˆ
 	StageHitInit();
 
-	//‚QD‚Ì‰Šú‰»
+	//ï¼’Dã®åˆæœŸåŒ–
 	Init2D();
-	//‚QDƒeƒLƒXƒg‰Šú‰»
+	//ï¼’Dãƒ†ã‚­ã‚¹ãƒˆåˆæœŸåŒ–
 	MyString::InitMyString();
 
-	//‘ºlƒ}ƒl[ƒWƒƒ[‚Ì‰Šú‰»
+	//æ‘äººãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã®åˆæœŸåŒ–
 	VillagerMgr::GetInstance().Init();
 	Player::Data pdata;
 	pdata.pos = XMFLOAT3(500, 0, -500);
@@ -190,7 +190,7 @@ void  SimulationInit() {
 	pdata.lastname = NameGenerator::GetInstance().CreateName(NameGenerator::FAMILLY);
 	VillagerMgr::GetInstance().CreateVillager(pdata);
 
-	//ƒJƒƒ‰‰ŠúˆÊ’u‚Ì‰Šú‰»
+	//ã‚«ãƒ¡ãƒ©åˆæœŸä½ç½®ã®åˆæœŸåŒ–
 	DX11MtxIdentity(FirstCameraPos);
 	FirstCameraPos._41 = VillagerMgr::GetInstance().m_villager[0]->GetPos().x;
 	FirstCameraPos._42 = VillagerMgr::GetInstance().m_villager[0]->GetPos().y;
@@ -204,10 +204,10 @@ void  SimulationInit() {
 
 	Sprite2DMgr::GetInstance().CreateUI(UILIST::BLACKBACK_START, 1000, 530, 0, 11, 5.5, XMFLOAT4(1, 1, 1, 1));
 
-	//MouseCursor¶¬
+	//MouseCursorç”Ÿæˆ
 	Sprite2DMgr::GetInstance().CreateUI(UILIST::ICON_MOUSE, 1000, 530, 0, 0.2,0.2, XMFLOAT4(1, 1, 1, 1));
 
-	// ƒ‰ƒCƒg‰Šú‰»
+	// ãƒ©ã‚¤ãƒˆåˆæœŸåŒ–
 	XMFLOAT4 lightpos(0, 0, 1, 0);
 
 	XMFLOAT2 uv[4];
@@ -220,14 +220,14 @@ void  SimulationInit() {
 	uv[3].x = 1.0f;
 	uv[3].y = 1.0f;
 
-	//ƒXƒJƒCƒh[ƒ€‰Šú‰»
+	//ã‚¹ã‚«ã‚¤ãƒ‰ãƒ¼ãƒ åˆæœŸåŒ–
 	g_skybox.Init();
 	g_skybox.SetModel(ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::SKYBOX)].modelname));
 
-	//’nŒ`‰Šú‰»
+	//åœ°å½¢åˆæœŸåŒ–
 	g_terrain.Init();
 
-	//ŠJnŠÔ‚Ìİ’è
+	//é–‹å§‹æ™‚é–“ã®è¨­å®š
 	starttime = timeGetTime();
 
 }
@@ -243,7 +243,7 @@ void  SimulationExit() {
 
 	MyString::ClearMyString();
 
-	//ƒXƒJƒCƒh[ƒ€I—¹ˆ—
+	//ã‚¹ã‚«ã‚¤ãƒ‰ãƒ¼ãƒ çµ‚äº†å‡¦ç†
 	g_skybox.Finalize();
 
 	g_terrain.Finalize();
@@ -256,35 +256,35 @@ void  SimulationUpdate() {
 
 	ImGuiIO& io = ImGui::GetIO();
 
-	//Œo‰ßŠÔ‚ğİ’è(ƒ~ƒŠ•b)
+	//çµŒéæ™‚é–“ã‚’è¨­å®š(ãƒŸãƒªç§’)
 	endtime = timeGetTime();
 	timer = (endtime - starttime);
 
 	CDirectInput::GetInstance().GetMouseState();
 
-	//‘Œ¹ƒ}ƒl[ƒWƒƒ[‚ÌXV
+	//è³‡æºãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã®æ›´æ–°
 	ResourceManager::GetInstance().Update();
 
-	//Œš’z•¨ƒ}ƒl[ƒWƒƒ[‚ÌXV
+	//å»ºç¯‰ç‰©ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã®æ›´æ–°
 	BuildingMgr::GetInstance().Update();
 
 
-	//‘ºlƒ}ƒl[ƒWƒƒ[‚ÌXV
+	//æ‘äººãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã®æ›´æ–°
 	VillagerMgr::GetInstance().Update();
 
-	//ƒXƒe[ƒWXV
+	//ã‚¹ãƒ†ãƒ¼ã‚¸æ›´æ–°
 	Stage::GetInstance().Update();
 
-	//ƒuƒƒbƒN‘I‘ğ
+	//ãƒ–ãƒ­ãƒƒã‚¯é¸æŠ
 	//Stage::GetInstance().SearchBlock();
 
-	//ƒXƒvƒ‰ƒCƒgƒ}ƒl[ƒWƒƒ[‚ÌXV
+	//ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã®æ›´æ–°
 	Sprite2DMgr::GetInstance().Update();
 
-	//ƒ{ƒ^ƒ“XV
+	//ãƒœã‚¿ãƒ³æ›´æ–°
 	GameButton::GetInstance().Update();
 
-	//F5ƒL[“ü—Í(ƒgƒŠƒK[)
+	//F5ã‚­ãƒ¼å…¥åŠ›(ãƒˆãƒªã‚¬ãƒ¼)
 	if (CDirectInput::GetInstance().CheckKeyBufferTrigger(DIK_F5))
 	{
 		switch (cameratype)
@@ -310,7 +310,7 @@ void  SimulationUpdate() {
 			break;
 		}
 	}
-	//ƒXƒJƒCƒh[ƒ€XV
+	//ã‚¹ã‚«ã‚¤ãƒ‰ãƒ¼ãƒ æ›´æ–°
 	g_skybox.Update(XMFLOAT3(0,0,0));
 	XMFLOAT4X4 Rotation;
 	XMMATRIX RotationMtx;
@@ -324,7 +324,7 @@ void  SimulationUpdate() {
 
 
 	DX11MtxIdentity(Rotation);
-	//ƒJƒƒ‰ƒ^ƒCƒv‚É‰‚¶‚Äİ’è
+	//ã‚«ãƒ¡ãƒ©ã‚¿ã‚¤ãƒ—ã«å¿œã˜ã¦è¨­å®š
 	switch (cameratype)
 	{
 	case CAMERAMODE::FIXED:
@@ -336,7 +336,7 @@ void  SimulationUpdate() {
 		break;
 
 	case CAMERAMODE::TPS:
-		//ƒY[ƒ€”{—¦ Šî€1.0f
+		//ã‚ºãƒ¼ãƒ å€ç‡ åŸºæº–1.0f
 		float zoom;
 		if (CDirectInput::GetInstance().CheckKeyBuffer(DIK_A)) {
 			FirstCameraPos._41 -= speed * FirstCameraPos._11;
@@ -391,24 +391,24 @@ void  SimulationUpdate() {
 }
 
 void  SimulationDraw() {
-	//‚RD•`‰æ
+	//ï¼“Dæç”»
 	TurnOnZbuffer();
 
 	Stage::GetInstance().Draw();
-	//‘Œ¹•`‰æ
+	//è³‡æºæç”»
 	ResourceManager::GetInstance().Draw();
 
-	//Œš’z•¨•`‰æ
+	//å»ºç¯‰ç‰©æç”»
 	BuildingMgr::GetInstance().Draw();
 	GameButton::GetInstance().PrevieModelDraw();
 
-	//‘ºl•`‰æ
+	//æ‘äººæç”»
 	VillagerMgr::GetInstance().Draw();
 
 	g_skybox.Draw();
 
 	g_terrain.Draw();
-	//2D•`‰æ
+	//2Dæç”»
 	TurnOffZbuffer();
 
 	Init2D();
