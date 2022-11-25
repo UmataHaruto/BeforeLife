@@ -14,12 +14,24 @@ using Microsoft::WRL::ComPtr;
 //モデルID
 enum class MODELID {
 	PLAYER,
-	ENEMY,
+	HAIR_00,
+	PICKAXE,
+	AXE,
+	BASKET,
 	SKYBOX,
-	FOG,
-	SEA,
 	GRASS,
 	CONIFER00,
+	ORE_IRON,
+	SMALLHOUSE,
+	TERRAIN,
+	TERRAIN_COLLISION,
+	SMALLSOUKO,
+	CREATE_WOOD,
+	CREATE_COAL,
+	CREATE_IRON,
+	CREATE_GOLD,
+
+
 };
 
 //モデルデータリスト
@@ -67,13 +79,24 @@ public:
 	ModelMgr& operator=(ModelMgr&&) = delete;
 
 	std::vector<ModelDataList> g_modellist = {
-	{MODELID::PLAYER,"assets/ModelData/FemaleWalk.x","shader/vsoneskin.fx","shader/ps.fx","assets/ModelData/"},
-	{(const MODELID)MODELID::ENEMY,"assets/f1/f1.x","shader/vs.fx","shader/ps.fx","assets/f1/"},
-	{(const MODELID)MODELID::SKYBOX,"assets/skydome/skydome.obj","shader/vs.fx","shader/BillBoard.hlsl","assets/skydome/"},
-	{(const MODELID)MODELID::FOG,"assets/ModelData/Fog.obj","shader/vs.fx","shader/ps.fx","assets/ModelData/"},
-	{(const MODELID)MODELID::SEA,"assets/ModelData/Quad_Lo.obj","shader/vs.fx","shader/ps.fx","assets/ModelData/"},
+	{MODELID::PLAYER,"assets/ModelData/male_adult/male_adult.fbx","shader/vsoneskin.fx","shader/ps.fx","assets/ModelData/male_adult/"},
+	{(const MODELID)MODELID::HAIR_00,"assets/ModelData/male_adult/Hair/Hair_00.obj","shader/vs_hair.hlsl","shader/ps_hair.hlsl","assets/ModelData/male_adult/Hair/"},
+	{(const MODELID)MODELID::PICKAXE,"assets/ModelData/Tools/Pickaxe/Pickaxe.obj","shader/vs.fx","shader/ps.fx","assets/ModelData/Tools/Pickaxe/"},
+	{(const MODELID)MODELID::AXE,"assets/ModelData/Tools/Axe/Axe.obj","shader/vs.fx","shader/ps.fx","assets/ModelData/Tools/Axe/"},
+	{(const MODELID)MODELID::BASKET,"assets/ModelData/Tools/Basket/Basket.obj","shader/vs.fx","shader/ps.fx","assets/ModelData/Tools/Basket/"},
+	{(const MODELID)MODELID::SKYBOX,"assets/skydome/Dome_X502.x","shader/vs.fx","shader/BillBoard.hlsl","assets/skydome/"},
 	{(const MODELID)MODELID::GRASS,"assets/Modeldata/Block/GrassBlock.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/Block/"},
-	{(const MODELID)MODELID::CONIFER00,"assets/Modeldata/tree/conifer00/tree.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/tree/conifer00/"},
+	{(const MODELID)MODELID::CONIFER00,"assets/Modeldata/tree/conifer00/conifer01.fbx","shader/vsoneskin.fx","shader/ps.fx","assets/Modeldata/tree/conifer00/"},
+	{(const MODELID)MODELID::ORE_IRON,"assets/Modeldata/Ore/Normal/Ore_Normal.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/Ore/Normal/"},
+	{(const MODELID)MODELID::SMALLHOUSE,"assets/Modeldata/House/House_Small.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/House/"},
+	{(const MODELID)MODELID::TERRAIN,"assets/Modeldata/terrain/terrain.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/terrain/"},
+	{(const MODELID)MODELID::TERRAIN,"assets/Modeldata/terrain/terrainColision.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/terrain/"},
+	{(const MODELID)MODELID::SMALLSOUKO,"assets/Modeldata/Souko/Souko.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/Souko/"},
+	{(const MODELID)MODELID::CREATE_WOOD,"assets/Modeldata/Create/CreateWood.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/Create/"},
+	{(const MODELID)MODELID::CREATE_COAL,"assets/Modeldata/Create/CreateCoalOre.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/Create/"},
+	{(const MODELID)MODELID::CREATE_IRON,"assets/Modeldata/Create/CreateIronOre.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/Create/"},
+	{(const MODELID)MODELID::CREATE_GOLD,"assets/Modeldata/Create/CreateGoldOre.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/Create/"},
+
 
 	};
 

@@ -19,7 +19,7 @@ void GameInit() {
 		false);
 
 	// カメラが必要
-	DirectX::XMFLOAT3 eye(0, 00, -30);		// カメラの位置
+	DirectX::XMFLOAT3 eye(500, 0, -500);		// カメラの位置
 	DirectX::XMFLOAT3 lookat(0, 0, 0);		// 注視点
 	DirectX::XMFLOAT3 up(0, 1, 0);			// カメラの上向きベクトル
 

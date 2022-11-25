@@ -6,6 +6,7 @@
 #include    "CBillBoard.h"
 #include    "quad2d.h"
 #include    "Window.h"
+#include    "Resource.h"
 
 #include	<wrl/client.h>
 #include	<unordered_map>
@@ -37,11 +38,26 @@ class Sprite2DMgr{
 		int AnimationDelay;
 	};
 
+	struct ProgressData
+	{
+		CBillBoard m_bar;
+		CBillBoard m_targetimage;
+
+		Resource::Data* m_data;
+	};
 private:
 	Sprite2DMgr() {
 	}
 	//エフェクトテンプレート格納ベクター
 	std::vector<EFFECT_PATH>g_EffectTemplate = {
+	{EFFECTLIST::TARGETCIRCLE,"assets/sprite/TargetCircle.png",true,false,false,6,2,1},
+	{EFFECTLIST::PROGRESSBAR_CIRCLE,"assets/sprite/Progressbar_Circle.png",true,false,false,10,6,1},
+	{EFFECTLIST::WOOD,"assets/sprite/UI/Resource/Wood.png",false,false,false,1,1,1},
+	{EFFECTLIST::ORE_COAL,"assets/sprite/UI/Resource/Coal.png",false,false,false,1,1,1},
+	{EFFECTLIST::ORE_IRON,"assets/sprite/UI/Resource/ironore.png",false,false,false,1,1,1},
+	{EFFECTLIST::ORE_GOLD,"assets/sprite/UI/Resource/Goldore.png",false,false,false,1,1,1},
+	{EFFECTLIST::IRON,"assets/sprite/UI/Resource/Iron.png",false,false,false,1,1,1},
+	{EFFECTLIST::GOLD,"assets/sprite/UI/Resource/Gold.png",false,false,false,1,1,1},
 	};
 
 	//UIテンプレート格納ベクター
@@ -59,12 +75,14 @@ private:
 
 	//UIデータ格納
 	std::vector<std::shared_ptr<Quad2D>>g_uihash;
-
 public:
 	//エフェクト格納ベクター
 	std::vector<CBillBoard>g_effects = {};
 	std::vector<Quad2D>g_UserInterfaces = {};
 	std::vector<Window*>g_Windows = {};
+	//プログレスバーデータ格納
+	std::vector<ProgressData>g_bars = {};
+
 
 	static Sprite2DMgr& GetInstance() {
 		static Sprite2DMgr Instance;
@@ -106,6 +124,9 @@ public:
 
 	//UIアニメーションを作成
 	void CreateAnimation(UILIST type, float x, float y, float z, float xsize, float ysize, DirectX::XMFLOAT4 color);
+
+	//プログレスバー生成
+	void CreateCircleProgressBar(Resource::Data* resource,float xsize,float ysize);
 	//エフェクトを作成
 	void CreateEffect(EFFECTLIST type,float x, float y, float z, float xsize, float ysize, DirectX::XMFLOAT4 color);
 

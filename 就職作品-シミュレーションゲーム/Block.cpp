@@ -23,6 +23,14 @@ bool Block::Init()
 bool Block::Init(Vector3 pos, BLOCKTYPE id)
 {
     m_Gridpos = pos;
+    m_pos.x = pos.x;
+    m_pos.y = pos.y;
+    m_pos.z = pos.z;
+
+    m_mtx._41 = m_pos.x;
+    m_mtx._42 = m_pos.y;
+    m_mtx._43 = m_pos.z;
+
     m_id = id;
     return false;
 }

@@ -6,7 +6,7 @@
 
 enum SELECT_SHADER_TYPE
 {
-	SELECT_SHADER_TYPE_NOORMAL,
+	SELECT_SHADER_TYPE_NORMAL,
 	SELECT_SHADER_TYPE_GATHERING,
 	SELECT_SHADER_TYPE_CREATE,
 	SELECT_SHADER_TYPE_CANCEL,
@@ -26,23 +26,25 @@ private:
 
 	FILETYPE				m_filetype = eASSIMPFILE;		// ファイルタイプ
 	ModelData				m_assimpfile;					// assimpfile
-	std::vector<AnimationDataAssimp*> m_animationcontainer;
 	ID3D11VertexShader* m_pVertexShader = nullptr;		// 頂点シェーダー入れ物
 	ID3D11PixelShader* m_pPixelShader = nullptr;		// ピクセルシェーダー入れ物
 	ID3D11PixelShader* m_pSelectPixelShader[SELECT_SHADER_TYPE_MAX];    //セレクト時シェーダー入れ物
 	ID3D11InputLayout* m_pVertexLayout = nullptr;		// 頂点フォーマット定義
 
 	ID3D11ShaderResourceView* m_texSRV = nullptr;			// テクスチャＳＲＶ
-	unsigned int	m_AnimFileIdx = 0;
 	//セレクト状態
 	SELECT_SHADER_TYPE m_selecttype = SELECT_SHADER_TYPE_NONE;
 public:
+	std::vector<AnimationDataAssimp*> m_animationcontainer;
+	unsigned int	m_AnimFileIdx = 0;
+
 	bool Init(const char* filename, const char* vsfile, const char* psfile, std::string texfolder);
 	void Uninit();
 	void Update(
 		unsigned int animno,
 		const XMFLOAT4X4& mtxworld);
 	void Draw(XMFLOAT4X4& mtxworld);
+	void ChangeColor(XMFLOAT4 color);
 	unsigned int GetAnimationNum() {	// アニメーション総数を取得
 
 		return m_animationcontainer[m_AnimFileIdx]->GetScene()->mNumAnimations;
@@ -65,6 +67,8 @@ public:
 		}
 	}
 
+
+
 	// アニメーションをロードする
 	bool LoadAnimation(const char* filename) {
 		AnimationDataAssimp* animdata;
@@ -81,25 +85,25 @@ public:
 		}
 	}
 
-	const ModelData& GetModelData() {
+	ModelData& GetModelData() {
 		return m_assimpfile;
 	}
 
-	void DrawOBB() {
-		m_assimpfile.DrawOBB();
-	}
+	//void DrawOBB() {
+	//	m_assimpfile.DrawOBB();
+	//}
 
-	void GetOBBList(std::vector<COBB*>& obblist) {
+	//void GetOBBList(std::vector<COBB*>& obblist) {
 
-		// メッシュデータ取得
-		const std::vector<Mesh>& meshes = m_assimpfile.GetMeshes();
+	//	// メッシュデータ取得
+	//	const std::vector<Mesh>& meshes = m_assimpfile.GetMeshes();
 
-		// OBB全件取得
-		for (int i = 0; i < meshes.size(); i++) {
-			const Mesh& m = meshes[i];
-			for (auto data : m.m_obbvectorcontainer) {
-				obblist.push_back(data);
-			}
-		}
-	}
+	//	// OBB全件取得
+	//	for (int i = 0; i < meshes.size(); i++) {
+	//		const Mesh& m = meshes[i];
+	//		for (auto data : m.m_obbvectorcontainer) {
+	//			obblist.push_back(data);
+	//		}
+	//	}
+	//}
 };

@@ -4,7 +4,7 @@
 #include	"Shader.h"
 #include	"CDirectxGraphics.h"
 #include	"DX11Settransform.h"
-#include	"ModelData.h"
+#include    "CCamera.h"
 
 bool CModel::Init(const char* filename, const char* vsfile, const char* psfile, std::string texfolder) {
 
@@ -34,7 +34,9 @@ bool CModel::Init(const char* filename, const char* vsfile, const char* psfile, 
 		{ "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,		0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "BONEINDEX",	0, DXGI_FORMAT_R32G32B32A32_SINT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "BONEWEIGHT",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		{ "BONEWEIGHT",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR"   ,	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "BONENUM"   ,	0, DXGI_FORMAT_R32_UINT          ,	0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 	unsigned int numElements = ARRAYSIZE(layout);
 
@@ -74,7 +76,7 @@ bool CModel::Init(const char* filename, const char* vsfile, const char* psfile, 
 		"shader/ps_Select_Normal.fx",
 		"main",
 		"ps_4_0",
-		&m_pSelectPixelShader[SELECT_SHADER_TYPE_NOORMAL]);
+		&m_pSelectPixelShader[SELECT_SHADER_TYPE_NORMAL]);
 	if (!sts) {
 		MessageBox(nullptr, "CreatePixelShader error", "error", MB_OK);
 		return false;
@@ -133,29 +135,29 @@ bool CModel::Init(const char* filename, const char* vsfile, const char* psfile, 
 
 void CModel::Uninit() {
 
-	// アニメーションデータ解放
-	for (auto sa : m_animationcontainer) {
-		sa->Exit();
-		delete sa;
-	}
+	//// アニメーションデータ解放
+	//for (auto sa : m_animationcontainer) {
+	//	sa->Exit();
+	//	delete sa;
+	//}
 
-	// 頂点シェーダー解放
-	if (m_pVertexShader) {
-		m_pVertexShader->Release();
-		m_pVertexShader = nullptr;
-	}
+	//// 頂点シェーダー解放
+	//if (m_pVertexShader) {
+	//	m_pVertexShader->Release();
+	//	m_pVertexShader = nullptr;
+	//}
 
-	// ピクセルシェーダー解放
-	if (m_pPixelShader) {
-		m_pPixelShader->Release();
-		m_pPixelShader = nullptr;
-	}
+	//// ピクセルシェーダー解放
+	//if (m_pPixelShader) {
+	//	m_pPixelShader->Release();
+	//	m_pPixelShader = nullptr;
+	//}
 
-	// 頂点レイアウト解放
-	if (m_pVertexLayout) {
-		m_pVertexLayout->Release();
-		m_pVertexLayout = nullptr;
-	}
+	//// 頂点レイアウト解放
+	//if (m_pVertexLayout) {
+	//	m_pVertexLayout->Release();
+	//	m_pVertexLayout = nullptr;
+	//}
 }
 
 // アニメーション更新
@@ -181,8 +183,8 @@ void CModel::Draw(XMFLOAT4X4& mtxworld) {
 	// ピクセルシェーダーをセット(セレクト状態に応じる)
 	switch (m_selecttype)
 	{
-	case SELECT_SHADER_TYPE_NOORMAL:
-		devcontext->PSSetShader(m_pSelectPixelShader[SELECT_SHADER_TYPE_NOORMAL], nullptr, 0);
+	case SELECT_SHADER_TYPE_NORMAL:
+		devcontext->PSSetShader(m_pSelectPixelShader[SELECT_SHADER_TYPE_NORMAL], nullptr, 0);
 		break;
 	case SELECT_SHADER_TYPE_GATHERING:
 		devcontext->PSSetShader(m_pSelectPixelShader[SELECT_SHADER_TYPE_GATHERING], nullptr, 0);
@@ -205,4 +207,17 @@ void CModel::Draw(XMFLOAT4X4& mtxworld) {
 	}
 	// 描画
 	m_assimpfile.Draw(devcontext, mtxworld);
+}
+
+void CModel::ChangeColor(XMFLOAT4 color)
+{	
+	//頂点カラーの変更
+	for (int i = 0; i < m_assimpfile.m_meshes.size(); i++)
+	{
+		for (int j = 0; j < m_assimpfile.m_meshes[i].m_vertices.size(); j++)
+		{
+			m_assimpfile.m_meshes[i].m_vertices[j].m_color = color;
+		}
+		m_assimpfile.m_meshes[i].updatevertexbuffer();
+	}
 }

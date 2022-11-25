@@ -45,6 +45,19 @@ void DX11MtxRotationX(float angle, XMFLOAT4X4& outmtx);
 void DX11MtxRotationY(float angle, XMFLOAT4X4& outmtx);
 void DX11MtxRotationZ(float angle, XMFLOAT4X4& outmtx);
 void DX11MtxScale(float sx, float sy, float sz, XMFLOAT4X4& outmtx);
+//ワールド座標をスクリーン座標に変換
+XMFLOAT3 DX11WorldtoScreen(XMFLOAT3 worldpos);
+//スクリーン座標をワールド座標に変換
+// スクリーン座標をワールド座標に変換
+XMFLOAT3 CalcScreenToWorld(
+	XMFLOAT3* pout,
+	int Sx,  // スクリーンX座標
+	int Sy,  // スクリーンY座標
+	float fZ,  // 射影空間でのZ値（0～1）
+	int Screen_w,
+	int Screen_h,
+	XMMATRIX* View,
+	XMMATRIX* Prj);
 float haltonseq(unsigned int no, unsigned int base);
 XMFLOAT4X4 DX11MtxaiToDX(aiMatrix4x4& aimtx);
-
+aiMatrix4x4 DXToDX11Mtxai(XMFLOAT4X4& dxmtx);

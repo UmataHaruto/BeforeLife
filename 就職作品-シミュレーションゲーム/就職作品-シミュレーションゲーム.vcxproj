@@ -141,18 +141,20 @@
   <ItemGroup>
     <ClCompile Include="2dsystem.cpp" />
     <ClCompile Include="animationdataassimp.cpp" />
+    <ClCompile Include="Animator.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="assimpscene.cpp" />
     <ClCompile Include="Block.cpp" />
     <ClCompile Include="BoundingSphere.cpp" />
+    <ClCompile Include="Box.cpp" />
+    <ClCompile Include="BuildingMgr.cpp" />
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Button.cpp" />
-    <ClCompile Include="CBBoxGenerater.cpp" />
     <ClCompile Include="CBillBoard.cpp" />
-    <ClCompile Include="CBox.cpp" />
     <ClCompile Include="CCamera.cpp" />
     <ClCompile Include="CDirectXGraphics.cpp" />
     <ClCompile Include="CModel.cpp" />
+    <ClCompile Include="collision.cpp" />
     <ClCompile Include="CWindow.cpp" />
     <ClCompile Include="CWindowCallback.cpp" />
     <ClCompile Include="DatFileLoader.cpp" />
@@ -164,6 +166,7 @@
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="GameButton.cpp" />
+    <ClCompile Include="House.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
@@ -174,40 +177,51 @@
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="ModelData.cpp" />
     <ClCompile Include="ModelMgr.cpp" />
+    <ClCompile Include="mousepostoworld.cpp" />
     <ClCompile Include="myimgui.cpp" />
     <ClCompile Include="mystring.cpp" />
+    <ClCompile Include="NameGenerator.cpp" />
     <ClCompile Include="obb.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="quad2d.cpp" />
+    <ClCompile Include="ResourceManager.cpp" />
+    <ClCompile Include="Resource.cpp" />
     <ClCompile Include="Setting.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Simulation.cpp" />
     <ClCompile Include="skydome.cpp" />
+    <ClCompile Include="Souko.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Sprite2DMgr.cpp" />
     <ClCompile Include="Stage.cpp" />
+    <ClCompile Include="StageHitCollider.cpp" />
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="utftosjisconv.cpp" />
+    <ClCompile Include="VillagerMgr.cpp" />
     <ClCompile Include="WICTextureLoader.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WinMain.cpp" />
+    <ClCompile Include="XAudio2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2dsystem.h" />
     <ClInclude Include="animationdataassimp.h" />
+    <ClInclude Include="Animator.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="assimpscene.h" />
     <ClInclude Include="Block.h" />
     <ClInclude Include="BoundingSphere.h" />
+    <ClInclude Include="Box.h" />
+    <ClInclude Include="BuildingMgr.h" />
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="Button.h" />
-    <ClInclude Include="CBBoxGenerater.h" />
     <ClInclude Include="CBillBoard.h" />
-    <ClInclude Include="CBox.h" />
     <ClInclude Include="CCamera.h" />
     <ClInclude Include="CDirectInput.h" />
     <ClInclude Include="CDirectxGraphics.h" />
     <ClInclude Include="CLight.h" />
     <ClInclude Include="CModel.h" />
+    <ClInclude Include="collision.h" />
     <ClInclude Include="CWindow.h" />
     <ClInclude Include="CWindowCallback.h" />
     <ClInclude Include="DatFileLoader.h" />
@@ -221,6 +235,7 @@
     <ClInclude Include="game.h" />
     <ClInclude Include="GameButton.h" />
     <ClInclude Include="gameobject.h" />
+    <ClInclude Include="House.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_dx11.h" />
@@ -235,23 +250,32 @@
     <ClInclude Include="mesh.h" />
     <ClInclude Include="ModelData.h" />
     <ClInclude Include="ModelMgr.h" />
+    <ClInclude Include="mousepostoworld.h" />
     <ClInclude Include="myimgui.h" />
     <ClInclude Include="mystring.h" />
+    <ClInclude Include="NameGenerator.h" />
     <ClInclude Include="obb.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="quad2d.h" />
+    <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="Resource.h" />
     <ClInclude Include="Setting.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="shaderhashmap.h" />
     <ClInclude Include="Simulation.h" />
     <ClInclude Include="skydome.h" />
+    <ClInclude Include="Souko.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="Sprite2DMgr.h" />
     <ClInclude Include="Stage.h" />
+    <ClInclude Include="StageHitCollider.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="uncopyable.h" />
     <ClInclude Include="utftosjisconv.h" />
     <ClInclude Include="vertexproto.h" />
+    <ClInclude Include="VillagerMgr.h" />
     <ClInclude Include="Window.h" />
+    <ClInclude Include="XAudio2.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shader\3dboxps.fx">
@@ -302,9 +326,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="shader\psOutline.fx">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </FxCompile>
     <FxCompile Include="shader\psquad2d.hlsl">
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">2.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -339,20 +360,33 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="shader\ps_hair.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="shader\ps_Select_Cancel.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="shader\ps_Select_Create.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="shader\ps_Select_Gathering.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="shader\ps_Select_Normal.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="shader\ps_Select_Range.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="shader\vs.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="shader\vs.hlsl">
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">2.0</ShaderModel>
@@ -385,6 +419,10 @@
     <FxCompile Include="shader\vssphere.hlsl">
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">2.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="shader\vs_hair.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>

@@ -91,6 +91,18 @@
     <Filter Include="ソース ファイル\2DSprite\Window\imgui\Button">
       <UniqueIdentifier>{a5115a67-7a53-4735-a1c5-f1eb1dba081c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\game\Resorce">
+      <UniqueIdentifier>{164281be-8b94-4bb5-9137-fbb5586b8922}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\game\Sound">
+      <UniqueIdentifier>{19ee5537-26f4-41fd-bfa2-8b6fd8a30e02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\game\Building">
+      <UniqueIdentifier>{7de00d4d-086a-467f-a3ab-daacf83e7f4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\game\gameobject\Terrain">
+      <UniqueIdentifier>{fd4e1fcf-f1cf-4f50-a40c-a13f23a1afd0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Effect.cpp">
@@ -204,12 +216,6 @@
     <ClCompile Include="Stage.cpp">
       <Filter>ソース ファイル\game\gameobject</Filter>
     </ClCompile>
-    <ClCompile Include="CBBoxGenerater.cpp">
-      <Filter>ソース ファイル\Collider</Filter>
-    </ClCompile>
-    <ClCompile Include="CBox.cpp">
-      <Filter>ソース ファイル\Collider</Filter>
-    </ClCompile>
     <ClCompile Include="obb.cpp">
       <Filter>ソース ファイル\Collider</Filter>
     </ClCompile>
@@ -245,6 +251,48 @@
     </ClCompile>
     <ClCompile Include="GameButton.cpp">
       <Filter>ソース ファイル\2DSprite\Window\imgui\Button</Filter>
+    </ClCompile>
+    <ClCompile Include="collision.cpp">
+      <Filter>ソース ファイル\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="VillagerMgr.cpp">
+      <Filter>ソース ファイル\game\gameobject\player</Filter>
+    </ClCompile>
+    <ClCompile Include="NameGenerator.cpp">
+      <Filter>ソース ファイル\system\util</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>ソース ファイル\game\Resorce</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource.cpp">
+      <Filter>ソース ファイル\game\Resorce</Filter>
+    </ClCompile>
+    <ClCompile Include="Animator.cpp">
+      <Filter>ソース ファイル\game\gameobject\player</Filter>
+    </ClCompile>
+    <ClCompile Include="XAudio2.cpp">
+      <Filter>ソース ファイル\game\Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="BuildingMgr.cpp">
+      <Filter>ソース ファイル\game\Building</Filter>
+    </ClCompile>
+    <ClCompile Include="House.cpp">
+      <Filter>ソース ファイル\game\Building</Filter>
+    </ClCompile>
+    <ClCompile Include="Souko.cpp">
+      <Filter>ソース ファイル\game\Building</Filter>
+    </ClCompile>
+    <ClCompile Include="Box.cpp">
+      <Filter>ソース ファイル\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>ソース ファイル\game\gameobject\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="StageHitCollider.cpp">
+      <Filter>ソース ファイル\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="mousepostoworld.cpp">
+      <Filter>ソース ファイル\system\util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -383,12 +431,6 @@
     <ClInclude Include="animationdataassimp.h">
       <Filter>ソース ファイル\system\model</Filter>
     </ClInclude>
-    <ClInclude Include="CBBoxGenerater.h">
-      <Filter>ソース ファイル\Collider</Filter>
-    </ClInclude>
-    <ClInclude Include="CBox.h">
-      <Filter>ソース ファイル\Collider</Filter>
-    </ClInclude>
     <ClInclude Include="obb.h">
       <Filter>ソース ファイル\Collider</Filter>
     </ClInclude>
@@ -427,6 +469,48 @@
     </ClInclude>
     <ClInclude Include="GameButton.h">
       <Filter>ソース ファイル\2DSprite\Window\imgui\Button</Filter>
+    </ClInclude>
+    <ClInclude Include="collision.h">
+      <Filter>ソース ファイル\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="VillagerMgr.h">
+      <Filter>ソース ファイル\game\gameobject\player</Filter>
+    </ClInclude>
+    <ClInclude Include="NameGenerator.h">
+      <Filter>ソース ファイル\system\util</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>ソース ファイル\game\Resorce</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>ソース ファイル\game\Resorce</Filter>
+    </ClInclude>
+    <ClInclude Include="Animator.h">
+      <Filter>ソース ファイル\game\gameobject\player</Filter>
+    </ClInclude>
+    <ClInclude Include="XAudio2.h">
+      <Filter>ソース ファイル\game\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="BuildingMgr.h">
+      <Filter>ソース ファイル\game\Building</Filter>
+    </ClInclude>
+    <ClInclude Include="House.h">
+      <Filter>ソース ファイル\game\Building</Filter>
+    </ClInclude>
+    <ClInclude Include="Souko.h">
+      <Filter>ソース ファイル\game\Building</Filter>
+    </ClInclude>
+    <ClInclude Include="Box.h">
+      <Filter>ソース ファイル\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>ソース ファイル\game\gameobject\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="StageHitCollider.h">
+      <Filter>ソース ファイル\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="mousepostoworld.h">
+      <Filter>ソース ファイル\system\util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -493,9 +577,6 @@
     <FxCompile Include="shader\3dboxps.fx">
       <Filter>ソース ファイル\shader\hlsl</Filter>
     </FxCompile>
-    <FxCompile Include="shader\psOutline.fx">
-      <Filter>ソース ファイル\shader\hlsl</Filter>
-    </FxCompile>
     <FxCompile Include="shader\ps_Select_Cancel.fx">
       <Filter>ソース ファイル\shader\hlsl</Filter>
     </FxCompile>
@@ -509,6 +590,15 @@
       <Filter>ソース ファイル\shader\hlsl</Filter>
     </FxCompile>
     <FxCompile Include="shader\ps_Select_Range.fx">
+      <Filter>ソース ファイル\shader\hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\ps_hair.hlsl">
+      <Filter>ソース ファイル\shader\hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\vs_hair.hlsl">
+      <Filter>ソース ファイル\shader\hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\vs.fx">
       <Filter>ソース ファイル\shader\hlsl</Filter>
     </FxCompile>
   </ItemGroup>

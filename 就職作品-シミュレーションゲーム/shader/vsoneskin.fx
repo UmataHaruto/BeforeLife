@@ -10,7 +10,8 @@ VS_OUTPUT main(
 	float4 Normal : NORMAL,
 	float2 Tex : TEXCOORD,
 	int4   BoneIndex : BONEINDEX,
-	float4 BoneWeight : BONEWEIGHT
+	float4 BoneWeight : BONEWEIGHT,
+	float4 Color : COLOR
 	)
 {
 	VS_OUTPUT output = (VS_OUTPUT)0;

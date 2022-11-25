@@ -6,6 +6,13 @@ bool Skydome::Init()
     //s—ñ‰Šú‰»
     DX11MtxIdentity(m_mtx);
 
+	XMMATRIX scale = XMMatrixScaling(30, 30, 30);
+	XMMATRIX mtx;
+
+	mtx = DirectX::XMLoadFloat4x4(&m_mtx);
+	mtx = XMMatrixMultiply(mtx, scale);
+	DirectX::XMStoreFloat4x4(&m_mtx, mtx);
+
     return true;
 }
 

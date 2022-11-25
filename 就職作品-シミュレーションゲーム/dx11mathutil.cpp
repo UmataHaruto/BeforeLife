@@ -1,6 +1,8 @@
 #include	<assimp\Importer.hpp>
 #include	"DX11mathutil.h"
 #include	"memory.h"
+#include    "CCamera.h"
+#include    "Application.h"
 
 using namespace DirectX;
 
@@ -361,7 +363,7 @@ bool IsInFrustum(const XMFLOAT3& pos, const XMFLOAT4X4& matrix) {
 
 	for (int i = 0; i < 6; i++) {
 		float ans = plane[i].a*pos.x + plane[i].b*pos.y + plane[i].c*pos.z + plane[i].d;
-		if (ans < 0) {
+		if (ans < -10) {
 			return false;
 		}
 	}
@@ -611,6 +613,63 @@ void DX11MtxScale(float sx, float sy, float sz,XMFLOAT4X4& outmtx) {
 }
 
 
+XMFLOAT3 DX11WorldtoScreen(XMFLOAT3 worldpos)
+{
+	XMVECTOR World_Pos = XMVectorSet(worldpos.x,-worldpos.y,worldpos.z,0.0f);
+	XMVECTOR Eye = XMVectorSet(
+		CCamera::GetInstance()->GetEye().x,
+		CCamera::GetInstance()->GetEye().y,
+		CCamera::GetInstance()->GetEye().z,
+	0.0f);
+
+	XMVECTOR At = XMVectorSet(
+		CCamera::GetInstance()->GetLookat().x,
+		CCamera::GetInstance()->GetLookat().y,
+		CCamera::GetInstance()->GetLookat().z,
+		0.0f);
+
+	XMVECTOR Up = XMVectorSet(
+		CCamera::GetInstance()->GetUp().x,
+		CCamera::GetInstance()->GetUp().y,
+		CCamera::GetInstance()->GetUp().z,
+		0.0f);
+
+	XMMATRIX View = XMMatrixLookAtLH(Eye,At,Up);
+	XMMATRIX Projection = XMMatrixPerspectiveFovLH(XM_PIDIV4, Application::CLIENT_WIDTH / (FLOAT)Application::CLIENT_HEIGHT,0.1f,1000.0f);
+
+	float w = Application::CLIENT_WIDTH / 2.0f;
+	float h = Application::CLIENT_HEIGHT / 2.0f;
+	
+	XMMATRIX viewport = {
+		w,0,0,0,
+		0,-h,0,0,
+		0,0,1,0,
+		w,h,0,1
+	};
+	//ワールド*ビュー変換行列
+	World_Pos = XMVector3Transform(World_Pos,View);
+	//ワールド*プロジェクション変換行列
+	World_Pos = XMVector3Transform(World_Pos,Projection);
+
+	XMFLOAT3 temp;
+	XMStoreFloat3(&temp,World_Pos);
+	temp.x /= temp.z;
+	temp.y /= temp.z;
+	temp.z = 1.0f;
+
+	//マウス計算に合わせ原点を調整
+	temp.x += 1.0f;
+	temp.x /= 2;
+	temp.y += 1.0f;
+	temp.y /= 2;
+	return temp;
+}
+
+XMFLOAT3 CalcScreenToWorld(XMFLOAT3* pout, int Sx, int Sy, float fZ, int Screen_w, int Screen_h, XMMATRIX* View, XMMATRIX* Prj)
+{
+	return XMFLOAT3();
+}
+
 /*------------------------
 ハルトン数列を計算
 入力
@@ -682,5 +741,33 @@ XMFLOAT4X4 DX11MtxaiToDX(aiMatrix4x4& aimtx) {
 	mtx._34 = aimtx.d3;
 	mtx._44 = aimtx.d4;
 
+	return mtx;
+}
+
+/*------------------------
+  DX mtx => assimp mtx
+--------------------------*/
+aiMatrix4x4 DXToDX11Mtxai(XMFLOAT4X4& dxmtx) {
+	aiMatrix4x4 mtx;
+
+	mtx.a1 = dxmtx._11;
+	mtx.a2 = dxmtx._21;
+	mtx.a3 = dxmtx._31;
+	mtx.a4 = dxmtx._41;
+
+	mtx.b1 = dxmtx._12;
+	mtx.b2 = dxmtx._22;
+	mtx.b3 = dxmtx._32;
+	mtx.b4 = dxmtx._42;
+
+	mtx.c1 = dxmtx._13;
+	mtx.c2 = dxmtx._23;
+	mtx.c3 = dxmtx._33;
+	mtx.c4 = dxmtx._43;
+
+	mtx.d1 = dxmtx._14;
+	mtx.d2 = dxmtx._24;
+	mtx.d3 = dxmtx._34;
+	mtx.d4 = dxmtx._44;
 	return mtx;
 }

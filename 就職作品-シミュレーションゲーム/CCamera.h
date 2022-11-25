@@ -32,7 +32,6 @@ public:
 	void Init(float nearclip, float farclip, float fov, 
 		float width, float height,
 		XMFLOAT3 eye, XMFLOAT3 lookat, XMFLOAT3 up){
-
 		SetProjection(nearclip,farclip,fov,width,height);
 		SetCamera(eye,lookat,up);
 	}
@@ -141,6 +140,11 @@ public:
 		return m_Up;
 	}
 
+	float GetZoom()
+	{
+		return m_Zoom;
+	}
+
 
 private:
 	XMFLOAT4X4		m_Projection;
@@ -151,9 +155,9 @@ private:
 	XMFLOAT3		m_Lookat;			// 注視点
 	XMFLOAT3		m_Up;				// 上向きベクトル
 
-	float           m_Zoom;                  //ズーム率
+	float           m_Zoom = 1.0f;                  //ズーム率
 	float           m_MaxZoom = 100;         //最大ズーム率
-	float           m_MinZoom = 0;           //最小ズーム率
+	float           m_MinZoom = -100;           //最小ズーム率
 
 	float			m_near;
 	float			m_Aspect;

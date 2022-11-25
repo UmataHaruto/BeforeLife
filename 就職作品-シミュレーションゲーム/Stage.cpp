@@ -1,23 +1,57 @@
 #include "Stage.h"
 #include "dx11mathutil.h"
+#include "myimgui.h"
+#include "CCamera.h"
 
 void Stage::Init()
 {
 
 }
 
+void Stage::Update()
+{
+
+}
+
 void Stage::Draw()
 {
+	XMVECTOR Eye = XMVectorSet(
+		CCamera::GetInstance()->GetEye().x,
+		CCamera::GetInstance()->GetEye().y,
+		CCamera::GetInstance()->GetEye().z,
+		0.0f);
+
+	XMVECTOR At = XMVectorSet(
+		CCamera::GetInstance()->GetLookat().x,
+		CCamera::GetInstance()->GetLookat().y,
+		CCamera::GetInstance()->GetLookat().z,
+		0.0f);
+
+	XMVECTOR Up = XMVectorSet(
+		CCamera::GetInstance()->GetUp().x,
+		CCamera::GetInstance()->GetUp().y,
+		CCamera::GetInstance()->GetUp().z,
+		0.0f);
+
+	XMFLOAT4X4 pro = CCamera::GetInstance()->GetProjectionMatrix();
+	XMMATRIX projection = XMLoadFloat4x4(&pro);
+	XMMATRIX View = XMMatrixLookAtLH(Eye, At, Up);
+	View = XMMatrixMultiply(View, projection);
+
+	XMFLOAT4X4 ans;
+	XMStoreFloat4x4(&ans,View);
 	//ステージの描画
 	for (int z = 0; z < MAP_DEPTH; z++) {
-		for (int y = 0; y < MAP_HEIGHT; y++) {
+		for (int y = 0; y < MAP_HEIGHT; y++){
 			for (int x = 0; x < MAP_WIDTH; x++) {
 				XMFLOAT4X4 mtxtrans;
 				XMFLOAT4X4 mtxrottrans;
-				XMFLOAT3 trans = { (y * 12.5f) - 100,(z * -12.5f),(x * -12.5f) + 200 };
+				XMFLOAT3 trans = { (y * 12.5f),(z * -12.5f),(x * -12.5f) };
 
 				DX11MtxTranslation(trans, mtxtrans);
 				//モデル描画
+				//画面内にあるものしか描画しない
+				Field[z][x][y].SetPos(trans);
 				switch (Field[z][x][y].GetBlockId())
 				{
 				case BLOCKTYPE::EMPTY:
@@ -25,10 +59,11 @@ void Stage::Draw()
 					break;
 
 				case BLOCKTYPE::GRASS:
-					Field[z][x][y].SetPos(trans);
-					Field[z][x][y].Draw();
+					if(IsInFrustum(Field[z][x][y].GetPos(),ans))
+						Field[z][x][y].Draw();
 					break;
 				}
+
 			}
 		}
 	}
@@ -69,8 +104,6 @@ void Stage::RoadStageData()
 
 	fp = fopen("assets/StageData/STAGE1.txt", "r");
 
-	int Hairetu[MAP_DEPTH][MAP_HEIGHT][MAP_WIDTH];
-
 	BLOCKTYPE type;
 
 	for (int y = 0; y < MAP_DEPTH; y++) {
@@ -84,8 +117,38 @@ void Stage::RoadStageData()
 			}
 		}
 	}
+	//ステージ情報の初期化
+	for (int z = 0; z < MAP_DEPTH; z++) {
+		for (int y = 0; y < MAP_HEIGHT; y++) {
+			for (int x = 0; x < MAP_WIDTH; x++) {
+\
+				XMFLOAT3 trans = { (y * 12.5f),(z * -12.5f),(x * -12.5f) };
 
-	fclose(fp);
+				//モデル描画
+				//画面内にあるものしか描画しない
+				Field[x][y][z].SetPos(trans);
+
+			}
+		}
+	}
+fclose(fp);
+
+}
+
+bool Stage::SearchBlock(XMFLOAT3 mousepos,Block* output)
+{
+	//配列番号
+	int x = mousepos.x / 12.5;
+	int y = 0;
+	int z = mousepos.z / 12.5;
+
+	//配列外は処理しない
+	if (x >= 0 && y >= 0 && z >= 0)
+	{
+		output = &Field[y][x][z];
+		return true;
+	}
+	return false;
 }
 
 Block Stage::GetField(int x,int y,int z)

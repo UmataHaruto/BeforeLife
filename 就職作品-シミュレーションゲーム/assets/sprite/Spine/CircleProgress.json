@@ -1,0 +1,32 @@
+{ "skeleton": { "images": "G:/GM31/就職作品-シミュレーションゲーム/就職作品-シミュレーションゲーム/assets/sprite/Spine/CircleProgress/" },
+"bones": [
+	{ "name": "root" }
+],
+"slots": [
+	{ "name": "裏", "bone": "root", "attachment": "裏" },
+	{ "name": "オレンジ", "bone": "root", "attachment": "オレンジ" },
+	{ "name": "中央円", "bone": "root", "attachment": "中央円" },
+	{ "name": "中央円 のコピー", "bone": "root", "attachment": "中央円 のコピー" },
+	{ "name": "長方形 1", "bone": "root" }
+],
+"skins": {
+	"default": {
+		"裏": {
+			"裏": { "x": 150.5, "y": -152.5, "width": 325, "height": 325 }
+		},
+		"オレンジ": {
+			"オレンジ": { "x": 150, "y": -150, "width": 302, "height": 302 }
+		},
+		"中央円": {
+			"中央円": { "x": 150.5, "y": -152.5, "width": 271, "height": 271 }
+		},
+		"中央円 のコピー": {
+			"中央円 のコピー": { "x": 150.5, "y": -152.5, "width": 271, "height": 271 }
+		},
+		"長方形 1": {
+			"長方形 1": { "x": 150, "y": -150, "width": 302, "height": 302 }
+		}
+	}
+},
+"animations": { "animation": {} }
+}

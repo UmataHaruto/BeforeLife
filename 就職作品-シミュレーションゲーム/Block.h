@@ -33,7 +33,10 @@ public:
 	{
 		m_model = pmodel;
 	}
-
+	//モデルデータを取得
+	CModel* GetModel() {
+		return m_model;
+	}
 	void SetPos(DirectX::XMFLOAT3 pos);
 
 	BLOCKTYPE GetBlockId()

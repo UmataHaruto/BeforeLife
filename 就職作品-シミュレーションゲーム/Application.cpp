@@ -96,7 +96,7 @@ void Application :: InitSystemWH()
 bool Application :: Init( HINSTANCE h_Instance )
 {
 	// メモリーリークを検出
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF|_CRTDBG_LEAK_CHECK_DF);
+	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF|_CRTDBG_LEAK_CHECK_DF);
 
 	// コンソールを割り当てる
 	AllocConsole();
@@ -174,24 +174,31 @@ unsigned long Application :: MainLoop()
 
 		// timeGetTime関数は、ミリ秒単位でシステム時刻を取得します。 
 		// システム時間は、Windowsを起動してからの経過時間です。
-		current_time = ::timeGetTime();	
+		current_time = ::timeGetTime();
 
-		uint64_t delta_time = current_time - last_time;
+		//ウィンドウのアクティブ情報を取得
+		HWND hWnd;
+		hWnd = GetActiveWindow();
 
-		last_time = current_time;
+		//ウィンドウアクティブ時のみゲーム更新
+		if (hWnd == CWindow::Instance()->GetHandle()) {
+			uint64_t delta_time = current_time - last_time;
 
-		Update(delta_time);
-		GameInput(delta_time);		// ｹﾞｰﾑ入力	
-		GameUpdate(delta_time);		// ｹﾞｰﾑ更新
-		GameRender(delta_time);		// ｹﾞｰﾑ描画
+			last_time = current_time;
 
-		int64_t sleep_time = 16666 - delta_time;
+			Update(delta_time);
+			GameInput(delta_time);		// ｹﾞｰﾑ入力	
+			GameUpdate(delta_time);		// ｹﾞｰﾑ更新
+			GameRender(delta_time);		// ｹﾞｰﾑ描画
 
-		if (sleep_time > 0) {
-			float tt = sleep_time / 1000.0f;
-//			printf("sleep:%f \n", tt);
-			std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(tt)));
-			//指定した相対時間だけ現スレッドをブロックする (function template)
+			int64_t sleep_time = 16666 - delta_time;
+
+			if (sleep_time > 0) {
+				float tt = sleep_time / 1000.0f;
+				//			printf("sleep:%f \n", tt);
+				std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(tt)));
+				//指定した相対時間だけ現スレッドをブロックする (function template)
+			}
 		}
 	}
 

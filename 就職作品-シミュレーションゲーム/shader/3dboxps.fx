@@ -16,7 +16,10 @@
 float4 main( VS_OUTPUT input ) : SV_Target
 {
 	float4 col = input.Color;
-	col.a = input.Color.a;
+	col.a = 0.5f;
+	col.r = 0.0f;
+	col.g = 0.8f;
+	col.b = 0.0f;
 
 	return col;
 }

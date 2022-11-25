@@ -38,15 +38,21 @@ cbuffer ConstantBufferViewPort : register(b5)
 	uint4 ViewportWidth;        // ビューポート幅
 	uint4 ViewportHeight;       // ビューポート高さ
 };
+
+cbuffer ConstantHairColor : register(b6)
+{
+	float4 Color;
+}
 //--------------------------------------------------------------------------------------
 // 構造体定義
 //--------------------------------------------------------------------------------------
 struct VS_OUTPUT
 {
 	float4 Pos : SV_POSITION;
-	float4 Color : COLOR0;
+	float4 Color : COLOR;
 	float2 Tex : TEXCOORD;
 	float4 WPos : TEXCOORD1;
 	float4 Normal : TEXCOORD2;
+
 };
 

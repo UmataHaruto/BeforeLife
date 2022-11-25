@@ -98,6 +98,13 @@ void Sprite2DMgr::Draw(XMFLOAT4X4 camera_mtx) {
 
 		g_effects[i].DrawBillBoard(camera_mtx);
 	}
+	//プログレスバー
+	for (int i = 0; i < g_bars.size(); i++) {
+
+		g_bars[i].m_bar.DrawBillBoard(camera_mtx);
+		g_bars[i].m_targetimage.DrawBillBoard(camera_mtx);
+
+	}
 	//ウィンドウの描画
 	for (int i = 0; i < g_Windows.size(); i++) {
 
@@ -139,6 +146,49 @@ void Sprite2DMgr::Update() {
 			{
 				(*it).Uninit();
 				it = g_effects.erase(it);
+			}
+			else
+			{
+				++it;
+			}
+		}
+
+	}
+	//プログレスバーの更新
+	{
+		for (int i = 0; i < g_bars.size(); i++) {
+
+			//アニメーション番号=パーセント
+			g_bars[i].m_bar.m_animationNo = (g_bars[i].m_data->EnduranceMax - g_bars[i].m_data->Endurance) / 2;
+			if (g_bars[i].m_bar.m_animationNo % 1 != 0)
+			{
+				g_bars[i].m_bar.m_animationNo -= 0.5;
+			}
+			g_bars[i].m_bar.Update();
+			g_bars[i].m_targetimage.Update();
+
+			//アニメーションを進める
+			if (g_bars[i].m_data->Endurance > 0)
+			{
+			}
+			//死んでいる場合
+			else
+			{
+				g_bars[i].m_bar.SetStatus(EFFECTSTATUS::DEAD);
+				g_bars[i].m_targetimage.SetStatus(EFFECTSTATUS::DEAD);
+
+			}
+		}
+		//死んでいるエフェクトを削除
+		auto it = g_bars.begin();
+		while (it != g_bars.end())
+		{
+			if ((*it).m_bar.GetStatus() == EFFECTSTATUS::DEAD)
+			{
+				(*it).m_bar.Uninit();
+				(*it).m_targetimage.Uninit();
+
+				it = g_bars.erase(it);
 			}
 			else
 			{
@@ -313,6 +363,82 @@ void Sprite2DMgr::CreateAnimation(UILIST type, float x, float y, float z, float 
 
 	//エフェクトリストへ格納
 	g_UserInterfaces.push_back(board);
+}
+
+void Sprite2DMgr::CreateCircleProgressBar(Resource::Data* resource, float xsize, float ysize)
+{
+	if (resource != nullptr) {
+		ProgressData data;
+		//バーを生成
+		CBillBoard board = *Sprite2DMgr::GetInstance().GetModelPtr(EFFECTLIST::PROGRESSBAR_CIRCLE);
+		//イメージ生成
+		CBillBoard image = *Sprite2DMgr::GetInstance().GetModelPtr((EFFECTLIST)((int)resource->type + 2));
+
+		board.m_vbuffer = nullptr;
+		image.m_vbuffer = nullptr;
+		//ビルボード有効化
+		board.SetBillBoard(true);
+		image.SetBillBoard(true);
+
+		//初期ライフを設定
+		board.SetLife(90);
+		image.SetLife(90);
+
+		//ビルボード初期化
+		board.SetPosition(resource->pos.x, resource->pos.y + 30, resource->pos.z);
+		board.SetSize(xsize, ysize);
+		board.SetColor(XMFLOAT4(1, 1, 1, 1));
+		board.SetAnimationNo(0);
+
+		image.SetPosition(resource->pos.x, resource->pos.y + 30, resource->pos.z);
+		image.SetSize(xsize - 10, ysize - 10);
+		image.SetColor(XMFLOAT4(1, 1, 1, 1));
+		image.SetAnimationNo(0);
+		//UVをセット
+		XMFLOAT2 uv[4];
+		uv[0].x = 0.0f;
+		uv[0].y = 0.0f;
+		uv[1].x = 1.0f;
+		uv[1].y = 0.0f;
+		uv[2].x = 0.0f;
+		uv[2].y = 1.0f;
+		uv[3].x = 1.0f;
+		uv[3].y = 1.0f;
+
+		board.SetUV(uv);
+		image.SetUV(uv);
+
+		//エフェクトリストへ格納
+		data.m_bar = board;
+		data.m_targetimage = image;
+
+		//頂点バッファ生成
+		ID3D11Device* dev;
+		dev = GetDX11Device();
+
+		ID3D11Buffer* vbuffer = nullptr;		// 頂点バッファ
+		ID3D11Buffer* Imagevbuffer = nullptr;		// 頂点バッファ
+
+		// 頂点バッファ作成（後で変更可能）
+		bool sts = CreateVertexBufferWrite(dev, sizeof(MyVertex), 4, board.m_Vertex, &vbuffer);
+		if (!sts) {
+			MessageBox(nullptr, "create vertex buffer error(CBillBoard)", "error", MB_OK);
+		}
+
+		data.m_bar.m_vbuffer = vbuffer;
+
+		// 頂点バッファ作成（後で変更可能）
+		sts = CreateVertexBufferWrite(dev, sizeof(MyVertex), 4, image.m_Vertex, &Imagevbuffer);
+		if (!sts) {
+			MessageBox(nullptr, "create vertex buffer error(CBillBoard)", "error", MB_OK);
+		}
+
+		data.m_targetimage.m_vbuffer = Imagevbuffer;
+		data.m_data = resource;
+
+		//格納
+		g_bars.push_back(data);
+	}
 }
 
 void Sprite2DMgr::CreateEffect(EFFECTLIST type,float x, float y, float z, float xsize, float ysize, DirectX::XMFLOAT4 color)

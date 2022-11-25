@@ -14,7 +14,6 @@
 #include "ModelMgr.h"
 #include "Application.h"
 #include "CLight.h"
-#include "Bullet.h"
 #include "CBillBoard.h"
 #include "Stage.h"
 #include "Sprite2DMgr.h"
@@ -23,18 +22,21 @@
 #include <tchar.h>
 #include	"WICTextureLoader.h"
 #include "GameButton.h"
+#include "mousepostoworld.h"
+#include "VillagerMgr.h"
+#include "NameGenerator.h"
+#include "ResourceManager.h"
+#include "XAudio2.h"
+#include "StageHitCollider.h"
+#include "Terrain.h"
+#include <thread>
+#include "BuildingMgr.h"
+//GIT TEST
 
-Player g_player;
-Enemy g_enemy;    //敵オブジェクト
+
 Skydome g_skybox;       // スカイドーム
-Effect Fog;    //Fogエフェクト
-Effect Sea;    //海オブジェクト
-Bullet bullets;    //弾クラス
-CBillBoard fireSmoke;    //スモーク
-Block block;
+Terrain g_terrain;    //地形(外側)
 XMFLOAT4X4 FirstCameraPos;
-
-BoundingSphere	g_bs;	// 境界球
 
 //時間計測
 DWORD starttime;
@@ -71,9 +73,45 @@ int nowcnt;
 //線形補間の回数
 int lerpcnt = 20;
 
-void  SimulationInit() {
+void InitThred00()
+{
+	for (int i = 0; i < 6; i++)
+	{
+		ModelMgr::GetInstance().LoadModel(
+			ModelMgr::GetInstance().g_modellist[i].modelname,
+			ModelMgr::GetInstance().g_modellist[i].vsfilename,
+			ModelMgr::GetInstance().g_modellist[i].psfilename,
+			ModelMgr::GetInstance().g_modellist[i].texfolder);
+	}
+}
 
-	for (int i = 0; i < ModelMgr::GetInstance().g_modellist.size(); i++)
+void InitThred01()
+{
+	for (int i = 6; i < 9; i++)
+	{
+		ModelMgr::GetInstance().LoadModel(
+			ModelMgr::GetInstance().g_modellist[i].modelname,
+			ModelMgr::GetInstance().g_modellist[i].vsfilename,
+			ModelMgr::GetInstance().g_modellist[i].psfilename,
+			ModelMgr::GetInstance().g_modellist[i].texfolder);
+	}
+}
+
+void InitThred02()
+{
+	for (int i = 9; i < 11; i++)
+	{
+		ModelMgr::GetInstance().LoadModel(
+			ModelMgr::GetInstance().g_modellist[i].modelname,
+			ModelMgr::GetInstance().g_modellist[i].vsfilename,
+			ModelMgr::GetInstance().g_modellist[i].psfilename,
+			ModelMgr::GetInstance().g_modellist[i].texfolder);
+	}
+}
+
+void InitThred03()
+{
+	for (int i = 11; i < ModelMgr::GetInstance().g_modellist.size(); i++)
 	{
 		ModelMgr::GetInstance().LoadModel(
 			ModelMgr::GetInstance().g_modellist[i].modelname,
@@ -82,31 +120,88 @@ void  SimulationInit() {
 			ModelMgr::GetInstance().g_modellist[i].texfolder);
 	}
 
+}
+
+void InitThred04()
+{
+	//名前生成の初期化
+	NameGenerator::GetInstance().Init();
+	SoundMgr::GetInstance().XA_Initialize();
+
+	//スプライトマネージャーの初期化
+	Sprite2DMgr::GetInstance().Init();
+
+	// IMGUI初期化
+	imguiInit();
+}
+void SearchMousePosThread()
+{
+	XMFLOAT3 g_nearp = { 0,0,0 };
+	XMFLOAT3 g_farp = { 0,0,0 };
+
+	SearchMousePoint(g_nearp, g_farp);
+}
+void  SimulationInit() {
+
+	//初期ロードをマルチスレッドで行う
+	std::thread thr1(InitThred00);
+	std::thread thr2(InitThred01);
+	std::thread thr3(InitThred02);
+	std::thread thr4(InitThred03);
+	std::thread thr5(InitThred04);
+
+	thr1.join();
+	thr2.join();
+	thr3.join();
+	thr4.join();
+	thr5.join();
+
+	//ゲームボタン初期化
+	GameButton::GetInstance().Init();
+
+
+	// ASSIMPを使用したアニメーションの読み込み
+	bool sts = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::PLAYER)].modelname)->LoadAnimation("assets/ModelData/male_adult/animation/male_adult_ver1.1.fbx");
+	sts = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::CONIFER00)].modelname)->LoadAnimation("assets/Modeldata/tree/conifer00/conifer01.fbx");
+	
+	//ステージをロード
+	Stage::GetInstance().RoadStageData();
+
+
+	//リソース初期化
+	ResourceManager::GetInstance().Init();
+
+	//建築物初期化
+	BuildingMgr::GetInstance().Init();
+
+	//ステージコリジョンを作成
+	StageHitInit();
+
 	//２Dの初期化
 	Init2D();
 	//２Dテキスト初期化
 	MyString::InitMyString();
 
+	//村人マネージャーの初期化
+	VillagerMgr::GetInstance().Init();
+	Player::Data pdata;
+	pdata.pos = XMFLOAT3(500, 0, -500);
+	pdata.firstname = NameGenerator::GetInstance().CreateName(NameGenerator::MALE);
+	pdata.lastname = NameGenerator::GetInstance().CreateName(NameGenerator::FAMILLY);
+	VillagerMgr::GetInstance().CreateVillager(pdata);
+
 	//カメラ初期位置の初期化
 	DX11MtxIdentity(FirstCameraPos);
+	FirstCameraPos._41 = VillagerMgr::GetInstance().m_villager[0]->GetPos().x;
+	FirstCameraPos._42 = VillagerMgr::GetInstance().m_villager[0]->GetPos().y;
+	FirstCameraPos._43 = VillagerMgr::GetInstance().m_villager[0]->GetPos().z;
 
-	// IMGUI初期化
-	imguiInit();
+	CCamera::GetInstance()->SetEye(VillagerMgr::GetInstance().m_villager[0]->GetPos());
+	CCamera::GetInstance()->CreateCameraMatrix();
 
 	//SetTime = 6:00
 	Application::GAME_TIME = 360;
 
-	//ゲームボタン初期化
-	GameButton::GetInstance().Init();
-
-	//スプライトマネージャーの初期化
-	Sprite2DMgr::GetInstance().Init();
-
-	//ボタンの初期化
-	//MenuButton = new Button(ButtonType::TOGGLE,XMFLOAT2(1260,20),XMFLOAT2(30,30), "assets/sprite/UI/MenuButton.png");
-
-	fireSmoke.LoadTexTure("assets/ModelData/Smoke.png");
-	fireSmoke.Init(0, 0, 200, 100, 100, XMFLOAT4(1, 1, 1, 1));
 	Sprite2DMgr::GetInstance().CreateUI(UILIST::BLACKBACK_START, 1000, 530, 0, 11, 5.5, XMFLOAT4(1, 1, 1, 1));
 
 	//MouseCursor生成
@@ -125,58 +220,33 @@ void  SimulationInit() {
 	uv[3].x = 1.0f;
 	uv[3].y = 1.0f;
 
-	fireSmoke.SetUV(uv);
-
-
-	// プレイヤ初期化
-	//g_player.Init();
-	//g_player.SetModel(ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::PLAYER)].modelname));
-
-	block.Init();
-
-	//プレイヤー初期化
-	g_player.Init();
-	g_player.SetModel(ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::PLAYER)].modelname));
-
-
-	//エネミー初期化
-	g_enemy.Init();
-	g_enemy.SetModel(ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::ENEMY)].modelname));
-
 	//スカイドーム初期化
 	g_skybox.Init();
 	g_skybox.SetModel(ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::SKYBOX)].modelname));
 
-	//煙エフェクトの初期化
-	Fog.Init();
-	Fog.SetModel(ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::FOG)].modelname));
-
-	//海の初期化
-	Sea.Init();
-	Sea.SetModel(ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::SEA)].modelname));
-
-	//ステージをロード
-	Stage::GetInstance().RoadStageData();
-
-	//モデルの全頂点を抜き出す
+	//地形初期化
+	g_terrain.Init();
 
 	//開始時間の設定
 	starttime = timeGetTime();
+
 }
 
 void  SimulationExit() {
 
-	// プレイヤ終了処理
-	g_player.Finalize();
 
-	g_enemy.Finalize();
+	VillagerMgr::GetInstance().Uninit();
 
-	Sea.Finalize();
+	ResourceManager::GetInstance().Uninit();
+
+	BuildingMgr::GetInstance().Uninit();
 
 	MyString::ClearMyString();
 
 	//スカイドーム終了処理
 	g_skybox.Finalize();
+
+	g_terrain.Finalize();
 
 	imguiExit();
 
@@ -184,45 +254,35 @@ void  SimulationExit() {
 
 void  SimulationUpdate() {
 
+	ImGuiIO& io = ImGui::GetIO();
+
 	//経過時間を設定(ミリ秒)
 	endtime = timeGetTime();
 	timer = (endtime - starttime);
 
 	CDirectInput::GetInstance().GetMouseState();
 
+	//資源マネージャーの更新
+	ResourceManager::GetInstance().Update();
+
+	//建築物マネージャーの更新
+	BuildingMgr::GetInstance().Update();
+
+
+	//村人マネージャーの更新
+	VillagerMgr::GetInstance().Update();
+
+	//ステージ更新
+	Stage::GetInstance().Update();
+
+	//ブロック選択
+	//Stage::GetInstance().SearchBlock();
+
 	//スプライトマネージャーの更新
 	Sprite2DMgr::GetInstance().Update();
 
 	//ボタン更新
 	GameButton::GetInstance().Update();
-
-	//ボタンとマウスのあたり判定
-	//if (MenuButton->CheckHit())
-	//{
-	//	//マウスがボタン上にある
-	//	MenuButton->ChangeMouseOn();
-	//	//ボタンがクリックされた
-	//if(CDirectInput::GetInstance().GetMouseLButtonTrigger()){
-	//	Sprite2DMgr::GetInstance().CreateWindowSprite(XMFLOAT2(400, 300), XMFLOAT2(600, 400),XMFLOAT4(1,1,1,1),true, "assets/sprite/UI/Window.png");
-	//	MenuButton->ChangeClick();
-	//}
-	//}
-
-	//ボタン更新
-	//MenuButton->Update();
-
-	// プレイヤ更新
-	g_player.Update();
-
-	//エネミー更新
-	g_enemy.Update();
-
-	Fog.Update(CCamera::GetInstance()->GetCameraMatrix());
-
-	Sea.Update(CCamera::GetInstance()->GetCameraMatrix());
-
-	//弾更新
-	bullets.Update();
 
 	//F5キー入力(トリガー)
 	if (CDirectInput::GetInstance().CheckKeyBufferTrigger(DIK_F5))
@@ -258,8 +318,10 @@ void  SimulationUpdate() {
 	XMFLOAT3 CameraAngle = {0,0,0};
 	XMFLOAT3 Position = CCamera::GetInstance()->GetEye();
 	XMFLOAT4X4 CameraMtx = CCamera::GetInstance()->GetCameraMatrix();
+	XMFLOAT3 FocusPos = CCamera::GetInstance()->GetLookat();
 	float speed = 1;
 	float dot = 0;
+
 
 	DX11MtxIdentity(Rotation);
 	//カメラタイプに応じて設定
@@ -270,10 +332,12 @@ void  SimulationUpdate() {
 		break;
 
 	case CAMERAMODE::DELAYTPS:
-		CCamera::GetInstance()->DelayTPSCamera(g_player.GetMtx());
+		CCamera::GetInstance()->DelayTPSCamera(VillagerMgr::GetInstance().m_villager[0]->GetMtx());
 		break;
 
 	case CAMERAMODE::TPS:
+		//ズーム倍率 基準1.0f
+		float zoom;
 		if (CDirectInput::GetInstance().CheckKeyBuffer(DIK_A)) {
 			FirstCameraPos._41 -= speed * FirstCameraPos._11;
 			FirstCameraPos._43 -= speed * FirstCameraPos._13;
@@ -305,6 +369,17 @@ void  SimulationUpdate() {
 		XMStoreFloat4x4(&FirstCameraPos, PositionMtx);
 
 		CCamera::GetInstance()->TPSCamera(FirstCameraPos);
+
+		if (io.MouseWheel != 0)
+		{
+			if (io.MouseWheel > 0)
+			{
+				CCamera::GetInstance()->SetZoom(CCamera::GetInstance()->GetZoom() - 0.1);
+			}
+			else {
+				CCamera::GetInstance()->SetZoom(CCamera::GetInstance()->GetZoom() + 0.1);
+			}
+		}
 		break;
 
 	default:
@@ -316,104 +391,29 @@ void  SimulationUpdate() {
 }
 
 void  SimulationDraw() {
-
-
 	//３D描画
 	TurnOnZbuffer();
 
 	Stage::GetInstance().Draw();
+	//資源描画
+	ResourceManager::GetInstance().Draw();
 
-	// プレイヤ描画
-	g_player.Draw();
+	//建築物描画
+	BuildingMgr::GetInstance().Draw();
+	GameButton::GetInstance().PrevieModelDraw();
+
+	//村人描画
+	VillagerMgr::GetInstance().Draw();
 
 	g_skybox.Draw();
 
+	g_terrain.Draw();
 	//2D描画
 	TurnOffZbuffer();
 
 	Init2D();
-	
+
 	GameButton::GetInstance().Draw();
 
 	Sprite2DMgr::GetInstance().Draw(CCamera::GetInstance()->GetCameraMatrix());
-
-	//ボタン描画
-	//MenuButton->Draw();
-
-	//ウィンドウ座標
-	//Screen座標を出力
-	XMFLOAT4X4 PlayuerPos = g_player.GetMtx();
-	XMMATRIX worldMatrix = XMMatrixTranslation(PlayuerPos._41, PlayuerPos._42, PlayuerPos._43);
-	XMMATRIX view_mtx = XMLoadFloat4x4(&CCamera::GetInstance()->GetCameraMatrix());
-	XMMATRIX projection_mtx = XMLoadFloat4x4(&CCamera::GetInstance()->GetProjectionMatrix());
-	//スクリーン座標変換行列
-	XMFLOAT4X4 Screen;
-	DX11MtxIdentity(Screen);
-	Screen._11 = Application::CLIENT_WIDTH / 2;
-	Screen._41 = Application::CLIENT_WIDTH / 2;
-	Screen._22 = Application::CLIENT_HEIGHT / 2;
-	Screen._42 = Application::CLIENT_HEIGHT / 2;
-	Screen._33 = 1;
-	Screen._44 = 1;
-	XMMATRIX Screen_mtx = XMLoadFloat4x4(&Screen);
-
-
-	ID3D11DeviceContext* pdevice;
-	CDirectXGraphics::GetInstance()->GetDXDevice()->GetImmediateContext(&pdevice);
-
-	XMMATRIX mtx = XMMatrixMultiply(worldMatrix,view_mtx);
-	mtx = XMMatrixMultiply(mtx, projection_mtx);
-	mtx = XMMatrixMultiply(mtx,Screen_mtx);
-
-
-	XMFLOAT4X4 position;
-	XMStoreFloat4x4(&position, mtx);
-
-	//表示テキストを設定
-	char str[128];
-	sprintf_s<128>(str, "PlayerScreenPos x:%f, y:%f",position._41, position._42);
-	MyString::DrawString(10, 275, 20, 20, XMFLOAT4(1, 1, 1, 1), str);
-	ImGuiIO& io = ImGui::GetIO();
-
-	sprintf_s<128>(str, "MouseScreenPos x:%f, y:%f",io.MousePos.x, io.MousePos.y);
-	MyString::DrawString(10, 295, 20, 20, XMFLOAT4(1, 1, 1, 1), str);
-
-
-	//Score表示
-	switch (cameratype)
-	{
-	case CAMERAMODE::FIXED:
-		sprintf_s<128>(str, "CameraMode FixedCamera");
-		MyString::DrawString(10, 75, 20, 20, XMFLOAT4(1, 1, 1, 1), str);
-
-		break;
-
-	case CAMERAMODE::DELAYTPS:
-		sprintf_s<128>(str, "CameraMode DelayCamera");
-		MyString::DrawString(10, 75, 20, 20, XMFLOAT4(1, 1, 1, 1), str);
-		break;
-
-	case CAMERAMODE::TPS:
-		sprintf_s<128>(str, "CameraMode TPSCamera");
-		MyString::DrawString(10, 75, 20, 20, XMFLOAT4(1, 1, 1, 1), str);
-
-		sprintf_s<128>(str, "MousePos X:%d Y:%d", CDirectInput::GetInstance().GetMousePosX(), CDirectInput::GetInstance().GetMousePosY());
-		MyString::DrawString(10, 15, 20, 20, XMFLOAT4(1, 1, 1, 1), str);
-		break;
-
-	case CAMERAMODE::FPS:
-		sprintf_s<128>(str, "CameraMode FPSCamera");
-		MyString::DrawString(10, 75, 20, 20, XMFLOAT4(1, 1, 1, 1), str);
-		break;
-
-	default:
-		break;
-	}
-	sprintf_s<128>(str, "I usually watch a movie on my days off. ");
-	MyString::DrawString(10, 105, 20, 20, XMFLOAT4(1, 1, 1, 1), str);
-
-
-	//２Dテキストの表示
-	MyString::DrawMyString();
-
 }

@@ -104,6 +104,7 @@ void ModelData::CreateBone(aiNode* node)
 
 	// ノード名をキーにしてボーン情報を保存
 	m_Bone[node->mName.C_Str()] = bone;
+	m_Bone[node->mName.C_Str()].Name = node->mName.C_Str();
 
 	for (unsigned int n = 0; n < node->mNumChildren; n++)
 	{
@@ -167,18 +168,18 @@ void ModelData::Draw(ID3D11DeviceContext* devcon, XMFLOAT4X4& mtxworld)
 
 void ModelData::DrawOBB() {
 	// OBB描画
-	for (int i = 0; i < m_meshes.size(); i++)
-	{
-		m_meshes[i].DrawOBB(m_Bone);
-	}
+	//for (int i = 0; i < m_meshes.size(); i++)
+	//{
+	//	m_meshes[i].DrawOBB(m_Bone);
+	//}
 }
 
 void ModelData::UpdateOBB(const XMFLOAT4X4& mtxworld) {
 	// メッシュのOBB更新
-	for (int i = 0; i < m_meshes.size(); i++)
-	{
-		m_meshes[i].UpdateOBB(m_Bone, mtxworld);
-	}
+	//for (int i = 0; i < m_meshes.size(); i++)
+	//{
+	//	m_meshes[i].UpdateOBB(m_Bone, mtxworld);
+	//}
 }
 
 // メッシュの解析
@@ -220,7 +221,7 @@ Mesh ModelData::processMesh(aiMesh* mesh, const aiScene* scene, int meshidx)
 		for (unsigned int b = 0; b < 4; b++)
 		{
 			vertex.m_BoneIndex[b] = -1;
-			vertex.m_BoneName[b] = "";
+			//vertex.m_BoneName[b] = "";
 			vertex.m_BoneWeight[b] = 0.0f;
 		}
 
@@ -245,7 +246,7 @@ Mesh ModelData::processMesh(aiMesh* mesh, const aiScene* scene, int meshidx)
 
 			// メッシュの中の何番目か
 			vertices[vidx].m_BoneWeight[vertices[vidx].m_BoneNum] = weight.mWeight;
-			vertices[vidx].m_BoneName[vertices[vidx].m_BoneNum] = bone->mName.C_Str();
+			//vertices[vidx].m_BoneName[vertices[vidx].m_BoneNum] = bone->mName.C_Str();
 			// 該当するボーン名のインデックス値をセット
 			vertices[vidx].m_BoneIndex[vertices[vidx].m_BoneNum] = m_Bone[bone->mName.C_Str()].idx;
 
@@ -281,7 +282,9 @@ Mesh ModelData::processMesh(aiMesh* mesh, const aiScene* scene, int meshidx)
 		}
 	}
 
-	return Mesh(vertices, indices, textures);
+	Material mt;
+
+	return Mesh(vertices, indices, textures,mt);
 }
 
 void ModelData::UpdateBoneMatrix(aiNode* node, aiMatrix4x4 matrix)
@@ -320,12 +323,21 @@ void ModelData::Update(
 	// 0番目のシーンを取り出し
 	const aiScene* s = animationcontainer[animfileno]->GetScene();
 
-	// アニメーションデータを持っているか？
+	 //アニメーションデータを持っているか？
 	if (s->HasAnimations())
 	{
 		//アニメーションデータからボーンマトリクス算出
 		aiAnimation* animation = s->mAnimations[animno];
+		
+		//アニメーションが切り替わったかの判定
+		static int duration_old;
 
+		if (duration_old != animation->mDuration)
+		{
+			m_AnimFrame = 0;
+		}
+
+		duration_old = animation->mDuration;
 		// ボーンの数だけループ
 		for (unsigned int c = 0; c < animation->mNumChannels; c++)
 		{
@@ -364,15 +376,16 @@ void ModelData::Update(
 		UpdateBoneMatrix(m_assimpscene.GetScene()->mRootNode, aiMatrix4x4());
 
 		// メッシュのOBB更新
-		for (int i = 0; i < m_meshes.size(); i++)
-		{
-			m_meshes[i].UpdateOBB(m_Bone,mtxworld);
-		}
+		//for (int i = 0; i < m_meshes.size(); i++)
+		//{
+		//	m_meshes[i].UpdateOBB(m_Bone,mtxworld);
+		//}
 	}
 
 	if (m_cnt % INTERPOLATENUM == 0) {
 		m_preFrame = m_Frame;
 		m_Frame++;
+		m_AnimFrame++;
 		m_factor = 0;
 	}
 
@@ -465,4 +478,14 @@ void ModelData::UpdateBoneMatrixConstantBuffer() {
 	// GPUへ定数バッファをセット
 	devicecontext->VSSetConstantBuffers(5, 1, &m_constantbufferbonematrix);
 
+}
+
+BONE ModelData::GetBone(std::string BoneName)
+{
+	return m_Bone[BoneName];
+}
+
+std::map<std::string, BONE>* ModelData::GetBone()
+{
+	return &m_Bone;
 }

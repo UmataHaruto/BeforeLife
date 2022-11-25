@@ -37,13 +37,18 @@ cbuffer ConstantBufferBoneMatrix : register(b5)
 {
 	matrix BoneMatrix[400];
 }
+
+cbuffer ConstantHairColor : register(b6)
+{
+	float4 Color;
+}
 //--------------------------------------------------------------------------------------
 // ç\ë¢ëÃíËã`
 //--------------------------------------------------------------------------------------
 struct VS_OUTPUT
 {
 	float4 Pos : SV_POSITION;
-	float4 Color : COLOR0;
+	float4 Color : COLOR;
 	float2 Tex : TEXCOORD;
 	float4 WPos : TEXCOORD1;
 	float4 Normal : TEXCOORD2;

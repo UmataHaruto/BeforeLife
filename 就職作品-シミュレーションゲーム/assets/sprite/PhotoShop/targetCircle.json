@@ -1,0 +1,29 @@
+{ "skeleton": { "images": "G:/GM31/就職作品-シミュレーションゲーム/就職作品-シミュレーションゲーム/assets/sprite/PhotoShop/TargetCircle/" },
+"PhotoshopToSpine": { "scale": 1, "padding": 1, "trim": true },
+"bones": [
+	{ "name": "root" }
+],
+"slots": [
+	{ "name": "レイヤー 2", "bone": "root", "attachment": "レイヤー 2" },
+	{ "name": "レイヤー 3", "bone": "root", "attachment": "レイヤー 3" },
+	{ "name": "楕円形 1", "bone": "root", "attachment": "楕円形 1" },
+	{ "name": "楕円形 2", "bone": "root", "attachment": "楕円形 2" }
+],
+"skins": {
+	"default": {
+		"レイヤー 2": {
+			"レイヤー 2": { "x": 250, "y": -313.5, "width": 228, "height": 143 }
+		},
+		"レイヤー 3": {
+			"レイヤー 3": { "x": 250, "y": -212.5, "width": 228, "height": 143 }
+		},
+		"楕円形 1": {
+			"楕円形 1": { "x": 249.5, "y": -145.5, "width": 85, "height": 85 }
+		},
+		"楕円形 2": {
+			"楕円形 2": { "x": 250, "y": -252.5, "width": 506, "height": 507 }
+		}
+	}
+},
+"animations": { "animation": {} }
+}

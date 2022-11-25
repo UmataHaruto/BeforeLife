@@ -15,6 +15,14 @@
 //エフェクトリスト
 enum class EFFECTLIST
 {
+	TARGETCIRCLE,
+	PROGRESSBAR_CIRCLE,
+	WOOD,
+	ORE_COAL,
+	ORE_IRON,
+	ORE_GOLD,
+	IRON,
+	GOLD,
 	_MAX,
 };
 
@@ -277,6 +285,7 @@ public:
 		static int SEdelay = 0;
 		static bool TargetComplate = false;
 		SEdelay++;
+		//プログレスバーの場合
 		if (m_delaycount >= m_animationDelay) {
 			m_delaycount = 0;
 			if (m_isAnimation)
@@ -309,18 +318,20 @@ public:
 				SetUV(uv);
 
 				//アニメーションカウントを進める
-				if (m_animationNo < m_cutU * m_cutV - 1) {
-					m_animationNo++;
-				}
-				//ループする場合
-				else if (m_isLoop)
-				{
-					m_animationNo = 0;
-				}
-				//ターゲットではない場合
-				else
-				{
-					m_sts = EFFECTSTATUS::DEAD;
+				if (m_type != EFFECTLIST::PROGRESSBAR_CIRCLE) {
+					if (m_animationNo < m_cutU * m_cutV - 1) {
+						m_animationNo++;
+					}
+					//ループする場合
+					else if (m_isLoop)
+					{
+						m_animationNo = 0;
+					}
+					//ターゲットではない場合
+					else
+					{
+						m_sts = EFFECTSTATUS::DEAD;
+					}
 				}
 			}
 		}

@@ -76,11 +76,16 @@ void CCamera::TPSCamera(XMFLOAT4X4 mtx)
 
 	lookat = pos;
 
-	eye.x = pos.x - (150 * zaxis.x) + (yaxis.x * 10);
-	eye.y = pos.y - (150 * zaxis.y) + (yaxis.y * 100);
-	eye.z = pos.z - (150 * zaxis.z) + (yaxis.z * 100);
+	eye.x = pos.x - ((150 * m_Zoom) * zaxis.x) + (yaxis.x * (10 * m_Zoom));
+	eye.y = pos.y - ((150 * m_Zoom) * zaxis.y) + (yaxis.y * (300 * m_Zoom));
+	eye.z = pos.z - ((150 * m_Zoom) * zaxis.z) + (yaxis.z * (10 * m_Zoom));
 
 	up = yaxis;
+
+	//ズーム処理
+	//eye.x = (lookat.x - eye.x) * m_Zoom;
+	//eye.y = (lookat.y - eye.y) * m_Zoom;
+	//eye.z = (lookat.z - eye.z) * m_Zoom;
 
 	//カメラクラスにセット
 	CCamera::GetInstance()->SetLookat(lookat);

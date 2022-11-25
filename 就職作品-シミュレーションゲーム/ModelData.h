@@ -15,6 +15,8 @@ using namespace DirectX;
 class ModelData
 {
 public:
+	std::vector<Mesh> m_meshes;					// メッシュの集合がモデル
+
 	ModelData();
 	~ModelData();
 
@@ -34,21 +36,25 @@ public:
 	const std::vector<Mesh>& GetMeshes()const {
 		return m_meshes;
 	}
+	BONE GetBone(std::string BoneName);
+
+	std::map<std::string, BONE>* GetBone();
 
 	void UpdateOBB(const XMFLOAT4X4& mtxworld);
-
-private:
+	//BONEを取得
 	int m_Frame = 0;								// フレーム番号
 	AssimpScene m_assimpscene;					// assimp scene
 
 	std::vector<const aiScene*> m_sceneAnimContainer;	// アニメーションコンテナ
+	int m_AnimFrame = 0;    //現在アニメーションのフレーム数
+
+private:
 
 	int m_cnt = 0;								// キーフレーム補間用
 	int m_preFrame = 0;							// キーフレーム補間用
 	float m_factor = 0.0f;						// キーフレーム補間用
 
 	std::map<std::string, BONE> m_Bone;			//ボーンデータ（ノードの名前で参照）
-	std::vector<Mesh> m_meshes;					// メッシュの集合がモデル
 
 	std::string m_directory;					// テクスチャファイルの位置
 	ID3D11Buffer* m_constantbufferbonematrix;	// ボーン行列格納用定数バッファ	

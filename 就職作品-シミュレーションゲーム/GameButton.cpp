@@ -6,6 +6,17 @@
 #include <vector>
 #include "Shader.h"
 #include "Application.h"
+#include "CDirectInput.h"
+#include "VillagerMgr.h"
+#include "ResourceManager.h"
+#include "ModelMgr.h"
+#include "XAudio2.h"
+#include "myimgui.h"
+#include <thread>
+#include "mousepostoworld.h"
+#include "BuildingMgr.h"
+#include "Souko.h"
+#include "Resource.h"
 
 GameButton::GameButton()
 {
@@ -17,6 +28,20 @@ GameButton::~GameButton()
 
 void GameButton::Init()
 {
+	//プレビューモデルを設定
+	Resource* resource = new Resource();
+	Resource::Data data;
+	data.amount = 1;
+	data.Endurance = 100;
+	data.EnduranceMax = 100;
+	data.Hardness = 100;
+	data.pos = XMFLOAT3(0, 0, 0);
+	data.type =ItemType::ORE_COAL;
+	resource->Init(data,MODELID::SMALLHOUSE);
+	resource->SetModel(ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::SMALLHOUSE)].modelname));
+	resource->GetModel()->ChangeSelectType(SELECT_SHADER_TYPE::SELECT_SHADER_TYPE_CREATE);
+	modelpreview = resource;
+
 	m_Game_HoverButton = GAMEBUTTON_NONE;
 
 	m_io = &ImGui::GetIO();
@@ -46,8 +71,12 @@ void GameButton::Init()
 	ID3D11DeviceContext* device11Context = GetDX11DeviceContext();
 
 	//SRV生成
-	//ゲームボタン
+	//ウィンドウ
 	CreatetSRVfromFile("assets/sprite/UI/Window.png", device, device11Context, &m_windowback_texture_view);
+	//カーソル選択範囲
+	CreatetSRVfromFile("assets/sprite/UI/MouseSelectArea.png", device, device11Context, &m_selectarea_texture_view);
+
+	//ゲームボタン
 	CreatetSRVfromFile("assets/sprite/UI/PoseButton_00.png", device, device11Context, &m_texture_view[GAMEBUTTON_STOP]);
 	CreatetSRVfromFile("assets/sprite/UI/PlayButton_00.png", device, device11Context, &m_texture_view[GAMEBUTTON_PLAY_00]);
 	CreatetSRVfromFile("assets/sprite/UI/PlayButton_01.png", device, device11Context, &m_texture_view[GAMEBUTTON_PLAY_01]);
@@ -60,11 +89,37 @@ void GameButton::Init()
 	CreatetSRVfromFile("assets/sprite/UI/SelectButton_COLLECT.png", device, device11Context, &m_select_texture_view[SELECTBUTTON_COLLECT]);
 	CreatetSRVfromFile("assets/sprite/UI/SelectButton_CANCCEL.png", device, device11Context, &m_select_texture_view[SELECTBUTTON_CANCEL]);
 
+	//建築ボタン
+	CreatetSRVfromFile("assets/sprite/UI/BuildButton_House.png", device, device11Context, &m_build_texture_view[BUILDBUTTON_HOUSE]);
+	CreatetSRVfromFile("assets/sprite/UI/BuildButton_Souko.png", device, device11Context, &m_build_texture_view[BUILDBUTTON_SOUKO]);
+
+	//建築_ハウスボタン
+	CreatetSRVfromFile("assets/sprite/UI/HouseIcon.png", device, device11Context, &m_build_house_texture_view[HOUSE_SMALL]);
+	//建築_倉庫ボタン
+	CreatetSRVfromFile("assets/sprite/UI/SoukoIcon.png", device, device11Context, &m_build_souko_texture_view[SOUKO_SMALL]);
+
+	//アイテムアイコン
+	CreatetSRVfromFile("assets/sprite/UI/Resource/Wood.png", device, device11Context, &m_resource_preview_texture[(int)ItemType::WOOD]);
+	CreatetSRVfromFile("assets/sprite/UI/Resource/Coal.png", device, device11Context, &m_resource_preview_texture[(int)ItemType::ORE_COAL]);
+	CreatetSRVfromFile("assets/sprite/UI/Resource/ironore.png", device, device11Context, &m_resource_preview_texture[(int)ItemType::ORE_IRON]);
+	CreatetSRVfromFile("assets/sprite/UI/Resource/Goldore.png", device, device11Context, &m_resource_preview_texture[(int)ItemType::ORE_GOLD]);
+	CreatetSRVfromFile("assets/sprite/UI/Resource/Iron.png", device, device11Context, &m_resource_preview_texture[(int)ItemType::IRON]);
+	CreatetSRVfromFile("assets/sprite/UI/Resource/Gold.png", device, device11Context, &m_resource_preview_texture[(int)ItemType::GOLD]);
 }
+
 
 
 void GameButton::Update()
 {
+	modelpreview->SetPos(m_mouseworldpos);
+	modelpreview->Update();
+
+	//デバッグメニュー
+	if (CDirectInput::GetInstance().CheckKeyBufferTrigger(DIK_F1))
+	{
+		m_debug = 1 - m_debug;
+	}
+
 	//ボタンイベント
 	if (m_RadioButton[GAMEBUTTON_STOP])
 	{
@@ -82,7 +137,6 @@ void GameButton::Update()
 	if (m_RadioButton[GAMEBUTTON_PLAY_02])
 	{
 		Application::Instance()->GAME_SPEED = 5;
-
 	}
 }
 
@@ -92,6 +146,10 @@ void GameButton::Draw()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 	ImGuiIO& io = ImGui::GetIO();
+	//村人ウィンドウを開いているか
+	static bool villagerpropaty = false;
+	static int edit_select = 0;
+	static int resource_select = 0;
 
 	//ウィンドウ設定
 	ImGuiWindowFlags window_flags = 0;
@@ -99,9 +157,280 @@ void GameButton::Draw()
 	window_flags |= ImGuiWindowFlags_NoMove;
 	window_flags |= ImGuiWindowFlags_NoResize;
 	window_flags |= ImGuiWindowFlags_NoBackground;
+	if (!m_debug) window_flags |= ImGuiWindowFlags_MenuBar;
 
 	ImGui::Begin(u8"操作説明", m_windowActivate, window_flags);
 
+	//メニュー
+	if (ImGui::BeginMenuBar())
+	{
+		if (ImGui::BeginMenu(u8"ファイル"))
+		{
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu(u8"村人"))
+		{
+			ImGui::MenuItem(u8"詳細",NULL,&villagerpropaty);
+
+			//キャラクター名を抽出
+			std::string firstname;
+			std::string lastname;
+			std::string margename[100];
+
+			const char* name[100];
+			//スポーン座標
+			static float spawnpos[3];
+
+			for (int i = 0; i < VillagerMgr::GetInstance().m_villager.size(); i++)
+			{
+				firstname = VillagerMgr::GetInstance().m_villager[i]->GetName(NameGenerator::MALE).c_str();
+				lastname = VillagerMgr::GetInstance().m_villager[i]->GetName(NameGenerator::FAMILLY).c_str();
+				margename[i] = firstname + lastname;
+				
+				name[i] = margename[i].c_str();
+			}
+			ImGui::Combo(u8"村人", &edit_select,name, VillagerMgr::GetInstance().m_villager.size());
+			ImGui::SameLine();
+			//村人追加
+			if (ImGui::Button("+"))
+			{
+				Player::Data pdata;
+				pdata.pos = XMFLOAT3(spawnpos[0],spawnpos[1],spawnpos[2]);
+				pdata.firstname = NameGenerator::GetInstance().CreateName(NameGenerator::MALE);
+				pdata.lastname = NameGenerator::GetInstance().CreateName(NameGenerator::FAMILLY);
+				VillagerMgr::GetInstance().CreateVillager(pdata);
+			}
+			//選択項目削除
+			ImGui::SameLine();
+			if (ImGui::Button("-") && edit_select != 0)
+			{
+				if (VillagerMgr::GetInstance().m_villager[edit_select] != nullptr &&
+					edit_select < VillagerMgr::GetInstance().m_villager.size()) {
+					VillagerMgr::GetInstance().m_villager[edit_select]->Finalize();
+					VillagerMgr::GetInstance().m_villager.erase(VillagerMgr::GetInstance().m_villager.begin() + edit_select);
+					edit_select -= 1;
+				}
+			}
+			ImGui::DragFloat3(u8"スポーン座標",spawnpos, 1, -1500, 1500);
+
+			static ImVec4 color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 200.0f / 255.0f);
+
+			static bool alpha_preview = true;
+			static bool alpha_half_preview = true;
+			static bool drag_and_drop = true;
+			static bool options_menu = true;
+			static bool hdr = false;
+
+			ImGuiColorEditFlags misc_flags = (hdr ? ImGuiColorEditFlags_HDR : 0) | (drag_and_drop ? 0 : ImGuiColorEditFlags_NoDragDrop) | (alpha_half_preview ? ImGuiColorEditFlags_AlphaPreviewHalf : (alpha_preview ? ImGuiColorEditFlags_AlphaPreview : 0)) | (options_menu ? 0 : ImGuiColorEditFlags_NoOptions);
+			ImGui::ColorEdit4("Hair Color", (float*)&color, ImGuiColorEditFlags_DisplayRGB | misc_flags);
+
+			//髪色の変更
+			//VillagerMgr::GetInstance().m_villager[edit_select]->GetModel()->ChangeColor(XMFLOAT4(color.x, color.y, color.z, color.w));
+			VillagerMgr::GetInstance().m_villager[edit_select]->GetModel()->ChangeColor(XMFLOAT4(1,1,0,1));
+
+			ImGui::EndMenu();
+		}
+		//モデルタブ
+		if (ImGui::BeginMenu(u8"モデル"))
+		{
+			Resource::Data pdata;
+			//スポーン座標
+			static float spawnpos[3] = {500,0,-500};
+			static int endurance =100;
+			static int endurancemax = 100;
+			static int hardness = 0;
+			static int amount = 1;
+
+			static int model_select = 0;
+			static int modeltype_select = 1;
+
+			const char* name[500];
+			const char* modelname[100];
+
+			std::string resource_name[500];
+
+			//資源の抽出
+			for (int i = 0; i < ResourceManager::GetInstance().m_resources.size(); i++)
+			{
+				resource_name[i] = std::string("TREE");
+				resource_name[i] = resource_name[i] + std::to_string(i);
+				name[i] = resource_name[i].c_str();
+
+				if (i >= 499)break;
+			}
+
+			ImGui::Combo(u8"資源リスト", &resource_select,name, ResourceManager::GetInstance().m_resources.size());
+			//モデルリスト
+			for (int i = 0; i < ModelMgr::GetInstance().g_modellist.size(); i++)
+			{
+				modelname[i] = ModelMgr::GetInstance().g_modellist[i].modelname.c_str();
+			}
+			ImGui::Combo(u8"モデル", &model_select, modelname, ModelMgr::GetInstance().g_modellist.size());
+			ImGui::SameLine();
+
+			//村人追加
+			if (ImGui::Button("+"))
+			{
+				pdata.type = (ItemType)modeltype_select;
+				pdata.pos = XMFLOAT3(spawnpos[0], spawnpos[1], spawnpos[2]);
+				pdata.Endurance = endurance;
+				pdata.EnduranceMax = endurancemax;
+				pdata.Hardness = hardness;
+				pdata.amount = amount;
+				ResourceManager::GetInstance().CreateResource(pdata,(MODELID)model_select);
+			}
+			//選択項目削除
+			ImGui::SameLine();
+			if (ImGui::Button("-") && resource_select != 0)
+			{
+				if (ResourceManager::GetInstance().m_resources[resource_select] != nullptr &&
+					resource_select < ResourceManager::GetInstance().m_resources.size()) {
+					ResourceManager::GetInstance().m_resources.erase(ResourceManager::GetInstance().m_resources.begin() + resource_select);
+					resource_select -= 1;
+				}
+			}
+			const char* modeltype[(int)ItemType::ITEM_MAX] = {
+				"WOOD",
+	             "ORE_COAL",
+	             "ORE_IRON",
+	             "ORE_GOLD",
+	             "IRON",
+	             "GOLD",
+	             "HERB"
+			};
+			ImGui::Combo(u8"モデルタイプ",&modeltype_select, modeltype,(int)ItemType::ITEM_MAX);
+			ImGui::DragFloat3(u8"スポーン座標", spawnpos, 1, -1500, 1500);
+			ImGui::SliderInt(u8"耐久度", &endurance, 0, 100);
+			ImGui::SliderInt(u8"最大耐久度", &endurancemax, 0, 100);
+			ImGui::SliderInt(u8"硬度",&hardness,0,5);
+			ImGui::SliderInt(u8"含有数(1個当たり)", &amount, 0, 100);
+			ImGui::EndMenu();
+		}
+		//サウンドタブ
+		if (ImGui::BeginMenu(u8"サウンド"))
+		{
+			SoundMgr::GetInstance().g_soundlist;
+			static int sound_select = 0;
+
+			const char* name[SOUND_MAX];
+			const char* modelname[SOUND_MAX];
+
+			std::string resource_name[SOUND_MAX];
+
+			//資源の抽出
+			for (int i = 0; i < SoundMgr::GetInstance().g_soundlist.size(); i++)
+			{
+				name[i] = SoundMgr::GetInstance().g_soundlist[i].filename.c_str();
+			}
+
+			ImGui::Combo(u8"サウンドリスト", &sound_select, name, SoundMgr::GetInstance().g_soundlist.size());
+			if (ImGui::Button(u8"再生"))
+			{
+				SoundMgr::GetInstance().XA_Play(SoundMgr::GetInstance().g_soundlist[sound_select].filename);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button(u8"停止"))
+			{
+				SoundMgr::GetInstance().XA_Stop(SoundMgr::GetInstance().g_soundlist[sound_select].filename);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button(u8"全停止"))
+			{
+				SoundMgr::GetInstance().XA_StopAll();
+			}
+			ImGui::EndMenu();
+		}
+		//if (ImGui::BeginMenu(u8"ポーザー"))
+		//{
+		//	//キャラクター名を抽出
+		//	std::string firstname;
+		//	std::string lastname;
+		//	std::string margename[100];
+		//	static int bone_select = 0;
+		//	//スポーン座標
+		//	static float bonepos[3] = {50,0,0};
+
+		//	const char* name[100];
+		//	//スポーン座標
+		//	static float spawnpos[3];
+
+		//	//資源の抽出
+		//	for (int i = 0; i < ResourceManager::GetInstance().m_resources.size(); i++)
+		//	{
+		//		margename[i] = std::string("TREE");
+		//		margename[i] = margename[i] + std::to_string(i);
+		//		name[i] = margename[i].c_str();
+
+		//		if (i >= 499)break;
+		//	}
+
+		//	ImGui::Combo(u8"資源リスト", &resource_select, name, ResourceManager::GetInstance().m_resources.size());
+
+		//	std::map<std::string, BONE>* bone = ResourceManager::GetInstance().m_resources[resource_select]->GetModel()->GetModelData().GetBone();
+
+		//	int count = 0;
+		//	for (auto itr : *bone)
+		//	{
+		//		margename[count] = itr.first;
+		//		name[count] = margename[count].c_str();
+		//		count++;
+		//	}
+
+		//	//ボーン座標を代入
+		//	XMFLOAT4X4 bonemtx = DX11MtxaiToDX(bone->find(name[bone_select])->second.Matrix);
+
+		//	//回転行列
+
+		//	XMFLOAT4X4 Rotation;
+		//	XMFLOAT4X4 aimtx = DX11MtxaiToDX(bone->find(name[bone_select])->second.Matrix);
+		//	XMMATRIX RotationMtx;
+		//	static int RotationCount = 0;
+		//	static bool RotationTrigger = false;
+		//	DX11MtxIdentity(Rotation);
+		//	if (RotationCount < -30) {
+		//		RotationTrigger = true;
+		//	}
+		//	if (RotationCount > 30)
+		//	{
+		//		RotationTrigger = false;
+		//	}
+		//	if (RotationTrigger == true) {
+		//		RotationCount++;
+		//		aiMatrix4x4 airotation;
+		//		bone->find(name[bone_select])->second.Matrix.RotationX(0.174533,airotation);
+		//		bone->find(name[bone_select])->second.Matrix = bone->find(name[bone_select])->second.Matrix * airotation;
+		//	}
+		//	else
+		//	{
+		//		DX11MtxRotationX(-bonepos[0], Rotation);
+		//		RotationCount--;
+		//	}
+
+
+		//	RotationMtx = XMLoadFloat4x4(&Rotation);
+
+		//	RotationMtx = XMMatrixMultiply(RotationMtx, XMLoadFloat4x4(&aimtx));
+
+
+
+		//	/*bonepos[0] = bonemtx._41;
+		//	bonepos[1] = bonemtx._42;
+		//	bonepos[2] = bonemtx._43;*/
+
+		//	ImGui::Combo(u8"ボーン", &bone_select, name,bone->size());
+		//	ImGui::DragFloat3(u8"座標",bonepos, 1, -1500, 1500);
+		//	XMStoreFloat4x4(&Rotation,RotationMtx);
+
+		//	//bone->find(name[bone_select])->second.Matrix = DXToDX11Mtxai(Rotation);
+		//	/*bone->find(name[bone_select])->second.Matrix.d1 = bonepos[0];
+		//	bone->find(name[bone_select])->second.Matrix.d2 = bonepos[1];
+		//	bone->find(name[bone_select])->second.Matrix.d3 = bonepos[2];*/
+
+		//	ImGui::EndMenu();
+		//}
+		ImGui::EndMenuBar();
+
+	}
 	m_style = &ImGui::GetStyle();
 	m_text_color = m_style->Colors;
 
@@ -117,14 +446,24 @@ void GameButton::Draw()
 		m_select_uv_min[i] = ImVec2(0.0f, 0.0f);                 // Top-left
 		m_select_uv_max[i] = ImVec2(1.00f, 0.25f);                 // Lower-right
 	}
+	for (int i = 0; i < BUILDBUTTON_MAX; i++) {
+		m_build_uv_min[i] = ImVec2(0.0f, 0.0f);                 // Top-left
+		m_build_uv_max[i] = ImVec2(1.00f, 0.25f);                 // Lower-right
+	}
+	for (int i = 0; i < HOUSEBUTTON_MAX; i++) {
+		m_build_house_uv_min[i] = ImVec2(0.0f, 0.0f);                 // Top-left
+		m_build_house_uv_max[i] = ImVec2(1.00f, 0.25f);                 // Lower-right
+	}
+	for (int i = 0; i < SOUKOBUTTON_MAX; i++) {
+		m_build_souko_uv_min[i] = ImVec2(0.0f, 0.0f);                 // Top-left
+		m_build_souko_uv_max[i] = ImVec2(1.00f, 0.25f);                 // Lower-right
+	}
 	m_tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
 	m_border_col = ImVec4(0.0f, 0.0f, 0.0f, 0.0f); // 50% opaque white
 
 	m_bg_col = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);             // Black background
 		//背景色
 	m_text_color[ImGuiCol_WindowBg] = ImVec4(0.01f, 0.37f, 0.56f, 0.90f);
-
-	
 
 	m_style->WindowRounding = 1.5f;
 	m_style->AntiAliasedFill = true;
@@ -136,9 +475,26 @@ void GameButton::Draw()
 		m_game_uv_max[m_Game_HoverButton] = ImVec2(1.0f, 0.75f);
 	}
 
+	//セレクトボタンUV変更
 	if (m_Select_HoverButton != -1) {
 		m_select_uv_min[m_Select_HoverButton] = ImVec2(0.0f, 0.5f);
-		m_select_uv_max[m_Select_HoverButton] = ImVec2(1.0f, 0.75f);
+		m_select_uv_max[m_Select_HoverButton] = ImVec2(1.0f, 0.75f);	
+	}
+	//BuildボタンUV変更
+	if (m_Build_HoverButton != -1) {
+		m_build_uv_min[m_Build_HoverButton] = ImVec2(0.0f, 0.5f);
+		m_build_uv_max[m_Build_HoverButton] = ImVec2(1.0f, 0.75f);
+	}
+	//ハウスボタンUV変更
+	if (m_Build_House_HoverButton != -1) {
+		m_build_house_uv_min[m_Build_House_HoverButton] = ImVec2(0.0f, 0.5f);
+		m_build_house_uv_max[m_Build_House_HoverButton] = ImVec2(1.0f, 0.75f);
+	}
+
+	//倉庫ボタンUV変更
+	if (m_Build_Souko_HoverButton != -1) {
+		m_build_souko_uv_min[m_Build_Souko_HoverButton] = ImVec2(0.0f, 0.5f);
+		m_build_souko_uv_max[m_Build_Souko_HoverButton] = ImVec2(1.0f, 0.75f);
 	}
 
 	//ゲームボタン専用uv
@@ -165,9 +521,43 @@ void GameButton::Draw()
 			m_select_uv_max[i].y += 0.25;
 		}
 	}
+
+	//建築ボタン専用uv
+	for (int i = 0; i < BUILDBUTTON_MAX; i++)
+	{
+		if (m_Build_RadioButton[i])
+		{
+			m_build_uv_min[i].y += 0.25;
+			m_build_uv_max[i].y += 0.25;
+		}
+	}
+
+	//建築_ハウスボタン専用uv
+	for (int i = 0; i < HOUSEBUTTON_MAX; i++)
+	{
+		if (m_Build_House_RadioButton[i])
+		{
+			m_build_house_uv_min[i].y += 0.25;
+			m_build_house_uv_max[i].y += 0.25;
+		}
+	}
+
+	//建築_倉庫ボタン専用uv
+	for (int i = 0; i < SOUKOBUTTON_MAX; i++)
+	{
+		if (m_Build_Souko_RadioButton[i])
+		{
+			m_build_souko_uv_min[i].y += 0.25;
+			m_build_souko_uv_max[i].y += 0.25;
+		}
+	}
 	//ホバーリセット
 	m_Game_HoverButton = GAMEBUTTON_NONE;
 	m_Select_HoverButton = SELECTBUTTON_NONE;
+	m_Build_HoverButton = BUILDBUTTON_NONE;
+	m_Build_House_HoverButton = HOUSEBUTTON_NONE;
+	m_Build_Souko_HoverButton = SOUKOBUTTON_NONE;
+
 
 	//押された回数
 	static int PushNum = 0;
@@ -311,6 +701,237 @@ void GameButton::Draw()
 	ImGui::PopStyleColor(3);
 	//セレクトボタン---------------------------------------------------
 
+	//建築ボタン---------------------------------------------------
+	ImGui::SetCursorPos(ImVec2(0, 645));
+	if (ImGui::ImageButton(m_build_texture_view[BUILDBUTTON_HOUSE], ImVec2(60, 60), m_build_uv_min[BUILDBUTTON_HOUSE], m_build_uv_max[BUILDBUTTON_HOUSE], 0, m_border_col, m_tint_col))
+	{
+		bool temp = m_Build_RadioButton[BUILDBUTTON_HOUSE];
+		ClearBuildRadio();
+		m_Build_RadioButton[BUILDBUTTON_HOUSE] = 1 - temp;
+	}
+	//ホバーイベント
+	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenOverlapped))
+	{
+		bool temp = m_Build_RadioButton[BUILDBUTTON_HOUSE];
+		m_Build_HoverButton = BUILDBUTTON_HOUSE;
+	}
+
+	ImGui::SetCursorPos(ImVec2(70, 645));
+	if (ImGui::ImageButton(m_build_texture_view[BUILDBUTTON_SOUKO], ImVec2(60, 60), m_build_uv_min[BUILDBUTTON_SOUKO], m_build_uv_max[BUILDBUTTON_SOUKO], 0, m_border_col, m_tint_col))
+	{
+		bool temp = m_Build_RadioButton[BUILDBUTTON_SOUKO];
+		ClearBuildRadio();
+		m_Build_RadioButton[BUILDBUTTON_SOUKO] = 1 - temp;
+	}
+	//ホバーイベント
+	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenOverlapped))
+	{
+		m_Build_HoverButton = BUILDBUTTON_SOUKO;
+	}
+
+	//建築ボタン---------------------------------------------------
+
+	modelpreviewflg = false;
+
+	//建築ウィンドウ---------------------------------------------------
+	if (m_Build_RadioButton[BUILDBUTTON_HOUSE])
+	{
+		ImGui::SetNextWindowPos(ImVec2(0, 550));
+		ImGui::SetNextWindowSize(ImVec2(400, 100));
+
+		ImGui::Begin(u8"住居");
+
+		XMFLOAT3 g_nerp;
+		XMFLOAT3 g_farp;
+
+		SearchMousePoint(g_nerp, g_farp);
+		ImGui::SetCursorPos(ImVec2(0,30));
+		//SMALLHOUSEボタン
+		if (ImGui::ImageButton(m_build_house_texture_view[HOUSE_SMALL], ImVec2(64.0f, 64.0f), m_build_house_uv_min[HOUSE_SMALL], m_build_house_uv_max[HOUSE_SMALL], 0, m_border_col, m_tint_col))
+		{
+			modelpreview->SetModel(ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::SMALLHOUSE)].modelname));
+			modelpreview->GetModel()->ChangeSelectType(SELECT_SHADER_TYPE::SELECT_SHADER_TYPE_CREATE);
+			modelpreview->InitColision();
+
+			bool temp = m_Build_House_RadioButton[HOUSE_SMALL];
+			ClearHouseRadio();
+			m_Build_House_RadioButton[HOUSE_SMALL] = 1 - temp;
+		}
+		//ホバーイベント
+		if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenOverlapped))
+		{
+			m_Build_House_HoverButton = HOUSE_SMALL;
+		}
+		
+		HouseButtonType currentselect = HOUSEBUTTON_NONE;
+		MODELID createmodel;
+
+		//現在選択中のオブジェクト
+		for (int i = 0; i < HOUSEBUTTON_MAX; i++)
+		{
+			if (m_Build_House_RadioButton[i])
+			{
+				currentselect = (HouseButtonType)i;
+			}
+		}
+		switch (currentselect)
+		{
+		case GameButton::HOUSE_SMALL:
+			createmodel = MODELID::SMALLHOUSE;
+			break;
+
+		case GameButton::HOUSEBUTTON_MAX:
+			break;
+
+		case GameButton::HOUSEBUTTON_NONE:
+			break;
+
+		default:
+			break;
+		}
+		if (currentselect != HOUSEBUTTON_NONE) {
+			modelpreviewflg = true;
+		}
+
+		//他の構造物とヒットしていないか
+		bool hit = false;
+		modelpreview->GetOBB()->SetBoxColor(false);
+		modelpreview->GetModel()->ChangeSelectType(SELECT_SHADER_TYPE::SELECT_SHADER_TYPE_CREATE);
+
+		std::vector<COBB> obbs = BuildingMgr::GetInstance().GetAllObb();
+
+		for (int i = 0; i < obbs.size(); i++)
+		{
+			if (modelpreview->GetOBB()->Collision(obbs[i]))
+			{
+				hit = true;
+			}
+		}
+
+		if (hit)
+		{
+			modelpreview->GetOBB()->SetBoxColor(true);
+			modelpreview->GetModel()->ChangeSelectType(SELECT_SHADER_TYPE::SELECT_SHADER_TYPE_CANCEL);
+		}
+
+		//クリック時建築物生成
+		if (io.MouseClicked[0] && modelpreviewflg == true) {
+			if (io.MousePos.y > 50 && io.MousePos.y < 550) {
+				
+				if(!hit)
+				{
+					House::Data initdata;
+					initdata.pos = m_mouseworldpos;
+					initdata.type = currentselect;
+					BuildingMgr::GetInstance().CreateHouse(initdata, createmodel);
+
+				}
+			}
+		}
+
+		ImGui::End();
+	}
+
+	if (m_Build_RadioButton[BUILDBUTTON_SOUKO])
+	{
+		MODELID createmodel;
+
+		ImGui::SetNextWindowPos(ImVec2(0, 550));
+		ImGui::SetNextWindowSize(ImVec2(400, 100));
+
+		ImGui::Begin(u8"倉庫");
+		XMFLOAT3 g_nerp;
+		XMFLOAT3 g_farp;
+
+		SearchMousePoint(g_nerp, g_farp);
+		ImGui::SetCursorPos(ImVec2(0, 30));
+		//SMALLHOUSEボタン
+		if (ImGui::ImageButton(m_build_souko_texture_view[SOUKO_SMALL], ImVec2(64.0f, 64.0f), m_build_souko_uv_min[SOUKO_SMALL], m_build_souko_uv_max[SOUKO_SMALL], 0, m_border_col, m_tint_col))
+		{
+			modelpreview->SetModel(ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::SMALLSOUKO)].modelname));
+			modelpreview->GetModel()->ChangeSelectType(SELECT_SHADER_TYPE::SELECT_SHADER_TYPE_CREATE);
+			modelpreview->InitColision();
+			bool temp = m_Build_Souko_RadioButton[SOUKO_SMALL];
+			ClearSoukoRadio();
+			m_Build_Souko_RadioButton[SOUKO_SMALL] = 1 - temp;
+		}
+		//ホバーイベント
+		if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenOverlapped))
+		{
+			m_Build_Souko_HoverButton = SOUKO_SMALL;
+		}
+
+		SoukoButtonType currentselect = SOUKOBUTTON_NONE;
+
+		//現在選択中のオブジェクト
+		for (int i = 0; i < SOUKOBUTTON_MAX; i++)
+		{
+			if (m_Build_Souko_RadioButton[i])
+			{
+				currentselect = (SoukoButtonType)i;
+			}
+		}
+		//各設定
+		Souko::Data initdata;
+
+		switch (currentselect)
+		{
+		case GameButton::SOUKO_SMALL:
+			initdata.store_max = 200;
+			createmodel = MODELID::SMALLSOUKO;
+			break;
+
+		case GameButton::SOUKOBUTTON_MAX:
+			break;
+
+		case GameButton::SOUKOBUTTON_NONE:
+			break;
+
+		default:
+			break;
+		}
+		if (currentselect != SOUKOBUTTON_NONE) {
+			modelpreviewflg = true;
+		}
+
+		//他の構造物とヒットしていないか
+		bool hit = false;
+		modelpreview->GetOBB()->SetBoxColor(false);
+		modelpreview->GetModel()->ChangeSelectType(SELECT_SHADER_TYPE::SELECT_SHADER_TYPE_CREATE);
+
+		std::vector<COBB> obbs = BuildingMgr::GetInstance().GetAllObb();
+
+		for (int i = 0; i < obbs.size(); i++)
+		{
+			if (modelpreview->GetOBB()->Collision(obbs[i]))
+			{
+				hit = true;
+			}
+		}
+
+		if (hit)
+		{
+			modelpreview->GetOBB()->SetBoxColor(true);
+			modelpreview->GetModel()->ChangeSelectType(SELECT_SHADER_TYPE::SELECT_SHADER_TYPE_CANCEL);
+		}
+
+		//クリック時建築物生成
+		if (io.MouseClicked[0] && modelpreviewflg == true) {
+			if (io.MousePos.y > 50 && io.MousePos.y < 550) {
+
+				if (!hit)
+				{
+					initdata.pos = m_mouseworldpos;
+					initdata.type = currentselect;
+					BuildingMgr::GetInstance().CreateSouko(initdata, createmodel);
+				}
+			}
+		}
+		ImGui::End();
+	}
+
+	//建築ウィンドウ---------------------------------------------------
+
 	//時間表示ウィンドウ
 	ImGui::SetCursorPos(ImVec2(1072, 5));
 	ImGui::Image(m_windowback_texture_view,ImVec2(150,32),ImVec2(0,0),ImVec2(1,1),m_tint_col,m_border_col);
@@ -339,11 +960,98 @@ void GameButton::Draw()
 	ImGui::Text(u8"%2d時 %2d分",hour,minutes);
 	ImGui::SetWindowFontScale(1);
 
-	ImGui::End();
+	//範囲選択表示
+	static ImVec2 DragStartPos = ImVec2(0,0);
 
+	//選択範囲スタート地点
+	if (ImGui::IsMouseClicked(0)) {
+		DragStartPos = ImVec2(ImGui::GetMousePos().x, ImGui::GetMousePos().y);
+	}
+	if (ImGui::IsMouseDown(0))
+	{
+		ImGui::SetCursorPos(ImVec2(DragStartPos.x, DragStartPos.y));
+		//選択サイズを変形
+		ImVec2 size;
+		size.x = ImGui::GetMousePos().x - DragStartPos.x;
+		size.y = ImGui::GetMousePos().y - DragStartPos.y;
+
+		ImGui::Image(m_selectarea_texture_view,size, ImVec2(0, 0), ImVec2(1, 1), m_tint_col, m_border_col);
+	}
+	ImGui::Text(u8"マウススタートPos:%f  %f",DragStartPos.x / Application::CLIENT_WIDTH,DragStartPos.y / Application::CLIENT_HEIGHT);
+
+	//素材表示
+	ImGui::SetWindowFontScale(1.5);
+
+	ImGui::SetCursorPos(ImVec2(1150, 80));
+	ImGui::Image(m_resource_preview_texture[(int)ItemType::WOOD],ImVec2(35,35), ImVec2(0,0), ImVec2(1,1),m_tint_col,m_border_col);
+	ImGui::SetCursorPos(ImVec2(1200, 82));
+	ImGui::Text(std::to_string(ResourceManager::GetInstance().GetItem(ItemType::WOOD)).c_str());
+	ImGui::SetCursorPos(ImVec2(1150, 110));
+	ImGui::Image(m_resource_preview_texture[(int)ItemType::ORE_COAL], ImVec2(35, 35), ImVec2(0, 0), ImVec2(1, 1), m_tint_col, m_border_col);
+	ImGui::SetCursorPos(ImVec2(1200, 114));
+	ImGui::Text(std::to_string(ResourceManager::GetInstance().GetItem(ItemType::ORE_COAL)).c_str());
+	ImGui::SetCursorPos(ImVec2(1150, 140));
+	ImGui::Image(m_resource_preview_texture[(int)ItemType::ORE_IRON], ImVec2(35, 35), ImVec2(0, 0), ImVec2(1, 1), m_tint_col, m_border_col);
+	ImGui::SetCursorPos(ImVec2(1200, 146));
+	ImGui::Text(std::to_string(ResourceManager::GetInstance().GetItem(ItemType::ORE_IRON)).c_str());
+	ImGui::SetCursorPos(ImVec2(1150, 170));
+	ImGui::Image(m_resource_preview_texture[(int)ItemType::ORE_GOLD], ImVec2(35, 35), ImVec2(0, 0), ImVec2(1, 1), m_tint_col, m_border_col);
+	ImGui::SetCursorPos(ImVec2(1200, 178));
+	ImGui::Text(std::to_string(ResourceManager::GetInstance().GetItem(ItemType::ORE_GOLD)).c_str());
+	ImGui::SetCursorPos(ImVec2(1150, 200));
+	ImGui::Image(m_resource_preview_texture[(int)ItemType::IRON], ImVec2(35, 35), ImVec2(0, 0), ImVec2(1, 1), m_tint_col, m_border_col);
+	ImGui::SetCursorPos(ImVec2(1200, 210));
+	ImGui::Text(std::to_string(ResourceManager::GetInstance().GetItem(ItemType::IRON)).c_str());
+	ImGui::SetCursorPos(ImVec2(1150, 230));
+	ImGui::Image(m_resource_preview_texture[(int)ItemType::GOLD], ImVec2(35, 35), ImVec2(0, 0), ImVec2(1, 1), m_tint_col, m_border_col);
+	ImGui::SetCursorPos(ImVec2(1200, 242));
+	ImGui::Text(std::to_string(ResourceManager::GetInstance().GetItem(ItemType::GOLD)).c_str());
+
+	ImGui::SetWindowFontScale(1);
+
+
+	ImGui::End();
+	//村人を非選択状態に
+	//村人ウィンドウの詳細
+	if (villagerpropaty) {
+		//村人を選択状態に
+		VillagerMgr::GetInstance().m_villager[edit_select]->SetSelect(true);
+
+		ImGui::SetNextWindowPos(ImVec2(750,50));
+		ImGui::SetNextWindowSize(ImVec2(350, 350));
+		ImGui::Begin(u8"ss");
+		//名前表示
+		std::string first = VillagerMgr::GetInstance().m_villager[edit_select]->GetName(NameGenerator::NAMETYPE::MALE).c_str();
+		std::string last = VillagerMgr::GetInstance().m_villager[edit_select]->GetName(NameGenerator::NAMETYPE::FAMILLY).c_str();
+		ImGui::Text((first + last).c_str());
+
+		//座標
+		static float position[3];
+		position[0] = VillagerMgr::GetInstance().m_villager[edit_select]->GetPos().x;
+		position[1] = VillagerMgr::GetInstance().m_villager[edit_select]->GetPos().y;
+		position[2] = VillagerMgr::GetInstance().m_villager[edit_select]->GetPos().z;
+
+		ImGui::DragFloat3(u8"座標",position,1,0,1000);
+		
+		//VillagerMgr::GetInstance().m_villager[edit_select]->SetPos(XMFLOAT3(position[0],position[1],position[2]));
+
+		//animation
+		CModel* model = VillagerMgr::GetInstance().m_villager[edit_select]->GetModel();
+		ImGui::Text(u8"アニメーション名");
+		ImGui::Text(model->m_animationcontainer[0]->GetScene()->mAnimations[(int)VillagerMgr::GetInstance().m_villager[edit_select]->GetAnimData().animno]->mName.C_Str());
+		ImGui::End();
+	}
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
+}
+
+void GameButton::PrevieModelDraw()
+{
+	if (m_mouseworldpos.y > -50 && m_mouseworldpos.y < 50 && modelpreviewflg == true)
+	{
+		modelpreview->Draw();
+	}
 }
 
 void GameButton::UnInit()
@@ -364,4 +1072,34 @@ void GameButton::ClearSelectRadio()
 	{
 		m_Select_RadioButton[i] = false;
 	}
+}
+
+void GameButton::ClearBuildRadio()
+{
+	for (int i = 0; i < BUILDBUTTON_MAX; i++)
+	{
+		m_Build_RadioButton[i] = false;
+	}
+}
+
+void GameButton::ClearHouseRadio()
+{
+	for (int i = 0; i < HOUSEBUTTON_MAX; i++)
+	{
+		m_Build_House_RadioButton[i] = false;
+	}
+}
+
+void GameButton::ClearSoukoRadio()
+{
+	for (int i = 0; i < SOUKOBUTTON_MAX; i++)
+	{
+		m_Build_Souko_RadioButton[i] = false;
+	}
+
+}
+
+void GameButton::SetMouseWorld(XMFLOAT3 pos)
+{
+	m_mouseworldpos = pos;
 }

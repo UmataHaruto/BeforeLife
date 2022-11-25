@@ -1,28 +1,13 @@
 #include	"obb.h"
-#include	"CDirectxGraphics.h"
-#include	"dx11mathutil.h"
-#include	"DatFileLoader.h"
-#include	"CBox.h"
 #include	"DX11Settransform.h"
-#include	"CBBoxGenerater.h"
 
 using namespace DirectX;
 
-
-COBB::COBB() {
-	DX11MtxIdentity(m_matworld);	// 単位行列化
-	m_name = "";
-}
-
-COBB::~COBB() {
-	Exit();
-}
-
 bool COBB::CompareLength(
-	const OBB& boxA,
-	const OBB& boxB,
+	const OBBinfo& boxA,
+	const OBBinfo& boxB,
 	const XMFLOAT3& vecSeparate,		// 分離軸
-	const XMFLOAT3& vecDistance)
+	const XMFLOAT3& vecDistance)		// 中心を結ぶベクトル
 {
 	float fDistance;
 
@@ -36,6 +21,8 @@ bool COBB::CompareLength(
 	//分離軸上にボックスＢを射影した影の長さ
 	float fShadowB = 0;
 
+	// この部分を完成させる（練習問題）
+
 	//ボックスAの”影”を算出
 	float fShadowAx;
 	float fShadowAy;
@@ -43,15 +30,15 @@ bool COBB::CompareLength(
 
 	// X軸を分離軸に射影
 	DX11Vec3Dot(fShadowAx, vecSeparate, boxA.vecAxisX);
-	fShadowAx=fabsf(fShadowAx*(boxA.fLengthX / 2));
+	fShadowAx = fabsf(fShadowAx * (boxA.fLengthX / 2));
 
 	// Y軸を分離軸に射影
 	DX11Vec3Dot(fShadowAy, vecSeparate, boxA.vecAxisY);
-	fShadowAy = fabsf(fShadowAy*(boxA.fLengthY / 2));
+	fShadowAy = fabsf(fShadowAy * (boxA.fLengthY / 2));
 
 	// Z軸を分離軸に射影
 	DX11Vec3Dot(fShadowAz, vecSeparate, boxA.vecAxisZ);
-	fShadowAz = fabsf(fShadowAz*(boxA.fLengthZ / 2));
+	fShadowAz = fabsf(fShadowAz * (boxA.fLengthZ / 2));
 
 	fShadowA = fShadowAx + fShadowAy + fShadowAz;
 
@@ -62,15 +49,15 @@ bool COBB::CompareLength(
 
 	// X軸を分離軸に射影
 	DX11Vec3Dot(fShadowBx, vecSeparate, boxB.vecAxisX);
-	fShadowBx = fabsf(fShadowBx*(boxB.fLengthX / 2));
+	fShadowBx = fabsf(fShadowBx * (boxB.fLengthX / 2));
 
 	// Y軸を分離軸に射影
 	DX11Vec3Dot(fShadowBy, vecSeparate, boxB.vecAxisY);
-	fShadowBy = fabsf(fShadowBy*(boxB.fLengthY / 2));
+	fShadowBy = fabsf(fShadowBy * (boxB.fLengthY / 2));
 
 	// Z軸を分離軸に射影
 	DX11Vec3Dot(fShadowBz, vecSeparate, boxB.vecAxisZ);
-	fShadowBz = fabsf(fShadowBz*(boxB.fLengthZ / 2));
+	fShadowBz = fabsf(fShadowBz * (boxB.fLengthZ / 2));
 
 	fShadowB = fShadowBx + fShadowBy + fShadowBz;
 
@@ -81,41 +68,20 @@ bool COBB::CompareLength(
 	return true;
 }
 
-// 頂点群から主成分分析してＯＢＢを作る
-void COBB::CalculateOBB(std::vector<XMFLOAT3>& vertices) {
-
-	CBBoxGenerater	Generator;
-	XMFLOAT4X4 mtx;
-	XMFLOAT4X4 eigenmtx;
-
-	// 共分散行列を作成
-	mtx = Generator.GetCovarianceMatrix(vertices);
-
-	// 固有ベクトルを計算で求める
-	Generator.GetEigenVector(mtx, eigenmtx);
-
-	// 固有ベクトルを基にしてＢＢＯＸを作成
-	m_obbinfo = Generator.CaclBBox(vertices, eigenmtx);
-
-}
-
-// 頂点群から固有ベクトルを使用してAABBを作る
-void COBB::CalculateBoundingBox(DatFileLoader* datdata) {
+void COBB::CalculateBoundingBox(std::vector<XMFLOAT3>& vertices) {
 
 	int				numvertices;			// 頂点数
 
-	float			*x;						// 頂点座標データ
-	float			*y;						// 頂点座標データ
-	float			*z;						// 頂点座標データ
+	float* x;						// 頂点座標データ
+	float* y;						// 頂点座標データ
+	float* z;						// 頂点座標データ
 
 	float			minx, miny, minz;		// 最小値（Ｘ，Ｙ，Ｚ）
 	float			maxx, maxy, maxz;		// 最大値（Ｘ，Ｙ、Ｚ）
 	float			cx, cy, cz;				// 中心座標
 
 
-	void* pVertices = NULL;
-
-	numvertices = datdata->m_VertexSuu;		// 頂点数をゲット
+	numvertices = vertices.size();			// 頂点数をゲット
 
 											// 頂点数分の座標格納エリア確保
 	x = new float[numvertices];
@@ -123,15 +89,15 @@ void COBB::CalculateBoundingBox(DatFileLoader* datdata) {
 	z = new float[numvertices];
 
 	// 頂点をすべて取り出す
-	for (int i = 0; i<numvertices; i++)
+	for (int i = 0; i < numvertices; i++)
 	{
-		x[i] = datdata->m_Vertex[i].m_Pos.x;	// Ｘ座標取得
-		y[i] = datdata->m_Vertex[i].m_Pos.y;	// Ｙ座標取得
-		z[i] = datdata->m_Vertex[i].m_Pos.z;	// Ｚ座標取得
+		x[i] = vertices[i].x;	// Ｘ座標取得
+		y[i] = vertices[i].y;	// Ｙ座標取得
+		z[i] = vertices[i].z;	// Ｚ座標取得
 	}
 
 	// ＸＹＺそれぞれについて、最大値、最小値を求める
-	for (int i = 0; i<numvertices; i++)
+	for (int i = 0; i < numvertices; i++)
 	{
 		if (i == 0) {
 			minx = maxx = x[i];
@@ -154,11 +120,11 @@ void COBB::CalculateBoundingBox(DatFileLoader* datdata) {
 	float maxdistance = 0;
 
 	// 全頂点と中心座標との距離を求める
-	for (int i = 0; i<numvertices; i++)
+	for (int i = 0; i < numvertices; i++)
 	{
 		// 2点間の距離を求める
-		distance = (x[i] - cx)*(x[i] - cx) + (y[i] - cy)*(y[i] - cy) + (z[i] - cz)*(z[i] - cz);
-		if (maxdistance<distance) maxdistance = distance;
+		distance = (x[i] - cx) * (x[i] - cx) + (y[i] - cy) * (y[i] - cy) + (z[i] - cz) * (z[i] - cz);
+		if (maxdistance < distance) maxdistance = distance;
 	}
 	// 最大半径を計算
 	maxdistance = sqrtf(maxdistance);
@@ -185,27 +151,34 @@ void COBB::CalculateBoundingBox(DatFileLoader* datdata) {
 	m_obbinfo.vecAxisZ = XMFLOAT3(0.0f, 0.0f, 1.0f);
 }
 
-void COBB::Update(DirectX::XMFLOAT4X4 mtxworld) {
+void COBB::Update(DirectX::XMFLOAT4X4 matworld) {
 	// 軸をセット
-	m_obbinfo.vecAxisX = XMFLOAT3(mtxworld._11, mtxworld._12, mtxworld._13);
-	m_obbinfo.vecAxisY = XMFLOAT3(mtxworld._21, mtxworld._22, mtxworld._23);
-	m_obbinfo.vecAxisZ = XMFLOAT3(mtxworld._31, mtxworld._32, mtxworld._33);
+	m_obbinfo.vecAxisX = XMFLOAT3(matworld._11, matworld._12, matworld._13);
+	m_obbinfo.vecAxisY = XMFLOAT3(matworld._21, matworld._22, matworld._23);
+	m_obbinfo.vecAxisZ = XMFLOAT3(matworld._31, matworld._32, matworld._33);
 
 	// 描画用の行列を更新
-	m_matworld = mtxworld;
+	m_matworld = matworld;
 
 	// OBBの中心座標を更新
-	DX11Vec3MulMatrix(m_obbinfo.currentcenter, m_obbinfo.center, mtxworld);
+	DX11Vec3MulMatrix(m_obbinfo.currentcenter, m_obbinfo.center, matworld);
 
 	// 現在位置を補正（BBOXの中心とモデルの原点位置は異なるため）
 	m_matworld._41 = m_obbinfo.currentcenter.x;
 	m_matworld._42 = m_obbinfo.currentcenter.y;
 	m_matworld._43 = m_obbinfo.currentcenter.z;
+
+	//初期間隔を適応
+	m_matworld._41 += m_interval.x;
+	m_matworld._42 += m_interval.y;
+	m_matworld._43 += m_interval.z;
 }
 
 void COBB::Draw() {
-	DX11SetTransform::GetInstance()->SetTransform(DX11SetTransform::TYPE::WORLD,m_matworld );
+	DX11SetTransform::GetInstance()->SetTransform(DX11SetTransform::TYPE::WORLD, m_matworld);
+
 	m_boxmesh.Draw();
+
 }
 
 bool COBB::Collision(COBB& obb) {
@@ -219,7 +192,7 @@ bool COBB::Collision(COBB& obb) {
 	vecDistance.y = m_obbinfo.currentcenter.y - obbpos.y;
 	vecDistance.z = m_obbinfo.currentcenter.z - obbpos.z;
 
-	OBB boxB, boxA;
+	OBBinfo boxB, boxA;
 	boxA = this->GetOBB();
 	boxB = obb.GetOBB();
 
@@ -240,7 +213,7 @@ bool COBB::Collision(COBB& obb) {
 	};
 
 	// OBB-Aの３軸を分離軸にしてチェック
-	for (int i = 0;i < 3;i++) {
+	for (int i = 0; i < 3; i++) {
 		vecSeparate.x = OBB_A_Axis[i]->x;
 		vecSeparate.y = OBB_A_Axis[i]->y;
 		vecSeparate.z = OBB_A_Axis[i]->z;
@@ -257,13 +230,13 @@ bool COBB::Collision(COBB& obb) {
 	}
 
 	// OBB-Bの３軸を分離軸にしてチェック
-	for (int i = 0;i < 3;i++) {
+	for (int i = 0; i < 3; i++) {
 		vecSeparate.x = OBB_B_Axis[i]->x;
 		vecSeparate.y = OBB_B_Axis[i]->y;
 		vecSeparate.z = OBB_B_Axis[i]->z;
 
 		DX11Vec3Normalize(vecSeparate, vecSeparate);	// 正規化
-															
+
 		sts = CompareLength(boxA,			// OBB-A
 			boxB,							// OBB-B
 			vecSeparate,					// 分離軸
@@ -274,8 +247,8 @@ bool COBB::Collision(COBB& obb) {
 	}
 
 	// 外積を分離軸として計算
-	for (int p1 = 0;p1 < 3;p1++) {
-		for (int p2 = 0;p2 < 3;p2++) {
+	for (int p1 = 0; p1 < 3; p1++) {
+		for (int p2 = 0; p2 < 3; p2++) {
 			XMFLOAT3	crossseparate;					// 外積ベクトル
 
 			// 外積を計算する
