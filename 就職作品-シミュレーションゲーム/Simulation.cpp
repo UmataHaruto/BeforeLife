@@ -31,8 +31,6 @@
 #include "Terrain.h"
 #include <thread>
 #include "BuildingMgr.h"
-//GIT TEST RECEVE
-
 
 Skydome g_skybox;       // スカイドーム
 Terrain g_terrain;    //地形(外側)
