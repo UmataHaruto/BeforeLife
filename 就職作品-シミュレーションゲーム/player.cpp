@@ -26,6 +26,7 @@ bool Player::Init(Data data) {
 	CModel* model = new CModel();
 	*model = *ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::PLAYER)].modelname);
 	m_model = model;
+	m_obb.Init(m_model);
 	m_obb.CreateBox(250,1700,250,XMFLOAT3(0,0,0));
 	//髪モデル
 	model = new CModel();
@@ -120,7 +121,20 @@ void Player::Update() {
 	XMFLOAT3 g_farp = { 0,0,0 };
 
 	//境界球の更新
-	m_obb.Update(GetMtx());
+	XMFLOAT4X4 obbmtx = m_mtx;
+	//obbmtx._11 = 1.0;
+	//obbmtx._12 = 0.0;
+	//obbmtx._13 = 0.0;
+	//obbmtx._14 = 0.0;
+	//obbmtx._21 = 0.0;
+	//obbmtx._22 = 1.0;
+	//obbmtx._23 = 0.0;
+	//obbmtx._24 = 0.0;
+	//obbmtx._31 = 0.0;
+	//obbmtx._32 = 0.0;
+	//obbmtx._33 = 1.0;
+	//obbmtx._34 = 0.0;
+	m_obb.Update(obbmtx);
 
 	//マウスクリック時
 	if (m_isselect) {
@@ -373,7 +387,7 @@ void Player::Update() {
 
 			for (int i = 0; i < obbs.size(); i++)
 			{
-				if (GetOBB().Collision(obbs[i]))
+				if (obbs[i].Collision(m_obb))
 				{
 					hit = true;
 				}

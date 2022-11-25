@@ -79,6 +79,16 @@ public:
 	void CreateBox(float width, float height, float depth,XMFLOAT3 interval)
 	{
 		m_interval = interval;
+		// 長さをセット
+		m_obbinfo.fLengthX = width;
+		m_obbinfo.fLengthY = height;
+		m_obbinfo.fLengthZ = depth;
+
+		// 3軸をセット
+		m_obbinfo.vecAxisX = XMFLOAT3(1.0f, 0.0f, 0.0f);
+		m_obbinfo.vecAxisY = XMFLOAT3(0.0f, 1.0f, 0.0f);
+		m_obbinfo.vecAxisZ = XMFLOAT3(0.0f, 0.0f, 1.0f);
+
 		m_boxmesh.Init(width,height,depth);
 	}
 
