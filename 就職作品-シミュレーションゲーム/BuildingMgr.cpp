@@ -108,6 +108,33 @@ int BuildingMgr::GetItemNum(ItemType tag)
 	return num;
 }
 
+std::vector<BuildingMgr::CollisionData>BuildingMgr::GetAllBuildingPosition()
+{
+	std::vector<BuildingMgr::CollisionData> data;
+
+	for (int i = 0; i < m_houses.size(); i++)
+	{
+		BuildingMgr::CollisionData collision;
+		collision.position = m_houses[i]->GetPos();
+		collision.width = m_houses[i]->GetOBB().GetBoxSize().x;
+		collision.height = m_houses[i]->GetOBB().GetBoxSize().y;
+
+		data.push_back(collision);
+	}
+	for (int i = 0; i < m_soukos.size(); i++)
+	{
+		BuildingMgr::CollisionData collision;
+		collision.position = m_soukos[i]->GetPos();
+		collision.width = m_soukos[i]->GetOBB().GetBoxSize().x;
+		collision.height = m_soukos[i]->GetOBB().GetBoxSize().y;
+
+		data.push_back(collision);
+	}
+
+
+	return data;
+}
+
 std::vector<COBB> BuildingMgr::GetAllObb()
 {
 	std::vector<COBB> obbs;

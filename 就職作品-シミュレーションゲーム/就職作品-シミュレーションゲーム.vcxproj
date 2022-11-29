@@ -186,6 +186,7 @@
     <ClCompile Include="quad2d.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="Resource.cpp" />
+    <ClCompile Include="RouteSearch.cpp" />
     <ClCompile Include="Setting.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Simulation.cpp" />
@@ -259,6 +260,7 @@
     <ClInclude Include="quad2d.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="RouteSearch.h" />
     <ClInclude Include="Setting.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="shaderhashmap.h" />

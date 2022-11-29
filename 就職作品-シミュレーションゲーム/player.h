@@ -208,6 +208,8 @@ private:
 
 	//移動目標
 	XMFLOAT3 movepos;
+	//移動目標キュー
+	std::vector<XMFLOAT2> moveque;
 
 	//移動中
 	bool m_ismoving = false;

@@ -103,6 +103,9 @@
     <Filter Include="ソース ファイル\game\gameobject\Terrain">
       <UniqueIdentifier>{fd4e1fcf-f1cf-4f50-a40c-a13f23a1afd0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Collider\TerrainCollision">
+      <UniqueIdentifier>{43769b38-5674-4a53-b3e2-514057e01ef1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Effect.cpp">
@@ -293,6 +296,9 @@
     </ClCompile>
     <ClCompile Include="mousepostoworld.cpp">
       <Filter>ソース ファイル\system\util</Filter>
+    </ClCompile>
+    <ClCompile Include="RouteSearch.cpp">
+      <Filter>ソース ファイル\Collider\TerrainCollision</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -511,6 +517,9 @@
     </ClInclude>
     <ClInclude Include="mousepostoworld.h">
       <Filter>ソース ファイル\system\util</Filter>
+    </ClInclude>
+    <ClInclude Include="RouteSearch.h">
+      <Filter>ソース ファイル\Collider\TerrainCollision</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -18,6 +18,18 @@ public:
 		float	fLengthZ;		// ＢＢＯＸ Ｚサイズ
 	};
 
+	//サイズを取得
+	XMFLOAT3 GetBoxSize()
+	{
+		XMFLOAT3 size;
+
+		size.x = m_obbinfo.fLengthX;
+		size.y = m_obbinfo.fLengthY;
+		size.z = m_obbinfo.fLengthZ;
+
+		return size;
+	}
+
 private:
 	OBBinfo				m_obbinfo;	// OBB BBOX情報
 	DirectX::XMFLOAT4X4	m_matworld;	// OBB 描画用ワールド変換行列

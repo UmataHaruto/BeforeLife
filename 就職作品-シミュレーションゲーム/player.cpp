@@ -7,6 +7,7 @@
 #include "mousepostoworld.h"
 #include "ResourceManager.h"
 #include "BuildingMgr.h"
+#include "RouteSearch.h"
 
 Player::PlayerInitData Player::ObjectInitData[] = {
 	{ Player::NONE,				Player::PLAYER_BODY,			{ 0, 0, 0 },				{ 0, 0, 0 } },	// 本体
@@ -100,6 +101,17 @@ void Player::Draw() {
 	//境界box表示
 	if (!GameButton::GetInstance().GetDebug()) {
 		m_obb.Draw();
+		for (int i = 0; i < moveque.size(); i++)
+		{
+			XMFLOAT4X4 mtx;
+			DX11MtxIdentity(mtx);
+
+			mtx._41 = moveque[i].x;
+			mtx._42 = m_pos.y;
+			mtx._43 = moveque[i].y;
+
+			ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::CONIFER00)].modelname)->Draw(mtx);
+		}
 	}
 }
 
@@ -154,7 +166,14 @@ void Player::Update() {
 			printf("x:%f,y:%f,z:%f\n", g_mousepoint.x, g_mousepoint.y, g_mousepoint.z);
 
 			//移動先の指定
+			RouteSearch::GetInstance().InitStageCollider();
 			movepos = XMFLOAT3(g_mousepoint.x, g_mousepoint.y, g_mousepoint.z);
+			moveque = RouteSearch::GetInstance().SearchRoute(m_pos, movepos);
+			//最初の移動先をキューの最後にする
+			XMFLOAT2 backque = moveque[moveque.size() - 1];
+			moveque.pop_back();
+			movepos = XMFLOAT3(backque.x,m_pos.y,backque.y);
+
 			m_ismoving = true;
 		}
 	}
@@ -454,8 +473,16 @@ void Player::Update() {
 			}
 		}
 
-		//目的地に到達した
+		//チェックポイントに到達した
 		if (fabs(m_pos.x - movepos.x) < 2.0f && fabs(m_pos.y - movepos.y) < 2.0f && fabs(m_pos.z - movepos.z) < 2.0f)
+		{
+			//最初の移動先をキューの最後にする
+			XMFLOAT2 backque = moveque[moveque.size() - 1];
+			moveque.pop_back();
+			movepos = XMFLOAT3(backque.x, m_pos.y, backque.y);
+		}
+		//目的地に到達
+		if (moveque.size() <= 0)
 		{
 			m_animdata.animno = AnimationType::IDLE_00;
 			m_ismoving = false;

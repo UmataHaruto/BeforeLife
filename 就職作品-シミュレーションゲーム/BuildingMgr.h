@@ -7,6 +7,14 @@
 class BuildingMgr
 {
 public:
+
+	struct CollisionData
+	{
+		XMFLOAT3 position;
+		int width;
+		int height;
+	};
+
 	static BuildingMgr& GetInstance() {
 		static BuildingMgr Instance;
 		return Instance;
@@ -22,10 +30,12 @@ public:
 
 	int GetItemNum(ItemType tag);
 
+	std::vector<CollisionData> GetAllBuildingPosition();
+
 	std::vector<COBB> GetAllObb();
 
 private:
-	//Ž‘Œ¹
+	//–¯‰Æ
 	std::vector<House*>m_houses;
 	//‘qŒÉ
 	std::vector<Souko*>m_soukos;

@@ -31,6 +31,7 @@
 #include "Terrain.h"
 #include <thread>
 #include "BuildingMgr.h"
+#include "RouteSearch.h"
 
 Skydome g_skybox;       // スカイドーム
 Terrain g_terrain;    //地形(外側)
@@ -307,6 +308,11 @@ void  SimulationUpdate() {
 		default:
 			break;
 		}
+	}
+
+	if (CDirectInput::GetInstance().CheckKeyBufferTrigger(DIK_F8)) {
+		RouteSearch::GetInstance().InitStageCollider();
+		RouteSearch::GetInstance().SearchRoute(XMFLOAT3(300,0,300), XMFLOAT3(20, 0, 20));
 	}
 	//スカイドーム更新
 	g_skybox.Update(XMFLOAT3(0,0,0));
