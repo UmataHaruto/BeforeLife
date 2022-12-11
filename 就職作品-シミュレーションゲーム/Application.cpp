@@ -18,12 +18,17 @@
 #include "macro.h"
 #include "game.h"
 #include "myimgui.h"
-
+#include "Title.h"
+#include "SceneMgr.h"
+#include "ModelMgr.h"
+#include "NameGenerator.h"
+#include "XAudio2.h"
+#include "Sprite2DMgr.h"
 
 //-----------------------------------------------------------------------------
 // スタティック　メンバー
 //-----------------------------------------------------------------------------
-const char* Application::WINDOW_TITLE = "SimulationGame";
+const char* Application::WINDOW_TITLE = "Before Life";
 const char* Application::WINDOW_CLASS_NAME = "win32app";
 
 const uint32_t		Application::WINDOW_STYLE_WINDOWED = (WS_VISIBLE | WS_CAPTION | WS_SYSMENU);
@@ -84,6 +89,73 @@ Application* Application::Instance()
 //==============================================================================
 void Application :: InitSystemWH()
 {
+
+}
+
+void InitThred00()
+{
+	for (int i = 0; i < 6; i++)
+	{
+		ModelMgr::GetInstance().LoadModel(
+			ModelMgr::GetInstance().g_modellist[i].modelname,
+			ModelMgr::GetInstance().g_modellist[i].vsfilename,
+			ModelMgr::GetInstance().g_modellist[i].psfilename,
+			ModelMgr::GetInstance().g_modellist[i].texfolder);
+		SceneMgr::GetInstance().AddLoadingRatio();
+	}
+	SceneMgr::GetInstance().SetInitStatus(0, true);
+}
+
+void InitThred01()
+{
+	for (int i = 6; i < 9; i++)
+	{
+		ModelMgr::GetInstance().LoadModel(
+			ModelMgr::GetInstance().g_modellist[i].modelname,
+			ModelMgr::GetInstance().g_modellist[i].vsfilename,
+			ModelMgr::GetInstance().g_modellist[i].psfilename,
+			ModelMgr::GetInstance().g_modellist[i].texfolder);
+		SceneMgr::GetInstance().AddLoadingRatio();
+
+	}
+	SceneMgr::GetInstance().SetInitStatus(1, true);
+}
+
+void InitThred02()
+{
+	for (int i = 9; i < 11; i++)
+	{
+		ModelMgr::GetInstance().LoadModel(
+			ModelMgr::GetInstance().g_modellist[i].modelname,
+			ModelMgr::GetInstance().g_modellist[i].vsfilename,
+			ModelMgr::GetInstance().g_modellist[i].psfilename,
+			ModelMgr::GetInstance().g_modellist[i].texfolder);
+		SceneMgr::GetInstance().AddLoadingRatio();
+	}
+	SceneMgr::GetInstance().SetInitStatus(2, true);
+}
+
+void InitThred03()
+{
+	//名前生成の初期化
+	NameGenerator::GetInstance().Init();
+
+	SceneMgr::GetInstance().SetInitStatus(3, true);
+
+}
+
+void InitThred04()
+{
+	for (int i = 11; i < ModelMgr::GetInstance().g_modellist.size(); i++)
+	{
+		ModelMgr::GetInstance().LoadModel(
+			ModelMgr::GetInstance().g_modellist[i].modelname,
+			ModelMgr::GetInstance().g_modellist[i].vsfilename,
+			ModelMgr::GetInstance().g_modellist[i].psfilename,
+			ModelMgr::GetInstance().g_modellist[i].texfolder);
+		SceneMgr::GetInstance().AddLoadingRatio();
+	}
+	SceneMgr::GetInstance().SetInitStatus(4, true);
 
 }
 
@@ -156,6 +228,8 @@ void Application :: Dispose()
 //==============================================================================
 unsigned long Application :: MainLoop()
 {
+	SoundMgr::GetInstance().XA_Initialize();
+
 	MSG		msg;	
 	ZeroMemory( &msg, sizeof( msg ) );	
 
@@ -165,12 +239,24 @@ unsigned long Application :: MainLoop()
 	uint64_t last_time = 0;
 
 	// ゲームの初期処理
-	GameInit();
+	TitleInit();
+
+	//初期ロードをマルチスレッドで行う
+	std::thread thr1(InitThred00);
+	std::thread thr2(InitThred01);
+	std::thread thr3(InitThred02);
+	std::thread thr4(InitThred03);
+	std::thread thr5(InitThred04);
 
 	// タイマ解像度をミリ秒に
 	::timeBeginPeriod(1);
 
 	while (window->ExecMessage()) {
+
+		if (SceneMgr::GetInstance().GetEndFlg())
+		{
+			break;
+		}
 
 		// timeGetTime関数は、ミリ秒単位でシステム時刻を取得します。 
 		// システム時間は、Windowsを起動してからの経過時間です。
@@ -187,9 +273,23 @@ unsigned long Application :: MainLoop()
 			last_time = current_time;
 
 			Update(delta_time);
-			GameInput(delta_time);		// ｹﾞｰﾑ入力	
-			GameUpdate(delta_time);		// ｹﾞｰﾑ更新
-			GameRender(delta_time);		// ｹﾞｰﾑ描画
+
+			switch (SceneMgr::GetInstance().GetSceneNo())
+			{
+			case SCENETYPE::TITLE:
+				TitleUpdate();
+				TitleDraw();
+			break;
+
+			case SCENETYPE::GAME:
+				GameInput(delta_time);		// ｹﾞｰﾑ入力	
+				GameUpdate(delta_time);		// ｹﾞｰﾑ更新
+				GameRender(delta_time);		// ｹﾞｰﾑ描画
+				break;
+
+			default:
+				break;
+			}
 
 			int64_t sleep_time = 16666 - delta_time;
 
@@ -201,6 +301,12 @@ unsigned long Application :: MainLoop()
 			}
 		}
 	}
+
+	thr1.join();
+	thr2.join();
+	thr3.join();
+	thr4.join();
+	thr5.join();
 
 	// タイマ解像度を元に戻す
 	::timeEndPeriod(1);

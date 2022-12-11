@@ -75,8 +75,17 @@ public:
 		CUT,
 		MINE,
 		COLLECT,
+		CARRY,
+		CONSTRUCTION,
 
 		WORK_MAX
+	};
+
+	enum class CarryStatus
+	{
+		NONE,                   //行動無し
+		SEARCH_INSTALLATION,    //移動対象へ移動中
+		CARRY,                  //運搬中
 	};
 
 	// 構造体型タグ
@@ -103,6 +112,12 @@ public:
 	{
 		std::string firstname;
 		std::string lastname;
+
+		float mood;
+		float hp_max;
+		float hp;
+		float stamina_max;
+		float stamina;
 
 		XMFLOAT3 pos;
 	};
@@ -188,6 +203,78 @@ public:
 	{
 		m_pos = pos;
 	}
+
+	//ヒットポイントをセット
+	void SetHitpoint(float max,float hp)
+	{
+		m_hp_max = max;
+		if(hp >= 0)
+		{
+		    m_hp = hp;
+		}
+		else if(hp >= m_hp_max)
+		{
+			m_hp = m_hp_max;
+		}
+		else
+		{
+			m_hp = 0;
+		}
+	}
+
+	//スタミナをセット
+	void SetStamina(float max,float stamina)
+	{
+		m_stamina_max = max;
+		if (stamina >= 0)
+		{
+			m_stamina = stamina;
+		}
+		else if (stamina >= m_stamina_max)
+		{
+			m_stamina = m_stamina_max;
+		}
+		else
+		{
+			m_stamina = 0;
+		}
+	}
+
+	//最大ヒットポイントを取得
+	float GetMaxHitpoint()
+	{
+		return m_hp_max;
+	}
+
+	//最大スタミナを取得
+	float GetMaxStamina()
+	{
+		return m_stamina_max;
+	}
+
+	//ヒットポイントを取得
+	float GetHitpoint()
+	{
+		return m_hp;
+	}
+
+	//スタミナを取得
+	float GetStamina()
+	{
+		return m_stamina;
+	}
+
+	//機嫌を取得
+	float GetMood()
+	{
+		return m_mood;
+	}
+
+	//選択状況を取得
+	bool GetSelect()
+	{
+		return m_isselect;
+	}
 private:
 	void AnimationUpdate();
 
@@ -197,9 +284,17 @@ private:
 	//性別
 	GENDER m_gender;
 
+	float m_mood;         //機嫌(0 ～ 100)
+	float m_hp_max;       //最大ヒットポイント
+	float m_hp;           //ヒットポイント
+	float m_stamina_max;  //最大スタミナ
+	float m_stamina;      //スタミナ
+
 	//運搬アイテム
 	Souko::Item m_carry;
 	bool m_iscarry;
+
+	CarryStatus m_carry_status = CarryStatus::NONE;
 
 	CModel* m_model;// 胴体
 	CModel* m_tools;// 道具
@@ -234,4 +329,5 @@ private:
 
 	//作業関数
 	void Work_Mine(void);
+	void Work_Carry(void);
 };

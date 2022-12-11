@@ -11,7 +11,7 @@ CLight				g_directionallight;
 
 void DX11LightInit(DirectX::XMFLOAT4 lightpos) {
 	g_directionallight.Init(CCamera::GetInstance()->GetEye(), lightpos);
-	g_directionallight.SetAmbient(XMFLOAT4(0.0f,0.0f,0.0f,0.0f));				// ŠÂ‹«Œõ
+	g_directionallight.SetAmbient(XMFLOAT4(3.5f,3.5f,3.5f,1.0f));				// ŠÂ‹«Œõ
 	g_directionallight.Update();
 }
 

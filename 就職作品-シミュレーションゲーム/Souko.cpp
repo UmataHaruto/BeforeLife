@@ -89,11 +89,13 @@ void Souko::Finalize()
 
 int Souko::PushItem(ItemType tag, int input)
 {
+	bool error = true;
 
 	for (int i = 0; i < m_data.items.size(); i++)
 	{
 		if (m_data.items[i].tag == tag)
 		{
+			error = false;
 			int residue = 0;
 
 			//格納数をオーバーする場合
@@ -108,11 +110,11 @@ int Souko::PushItem(ItemType tag, int input)
 				m_data.items[i].num += input;
 			}
 		}
-		//異常終了:不正なタグ
-		else
-		{
-			return -1;
-		}
+	}
+	//異常終了:不正なタグ
+	if (error)
+	{
+		return -1;
 	}
 
 	return 0;

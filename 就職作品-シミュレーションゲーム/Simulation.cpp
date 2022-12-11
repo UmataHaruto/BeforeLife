@@ -72,67 +72,6 @@ int nowcnt;
 //線形補間の回数
 int lerpcnt = 20;
 
-void InitThred00()
-{
-	for (int i = 0; i < 6; i++)
-	{
-		ModelMgr::GetInstance().LoadModel(
-			ModelMgr::GetInstance().g_modellist[i].modelname,
-			ModelMgr::GetInstance().g_modellist[i].vsfilename,
-			ModelMgr::GetInstance().g_modellist[i].psfilename,
-			ModelMgr::GetInstance().g_modellist[i].texfolder);
-	}
-}
-
-void InitThred01()
-{
-	for (int i = 6; i < 9; i++)
-	{
-		ModelMgr::GetInstance().LoadModel(
-			ModelMgr::GetInstance().g_modellist[i].modelname,
-			ModelMgr::GetInstance().g_modellist[i].vsfilename,
-			ModelMgr::GetInstance().g_modellist[i].psfilename,
-			ModelMgr::GetInstance().g_modellist[i].texfolder);
-	}
-}
-
-void InitThred02()
-{
-	for (int i = 9; i < 11; i++)
-	{
-		ModelMgr::GetInstance().LoadModel(
-			ModelMgr::GetInstance().g_modellist[i].modelname,
-			ModelMgr::GetInstance().g_modellist[i].vsfilename,
-			ModelMgr::GetInstance().g_modellist[i].psfilename,
-			ModelMgr::GetInstance().g_modellist[i].texfolder);
-	}
-}
-
-void InitThred03()
-{
-	for (int i = 11; i < ModelMgr::GetInstance().g_modellist.size(); i++)
-	{
-		ModelMgr::GetInstance().LoadModel(
-			ModelMgr::GetInstance().g_modellist[i].modelname,
-			ModelMgr::GetInstance().g_modellist[i].vsfilename,
-			ModelMgr::GetInstance().g_modellist[i].psfilename,
-			ModelMgr::GetInstance().g_modellist[i].texfolder);
-	}
-
-}
-
-void InitThred04()
-{
-	//名前生成の初期化
-	NameGenerator::GetInstance().Init();
-	SoundMgr::GetInstance().XA_Initialize();
-
-	//スプライトマネージャーの初期化
-	Sprite2DMgr::GetInstance().Init();
-
-	// IMGUI初期化
-	imguiInit();
-}
 void SearchMousePosThread()
 {
 	XMFLOAT3 g_nearp = { 0,0,0 };
@@ -142,22 +81,8 @@ void SearchMousePosThread()
 }
 void  SimulationInit() {
 
-	//初期ロードをマルチスレッドで行う
-	std::thread thr1(InitThred00);
-	std::thread thr2(InitThred01);
-	std::thread thr3(InitThred02);
-	std::thread thr4(InitThred03);
-	std::thread thr5(InitThred04);
-
-	thr1.join();
-	thr2.join();
-	thr3.join();
-	thr4.join();
-	thr5.join();
-
 	//ゲームボタン初期化
 	GameButton::GetInstance().Init();
-
 
 	// ASSIMPを使用したアニメーションの読み込み
 	bool sts = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::PLAYER)].modelname)->LoadAnimation("assets/ModelData/male_adult/animation/male_adult_ver1.1.fbx");
@@ -187,6 +112,11 @@ void  SimulationInit() {
 	pdata.pos = XMFLOAT3(500, 0, -500);
 	pdata.firstname = NameGenerator::GetInstance().CreateName(NameGenerator::MALE);
 	pdata.lastname = NameGenerator::GetInstance().CreateName(NameGenerator::FAMILLY);
+	pdata.hp_max = 100;
+	pdata.hp = 80;
+	pdata.mood = 70;
+	pdata.stamina_max = 100;
+	pdata.stamina = 85;
 	VillagerMgr::GetInstance().CreateVillager(pdata);
 
 	//カメラ初期位置の初期化
@@ -228,7 +158,6 @@ void  SimulationInit() {
 
 	//開始時間の設定
 	starttime = timeGetTime();
-
 }
 
 void  SimulationExit() {

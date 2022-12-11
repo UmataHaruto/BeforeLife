@@ -11,6 +11,10 @@ float4 main(VS_OUTPUT input) : SV_Target
 	float4 col;
 	float4 texcol = g_Tex.Sample(g_SamplerLinear, input.Tex);
 	col = texcol * input.Color;
+	col.r += 0.1;
+	col.g += 0.1;
+	col.b += 0.1;
+
 	col.a = 1.0f;
 	return col;
 }

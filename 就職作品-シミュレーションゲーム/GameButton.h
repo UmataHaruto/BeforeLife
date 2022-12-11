@@ -38,6 +38,7 @@ public:
 	{
 		BUILDBUTTON_HOUSE,
 		BUILDBUTTON_SOUKO,
+		BUILDBUTTON_ROAD,
 
 		BUILDBUTTON_MAX,
 		BUILDBUTTON_NONE = -1,
@@ -54,6 +55,20 @@ public:
 		HOUSEBUTTON_NONE = -1,
 	};
 
+	enum PartyListType
+	{
+		BAR_BACK,
+		BAR_FRAME,
+		BAR_NAME,
+		BAR_HELTH,
+		BAR_STAMINA,
+		ICON_HELTH,
+		ICON_STAMINA,
+		ICON_EMOTE,
+
+		LIST_MAX,
+	};
+
 	//建築-倉庫
 	enum SoukoButtonType
 	{
@@ -61,6 +76,15 @@ public:
 
 		SOUKOBUTTON_MAX,
 		SOUKOBUTTON_NONE = -1,
+	};
+
+	//建築-道路
+	enum RoadButtonType
+	{
+		ROAD_DIRT,
+
+		ROADBUTTON_MAX,
+		ROADBUTTON_NONE = -1,
 	};
 	//コンストラクタ
 	GameButton();
@@ -139,14 +163,20 @@ private:
 
 	ID3D11ShaderResourceView* m_build_souko_texture_view[SOUKOBUTTON_MAX];
 
+	ID3D11ShaderResourceView* m_build_road_texture_view[ROADBUTTON_MAX];
+
 	//リソース表示用テクスチャ
 	ID3D11ShaderResourceView* m_resource_preview_texture[(int)ItemType::ITEM_MAX];
+
+	//住人リスト用テクスチャ
+	ID3D11ShaderResourceView* m_party_list_texture[(int)PartyListType::LIST_MAX];
 
 	GameButtonType m_Game_HoverButton;
 	SelectButtonType m_Select_HoverButton;
 	BuildButtonType m_Build_HoverButton;
 	HouseButtonType m_Build_House_HoverButton;
 	SoukoButtonType m_Build_Souko_HoverButton;
+	RoadButtonType m_Build_Road_HoverButton;
 
 	//ボタン状態(トリガー)
 	bool m_TriggerButton[GAMEBUTTON_MAX];
@@ -165,6 +195,9 @@ private:
 	//建築_倉庫ボタン(ラジオ)
 	bool m_Build_Souko_RadioButton[SOUKOBUTTON_MAX];
 
+	//建築_道路ボタン(ラジオ)
+	bool m_Build_Road_RadioButton[ROADBUTTON_MAX];
+
 	//建築物
 
 	ImVec2 m_pos;
@@ -179,7 +212,8 @@ private:
 	ImVec2 m_build_house_uv_max[HOUSEBUTTON_MAX];                 // Lower-right
 	ImVec2 m_build_souko_uv_min[HOUSEBUTTON_MAX];                 // Top-left
 	ImVec2 m_build_souko_uv_max[HOUSEBUTTON_MAX];                 // Lower-right
-
+	ImVec2 m_build_road_uv_min[ROADBUTTON_MAX];                 // Top-left
+	ImVec2 m_build_road_uv_max[ROADBUTTON_MAX];                 // Lower-right
 	ImVec4 m_tint_col;   // No tint
 	ImVec4 m_border_col; // 50% opaque white
 	bool m_debug = false;

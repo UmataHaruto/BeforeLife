@@ -26,12 +26,13 @@ enum class MODELID {
 	TERRAIN,
 	TERRAIN_COLLISION,
 	SMALLSOUKO,
+	CREATE_PLANE,
 	CREATE_WOOD,
 	CREATE_COAL,
 	CREATE_IRON,
 	CREATE_GOLD,
-
-
+	ROUTE_PREVIEW,
+	ROAD_DIRT,
 };
 
 //モデルデータリスト
@@ -92,11 +93,13 @@ public:
 	{(const MODELID)MODELID::TERRAIN,"assets/Modeldata/terrain/terrain.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/terrain/"},
 	{(const MODELID)MODELID::TERRAIN,"assets/Modeldata/terrain/terrainColision.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/terrain/"},
 	{(const MODELID)MODELID::SMALLSOUKO,"assets/Modeldata/Souko/Souko.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/Souko/"},
+	{(const MODELID)MODELID::CREATE_WOOD,"assets/Modeldata/Create/CreatePlane.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/Create/"},
 	{(const MODELID)MODELID::CREATE_WOOD,"assets/Modeldata/Create/CreateWood.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/Create/"},
 	{(const MODELID)MODELID::CREATE_COAL,"assets/Modeldata/Create/CreateCoalOre.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/Create/"},
 	{(const MODELID)MODELID::CREATE_IRON,"assets/Modeldata/Create/CreateIronOre.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/Create/"},
 	{(const MODELID)MODELID::CREATE_GOLD,"assets/Modeldata/Create/CreateGoldOre.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/Create/"},
-
+	{(const MODELID)MODELID::ROUTE_PREVIEW,"assets/Modeldata/RoutePreview.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/"},
+	{(const MODELID)MODELID::ROAD_DIRT,"assets/Modeldata/Block/Road_Dirt.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/Block/"},
 
 	};
 

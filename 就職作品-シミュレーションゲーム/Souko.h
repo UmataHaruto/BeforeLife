@@ -19,7 +19,7 @@ public:
 	{
 		GameButton::SoukoButtonType type;    //タイプ
 		DirectX::XMFLOAT3 pos;               //座標
-		std::vector<Item> items;      //住人リスト
+		std::vector<Item> items;      //アイテムリスト
 		int store_max;                   //最大収納数
 	};
 
@@ -38,6 +38,12 @@ public:
 	COBB GetOBB(void)
 	{
 		return m_obb;
+	}
+
+	//バウンディングboxを取得
+	COBB GetEntranceOBB(void)
+	{
+		return m_obb_entrance;
 	}
 
 	//データを取得
@@ -65,6 +71,17 @@ public:
 		m_mtx._42 = m_pos.y;
 		m_mtx._43 = m_pos.z;
 
+	}
+
+	int GetItemNum(ItemType tag)
+	{
+		for (int i = 0; i < m_data.items.size(); i++)
+		{
+			if(m_data.items[i].tag == tag){
+				return m_data.items[i].num;
+			}
+		}
+		return 0;
 	}
 
 	//アイテムを格納(戻り値:格納できなかった数)

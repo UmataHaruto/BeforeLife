@@ -69,6 +69,10 @@ bool Player::Init(Data data) {
 	m_first_name = data.firstname;
 	m_last_name = data.lastname;
 
+	m_mood = data.mood;
+	SetHitpoint(data.hp_max,data.hp);
+	SetStamina(data.stamina_max,data.stamina);
+
 	mtx = DirectX::XMLoadFloat4x4(&m_mtx);
 	mtx = XMMatrixMultiply(mtx, scale);
 	DirectX::XMStoreFloat4x4(&m_mtx, mtx);
@@ -98,20 +102,39 @@ void Player::Draw() {
 		m_tools->Draw(m_mtxParentChild[2]);
 	}
 
+	static int RoutePreviewDegree = 0;
+
+	if (RoutePreviewDegree < 360) {
+		RoutePreviewDegree++;
+	}
+	else
+	{
+		RoutePreviewDegree = 0;
+	}
+
 	//境界box表示
 	if (!GameButton::GetInstance().GetDebug()) {
 		m_obb.Draw();
-		for (int i = 0; i < moveque.size(); i++)
-		{
-			XMFLOAT4X4 mtx;
-			DX11MtxIdentity(mtx);
+	}
+	for (int i = 0; i < moveque.size(); i++)
+	{
+		XMFLOAT4X4 mtx;
+		XMFLOAT4X4 Rotation;
+		XMMATRIX RotationMtx;
+		XMMATRIX PositionMtx;
+		DX11MtxIdentity(mtx);
 
-			mtx._41 = moveque[i].x;
-			mtx._42 = m_pos.y;
-			mtx._43 = moveque[i].y;
+		mtx._41 = moveque[i].x;
+		mtx._42 = m_pos.y;
+		mtx._43 = moveque[i].y;
 
-			ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::CONIFER00)].modelname)->Draw(mtx);
-		}
+		DX11MtxRotationY(RoutePreviewDegree, Rotation);
+		RotationMtx = XMLoadFloat4x4(&Rotation);
+		PositionMtx = XMLoadFloat4x4(&mtx);
+		PositionMtx = XMMatrixMultiply(RotationMtx, PositionMtx);
+		XMStoreFloat4x4(&mtx, PositionMtx);
+
+		ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::ROUTE_PREVIEW)].modelname)->Draw(mtx);
 	}
 }
 
@@ -134,47 +157,40 @@ void Player::Update() {
 
 	//境界球の更新
 	XMFLOAT4X4 obbmtx = m_mtx;
-	//obbmtx._11 = 1.0;
-	//obbmtx._12 = 0.0;
-	//obbmtx._13 = 0.0;
-	//obbmtx._14 = 0.0;
-	//obbmtx._21 = 0.0;
-	//obbmtx._22 = 1.0;
-	//obbmtx._23 = 0.0;
-	//obbmtx._24 = 0.0;
-	//obbmtx._31 = 0.0;
-	//obbmtx._32 = 0.0;
-	//obbmtx._33 = 1.0;
-	//obbmtx._34 = 0.0;
+
 	m_obb.Update(obbmtx);
 
 	//マウスクリック時
 	if (m_isselect) {
 		if (io.MouseClicked[0]) {
-			m_isselect = false;
 
 			XMFLOAT3 g_mousepoint = SearchMousePoint(g_nearp, g_farp);
-			Sprite2DMgr::GetInstance().CreateAnimation(
-				EFFECTLIST::TARGETCIRCLE,
-				g_mousepoint.x,
-				g_mousepoint.y,
-				g_mousepoint.z,
-				30,
-				30,
-				XMFLOAT4(1, 1, 1, 1),
-				nullptr);
-			printf("x:%f,y:%f,z:%f\n", g_mousepoint.x, g_mousepoint.y, g_mousepoint.z);
 
-			//移動先の指定
-			RouteSearch::GetInstance().InitStageCollider();
-			movepos = XMFLOAT3(g_mousepoint.x, g_mousepoint.y, g_mousepoint.z);
-			moveque = RouteSearch::GetInstance().SearchRoute(m_pos, movepos);
-			//最初の移動先をキューの最後にする
-			XMFLOAT2 backque = moveque[moveque.size() - 1];
-			moveque.pop_back();
-			movepos = XMFLOAT3(backque.x,m_pos.y,backque.y);
+			if (g_mousepoint.y > -20 && io.MousePos.x > 180 && io.MousePos.y > 150) {
+				m_isselect = false;
+				Sprite2DMgr::GetInstance().CreateAnimation(
+					EFFECTLIST::TARGETCIRCLE,
+					g_mousepoint.x,
+					g_mousepoint.y,
+					g_mousepoint.z,
+					30,
+					30,
+					XMFLOAT4(1, 1, 1, 1),
+					nullptr);
 
-			m_ismoving = true;
+				//移動先の指定
+				RouteSearch::GetInstance().InitStageCollider();
+				movepos = XMFLOAT3(g_mousepoint.x, g_mousepoint.y, g_mousepoint.z);
+				moveque = RouteSearch::GetInstance().SearchRoute(m_pos, movepos);
+				//最初の移動先をキューの最後にする
+				if (moveque.size() > 0) {
+					XMFLOAT2 backque = moveque[moveque.size() - 1];
+					moveque.pop_back();
+					movepos = XMFLOAT3(backque.x, m_pos.y, backque.y);
+
+					m_ismoving = true;
+				}
+			}
 		}
 	}
 	//ノーマルシェーダーに変更
@@ -192,28 +208,14 @@ void Player::Update() {
 	//アイテム運送中の場合
 	if (m_carry.num > 0 && m_carry.tag != ItemType::ITEM_NONE)
 	{
+		m_tools = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::CREATE_PLANE)].modelname);
 		m_iscarry = true;
-		switch (m_carry.tag)
-		{
-		case ItemType::WOOD:
-			m_tools = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::CREATE_WOOD)].modelname);
-		break;
-
-		case ItemType::ORE_COAL:
-			m_tools = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::CREATE_COAL)].modelname);
-			break;
-
-		case ItemType::ORE_IRON:
-			m_tools = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::CREATE_IRON)].modelname);
-			break;
-
-		case ItemType::ORE_GOLD:
-			m_tools = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::CREATE_GOLD)].modelname);
-			break;
-		default:
-			break;
-		}
 	}
+	if (m_animdata.animno == AnimationType::CARRY_IDLE && m_carry.num <= 0)
+	{
+		m_animdata.animno == AnimationType::IDLE_00;
+	}
+
 
 	//確定した行動
 	ActionType action = m_action_priority[0].action;
@@ -260,6 +262,13 @@ void Player::Update() {
 			break;
 
 		case Player::WorkType::COLLECT:
+			break;
+
+		case Player::WorkType::CARRY:
+			Work_Carry();
+			break;
+
+		case Player::WorkType::CONSTRUCTION:
 			break;
 
 		case Player::WorkType::WORK_MAX:
@@ -376,6 +385,10 @@ void Player::Update() {
 	{
 		//walk animation
 		    m_animdata.animno = AnimationType::WALK;
+			if (m_carry.num > 0)
+			{
+				m_animdata.animno = AnimationType::CARRY_RUN;
+			}
 			XMVECTOR Pos = XMVectorSet(m_pos.x, m_pos.y, -m_pos.z, 0.0f);
 			XMVECTOR At = XMVectorSet(movepos.x, movepos.y, -movepos.z, 0.0f);;
 			XMVECTOR Up = XMVectorSet(0, 1, 0, 0.0f);
@@ -413,64 +426,29 @@ void Player::Update() {
 			}
 		if (m_pos.x > movepos.x)
 		{
-			if (!hit) {
-				m_pos.x--;
-			}
-			else
-			{
-				m_pos.x++;
-			}
+			m_pos.x--;
 		}
 		if (m_pos.x < movepos.x)
 		{
-			if (!hit) {
-				m_pos.x++;
-			}
-			else
-			{
-				m_pos.x--;
-			}		}
-
+			m_pos.x++;
+		}
 		if (m_pos.y > movepos.y)
 		{
-			if (!hit) {
-				m_pos.y--;
-			}
-			else
-			{
-				m_pos.y++;
-			}
+			m_pos.y--;
 		}
 		if (m_pos.y < movepos.y)
 		{
-			if (!hit) {
-				m_pos.y++;
-			}
-			else
-			{
-				m_pos.y--;
-			}
+			m_pos.y++;
 		}
 
 		if (m_pos.z > movepos.z)
 		{
-			if (!hit) {
-				m_pos.z--;
-			}
-			else
-			{
-				m_pos.z++;
-			}
+			m_pos.z--;
 		}
 		if (m_pos.z < movepos.z)
 		{
-			if (!hit) {
-				m_pos.z++;
-			}
-			else
-			{
-				m_pos.z--;
-			}
+			m_pos.z++;
+
 		}
 
 		//チェックポイントに到達した
@@ -485,6 +463,10 @@ void Player::Update() {
 		if (moveque.size() <= 0)
 		{
 			m_animdata.animno = AnimationType::IDLE_00;
+			if (m_carry.num > 0)
+			{
+				m_animdata.animno = AnimationType::CARRY_IDLE;
+			}
 			m_ismoving = false;
 			Moveinit = false;
 		}
@@ -620,35 +602,60 @@ void Player::Work_Mine(void)
 	static float miningtimer = 0;
 	miningtimer += io.DeltaTime;
 	//最短距離
-	for(int i = 0; i < ResourceManager::GetInstance().m_resources.size(); i++)
+	for (int i = 0; i < ResourceManager::GetInstance().m_resources.size(); i++)
 	{
 		float length;
-		DX11p2pLength(m_pos, ResourceManager::GetInstance().m_resources[i]->GetPos(),length);
+		DX11p2pLength(m_pos, ResourceManager::GetInstance().m_resources[i]->GetPos(), length);
 		if (maxlength > length)
 		{
 			index = i;
 			maxlength = length;
 		}
 	}
+
+	//資源が無い場合輸送を優先
+	if (ResourceManager::GetInstance().m_resources.size() == 0)
+	{
+		Work_Carry();
+	}
+
 	//移動地点を指定
-	if (ResourceManager::GetInstance().m_resources.size() != 0) {
+	if (ResourceManager::GetInstance().m_resources.size() != 0 && ismine == false && m_ismoving == false) {
 		m_ismoving = true;
 		movepos = ResourceManager::GetInstance().m_resources[index]->GetPos();
-		//目的地に到達した
-		if (fabs(m_pos.x - movepos.x) < 20.0f && fabs(m_pos.y - movepos.y) < 20.0f && fabs(m_pos.z - movepos.z) < 20.0f && m_ismoving == true)
-		{
-			m_ismoving = false;
-			ismine = true;
-		}
 
-		//採掘
-		if (ismine)
+		//移動先の指定
+		RouteSearch::GetInstance().InitStageCollider();
+		moveque = RouteSearch::GetInstance().SearchRoute(m_pos, movepos);
+		//最初の移動先をキューの最後にする
+		if (moveque.size() > 0) {
+			XMFLOAT2 backque = moveque[moveque.size() - 1];
+			moveque.pop_back();
+			movepos = XMFLOAT3(backque.x, m_pos.y, backque.y);
+
+			m_ismoving = true;
+		}
+	}
+	//目的地に到達した
+	if (ResourceManager::GetInstance().m_resources.size() != 0 &&m_obb.Collision(*ResourceManager::GetInstance().m_resources[index]->GetOBB()) && moveque.size() == 0)
+	{
+		//m_ismoving = false;
+		ismine = true;
+	}
+	else
+	{
+		ismine = false;
+	}
+
+	//採掘
+	if (ResourceManager::GetInstance().m_resources.size() != 0) {
+		if (ismine && m_obb.Collision(*ResourceManager::GetInstance().m_resources[index]->GetOBB()))
 		{
 			m_animdata.animno = AnimationType::MINE;
 			//初期処理
 			if (!mineinit)
 			{
-				Sprite2DMgr::GetInstance().CreateCircleProgressBar(ResourceManager::GetInstance().m_resources[index]->GetData(), 15,15);
+				Sprite2DMgr::GetInstance().CreateCircleProgressBar(ResourceManager::GetInstance().m_resources[index]->GetData(), 15, 15);
 				mineinit = true;
 			}
 			else
@@ -672,16 +679,171 @@ void Player::Work_Mine(void)
 					{
 						ismine = false;
 						mineinit = false;
+						//地面にアイテムを配置する
+						Resource::Data data = *ResourceManager::GetInstance().m_resources[index]->GetData();
+						switch (data.type)
+						{
+						case ItemType::WOOD:
+							ResourceManager::GetInstance().CreateInstallationResource(data, MODELID::CREATE_WOOD);
+							break;
 
-						//輸送アイテムの設定
-						Souko::Item item;
-						item.tag = ResourceManager::GetInstance().m_resources[index]->GetData()->type;
-						item.num = ResourceManager::GetInstance().m_resources[index]->GetData()->amount;
-						SetCarryItem(item.tag,item.num);
-						m_animdata.animno = AnimationType::CARRY_IDLE;
+						case ItemType::ORE_COAL:
+							ResourceManager::GetInstance().CreateInstallationResource(data, MODELID::CREATE_COAL);
+							break;
+
+						case ItemType::ORE_IRON:
+							ResourceManager::GetInstance().CreateInstallationResource(data, MODELID::CREATE_IRON);
+							break;
+
+						case ItemType::ORE_GOLD:
+							ResourceManager::GetInstance().CreateInstallationResource(data, MODELID::CREATE_GOLD);
+							break;
+						default:
+							break;
+						}
+						m_animdata.animno = AnimationType::IDLE_00;
+
 					}
 				}
 			}
 		}
+	}
+}
+
+void Player::Work_Carry(void)
+{
+
+	int index = 0;
+	float maxlength = 0;
+	static bool routeinit = false;
+
+	switch (m_carry_status)
+	{
+	case Player::CarryStatus::NONE:
+		//最短距離
+		for (int i = 0; i < ResourceManager::GetInstance().GetInstallationResource().size(); i++)
+		{
+			float length;
+			DX11p2pLength(m_pos, ResourceManager::GetInstance().GetInstallationResource()[index]->GetPos(), length);
+			if (maxlength > length)
+			{
+				index = i;
+				maxlength = length;
+			}
+		}
+		//移動地点を指定
+		if (ResourceManager::GetInstance().GetInstallationResource().size() != 0 && m_ismoving == false) {
+			m_ismoving = true;
+			movepos = ResourceManager::GetInstance().GetInstallationResource()[index]->GetPos();
+
+			//移動先の指定
+			RouteSearch::GetInstance().InitStageCollider();
+			moveque = RouteSearch::GetInstance().SearchRoute(m_pos, movepos);
+			//最初の移動先をキューの最後にする
+			if (moveque.size() > 0) {
+				XMFLOAT2 backque = moveque[moveque.size() - 1];
+				moveque.pop_back();
+				movepos = XMFLOAT3(backque.x, m_pos.y, backque.y);
+
+				m_ismoving = true;
+			}
+		}
+
+		//目的地に到達した
+		if (ResourceManager::GetInstance().GetInstallationResource().size() != 0) {
+			if (m_obb.Collision(*ResourceManager::GetInstance().GetInstallationResource()[index]->GetOBB()) && moveque.size() == 0)
+			{
+				routeinit = false;
+				m_ismoving = false;
+				m_carry_status = CarryStatus::CARRY;
+
+				//輸送アイテムの設定
+				Souko::Item item;
+				item.tag = ResourceManager::GetInstance().GetInstallationResource()[index]->GetData()->type;
+				item.num = ResourceManager::GetInstance().GetInstallationResource()[index]->GetData()->amount;
+				SetCarryItem(item.tag, item.num);
+				m_animdata.animno = AnimationType::CARRY_IDLE;
+
+				//設置物削除
+				ResourceManager::GetInstance().EraseInstallation(index);
+			}
+		}
+		break;
+
+	case Player::CarryStatus::SEARCH_INSTALLATION:
+
+		break;
+
+	case Player::CarryStatus::CARRY:
+
+		//アニメーションをセット
+		if (m_ismoving)
+		{
+			m_animdata.animno = AnimationType::CARRY_RUN;
+		}
+		else
+		{
+			m_animdata.animno = AnimationType::CARRY_IDLE;
+		}
+
+		//最短距離
+		for (int i = 0; i < BuildingMgr::GetInstance().GetSouko().size(); i++)
+		{
+			float length;
+			DX11p2pLength(m_pos, BuildingMgr::GetInstance().GetSouko()[i]->GetEntranceOBB().GetPosition(), length);
+			if (maxlength > length)
+			{
+				index = i;
+				maxlength = length;
+			}
+		}
+
+		//移動地点を指定
+		if (BuildingMgr::GetInstance().GetSouko().size() != 0 && m_ismoving == false && routeinit == false) {
+			m_ismoving = true;
+			movepos = BuildingMgr::GetInstance().GetSouko()[index]->GetEntranceOBB().GetPosition();
+			movepos.x += BuildingMgr::GetInstance().GetSouko()[index]->GetEntranceOBB().GetInterval().x;
+			movepos.y += BuildingMgr::GetInstance().GetSouko()[index]->GetEntranceOBB().GetInterval().y;
+			movepos.z += BuildingMgr::GetInstance().GetSouko()[index]->GetEntranceOBB().GetInterval().z;
+			//移動先の指定
+			RouteSearch::GetInstance().InitStageCollider();
+			moveque = RouteSearch::GetInstance().SearchRoute(m_pos, movepos);
+			//最初の移動先をキューの最後にする
+			if (moveque.size() > 0) {
+				routeinit = true;
+				XMFLOAT2 backque = moveque[moveque.size() - 1];
+				moveque.pop_back();
+				movepos = XMFLOAT3(backque.x, m_pos.y, backque.y);
+
+				m_ismoving = true;
+			}
+		}
+
+		//目的地に到達した
+		if (BuildingMgr::GetInstance().GetSouko().size() != 0) {
+			if (fabs(m_pos.x - movepos.x) < 20.0f && fabs(m_pos.y - movepos.y) < 20.0f && fabs(m_pos.z - movepos.z) < 20.0f && moveque.size() == 0)
+			{
+				int remaining = BuildingMgr::GetInstance().GetSouko()[index]->PushItem(m_carry.tag, m_carry.num);
+
+				//倉庫に入り切る場合
+				if (remaining <= 0) 
+				{
+					m_carry.tag = ItemType::ITEM_NONE;
+					m_carry.num = 0;
+				}
+				else
+				{
+					m_carry.num = remaining;
+				}
+				m_ismoving = false;
+				m_tools = nullptr;
+				m_carry_status = CarryStatus::NONE;
+				routeinit = false;
+			}
+		}
+		break;
+
+	default:
+		break;
 	}
 }

@@ -27,10 +27,10 @@ void RouteSearch::InitStageCollider()
 		float y_max = fabs(collisiondata[i].position.z) + (collisiondata[i].height / 2);
 
 		int x_min_idx = x_min / 12.5f;
-		int y_min_idx = y_min / 12.5f;
+		int y_min_idx = (y_min / 12.5f) - 2;
 
 		int x_max_idx = x_max / 12.5f;
-		int y_max_idx = y_max / 12.5f;
+		int y_max_idx = (y_max / 12.5f) + 3;
 
 		//範囲を１で埋める
 		for (int y = y_min_idx; y < y_max_idx; y++) {
@@ -63,96 +63,139 @@ std::vector<XMFLOAT2> RouteSearch::SearchRoute(XMFLOAT3 start, XMFLOAT3 goal)
 
 	//ゴールした
 	bool isgoal = false;
+
 	//ゴール不可能
 	bool notgoal = false;
+
+	//ゴールが存在しない
+	bool nothinggoal = false;
+
+	//スタート地点が存在しない
+	bool nothingstart = false;
+	
+	//∞ループ検知用
+	int loopcount = 0;
+
 	while (1)
 	{
+
+		loopcount++;
 		notgoal = true;
+		//スコアが最も低い値
+		int score_min = 9998;
+		//最低スコア番号
+		int score_min_idx[2];
+		score_min_idx[0] = 0;
+		score_min_idx[1] = 0;
+
+		nothinggoal = true;
+		nothingstart = true;
+		
 		//上下左右をオープン
 		for (int i = 0; i < MAP_HEIGHT; i++)
 		{
 			for (int j = 0; j < MAP_WIDTH; j++)
 			{
 				if (m_stagecollider[i][j].GetStatus() == AStar::Status::OPEN) {
-					//ゴールに達した場合
-					if (m_stagecollider[i][j].GetNumber() == 3)
+
+					//スコアが最も低い値を抽出
+					if (m_stagecollider[i][j].GetScore() < score_min)
 					{
-						isgoal = true;
-						AStar* parent = m_stagecollider[i][j].GetParent();
-						while (1)
-						{
-							if (parent->GetParent() == nullptr)
-							{
-								break;
-							}
-
-							parent->SetNumber(4);
-							XMFLOAT2 temp;
-							temp.x = parent->GetId() % MAP_HEIGHT;
-							temp.x *= 12.5;
-							temp.x += 12.5 / 2;
-
-							temp.y = parent->GetId() - (parent->GetId() % MAP_HEIGHT);
-							temp.y *= -12.5;
-							temp.y -= 12.5 / 2;
-							route.push_back(temp);
-							parent = parent->GetParent();
-						}
-						break;
+						score_min_idx[0] = i;
+						score_min_idx[1] = j;
+						score_min = m_stagecollider[i][j].GetScore();
 					}
 
-					notgoal = false;
-					m_stagecollider[i][j].SetStatus(AStar::Status::CLOSE);
-					//左を確認
-					if (j - 1 >= 0)
-					{
-						if (m_stagecollider[i][j - 1].GetStatus() != AStar::Status::CLOSE && m_stagecollider[i][j - 1].GetNumber() != 1)
-						{
-							int score = fabs(goalpos.x - (j - 1)) + fabs(goalpos.y - i);
-							m_stagecollider[i][j - 1].SetScore(score);
-							m_stagecollider[i][j - 1].SetStatus(AStar::Status::OPEN);
-							m_stagecollider[i][j - 1].SetParent(&m_stagecollider[i][j]);
-						}
-					}
-					//右を確認
-					if (j + 1 <= MAP_WIDTH)
-					{
-						if (m_stagecollider[i][j + 1].GetStatus() != AStar::Status::CLOSE && m_stagecollider[i][j + 1].GetNumber() != 1)
-						{
-							int score = fabs(goalpos.x - (j + 1)) + fabs(goalpos.y - i);
-							m_stagecollider[i][j + 1].SetScore(score);
-							m_stagecollider[i][j + 1].SetStatus(AStar::Status::OPEN);
-							m_stagecollider[i][j + 1].SetParent(&m_stagecollider[i][j]);
-
-						}
-					}
-					//上を確認
-					if (i - 1 >= 0)
-					{
-						if (m_stagecollider[i - 1][j].GetStatus() != AStar::Status::CLOSE && m_stagecollider[i - 1][j].GetNumber() != 1)
-						{
-							int score = fabs(goalpos.x - j) + fabs(goalpos.y - (i - 1));
-							m_stagecollider[i - 1][j].SetScore(score);
-							m_stagecollider[i - 1][j].SetStatus(AStar::Status::OPEN);
-							m_stagecollider[i - 1][j].SetParent(&m_stagecollider[i][j]);
-
-						}
-					}
-					//下を確認
-					if (i - 1 <= MAP_HEIGHT)
-					{
-						if (m_stagecollider[i + 1][j].GetStatus() != AStar::Status::CLOSE && m_stagecollider[i + 1][j].GetNumber() != 1)
-						{
-							int score = fabs(goalpos.x - j) + fabs(goalpos.y - (i + 1));
-							m_stagecollider[i + 1][j].SetScore(score);
-							m_stagecollider[i + 1][j].SetStatus(AStar::Status::OPEN);
-							m_stagecollider[i + 1][j].SetParent(&m_stagecollider[i][j]);
-
-						}
-					}
+				}
+				if (m_stagecollider[i][j].GetNumber() == 3) {
+					nothinggoal = false;
+				}
+				if (m_stagecollider[i][j].GetNumber() == 2) {
+					nothingstart = false;
 				}
 			}
 		}
+
+		//ゴールに達した場合
+		if (m_stagecollider[score_min_idx[0]][score_min_idx[1]].GetNumber() == 3)
+		{
+			isgoal = true;
+			if (m_stagecollider[score_min_idx[0]][score_min_idx[1]].GetParent() != nullptr) {
+				AStar* parent = m_stagecollider[score_min_idx[0]][score_min_idx[1]].GetParent();
+				while (1)
+				{
+					if (parent->GetParent() == nullptr)
+					{
+						break;
+					}
+
+					parent->SetNumber(4);
+					XMFLOAT2 temp;
+					temp.x = parent->GetId() % MAP_HEIGHT;
+					temp.x *= 12.5;
+					temp.x += 12.5 / 2;
+
+					temp.y = ((parent->GetId() - (parent->GetId() % MAP_HEIGHT)) / MAP_WIDTH);
+					temp.y *= -12.5;
+					temp.y -= 12.5 / 2;
+					route.push_back(temp);
+					parent = parent->GetParent();
+				}
+			}
+			break;
+		}
+
+		notgoal = false;
+		m_stagecollider[score_min_idx[0]][score_min_idx[1]].SetStatus(AStar::Status::CLOSE);
+		//左を確認
+		if (score_min_idx[1] - 1 >= 0)
+		{
+			if (m_stagecollider[score_min_idx[0]][score_min_idx[1] - 1].GetStatus() != AStar::Status::CLOSE && m_stagecollider[score_min_idx[0]][score_min_idx[1] - 1].GetNumber() != 1)
+			{
+				int score = fabs(goalpos.x - (score_min_idx[1] - 1)) + fabs(goalpos.y - score_min_idx[0]);
+				m_stagecollider[score_min_idx[0]][score_min_idx[1] - 1].SetScore(score);
+				m_stagecollider[score_min_idx[0]][score_min_idx[1] - 1].SetStatus(AStar::Status::OPEN);
+				m_stagecollider[score_min_idx[0]][score_min_idx[1] - 1].SetParent(&m_stagecollider[score_min_idx[0]][score_min_idx[1]]);
+			}
+		}
+		//右を確認
+		if (score_min_idx[1] + 1 <= MAP_WIDTH)
+		{
+			if (m_stagecollider[score_min_idx[0]][score_min_idx[1] + 1].GetStatus() != AStar::Status::CLOSE && m_stagecollider[score_min_idx[0]][score_min_idx[1] + 1].GetNumber() != 1)
+			{
+				int score = fabs(goalpos.x - (score_min_idx[1] + 1)) + fabs(goalpos.y - score_min_idx[0]);
+				m_stagecollider[score_min_idx[0]][score_min_idx[1] + 1].SetScore(score);
+				m_stagecollider[score_min_idx[0]][score_min_idx[1] + 1].SetStatus(AStar::Status::OPEN);
+				m_stagecollider[score_min_idx[0]][score_min_idx[1] + 1].SetParent(&m_stagecollider[score_min_idx[0]][score_min_idx[1]]);
+
+			}
+		}
+		//上を確認
+		if (score_min_idx[0] - 1 >= 0)
+		{
+			if (m_stagecollider[score_min_idx[0] - 1][score_min_idx[1]].GetStatus() != AStar::Status::CLOSE && m_stagecollider[score_min_idx[0] - 1][score_min_idx[1]].GetNumber() != 1)
+			{
+				int score = fabs(goalpos.x - score_min_idx[1]) + fabs(goalpos.y - (score_min_idx[0] - 1));
+				m_stagecollider[score_min_idx[0] - 1][score_min_idx[1]].SetScore(score);
+				m_stagecollider[score_min_idx[0] - 1][score_min_idx[1]].SetStatus(AStar::Status::OPEN);
+				m_stagecollider[score_min_idx[0] - 1][score_min_idx[1]].SetParent(&m_stagecollider[score_min_idx[0]][score_min_idx[1]]);
+
+			}
+		}
+		//下を確認
+		if (score_min_idx[0] + 1 <= MAP_HEIGHT)
+		{
+			if (m_stagecollider[score_min_idx[0] + 1][score_min_idx[1]].GetStatus() != AStar::Status::CLOSE && m_stagecollider[score_min_idx[0] + 1][score_min_idx[1]].GetNumber() != 1)
+			{
+				int score = fabs(goalpos.x - score_min_idx[1]) + fabs(goalpos.y - (score_min_idx[0] + 1));
+				m_stagecollider[score_min_idx[0] + 1][score_min_idx[1]].SetScore(score);
+				m_stagecollider[score_min_idx[0] + 1][score_min_idx[1]].SetStatus(AStar::Status::OPEN);
+				m_stagecollider[score_min_idx[0] + 1][score_min_idx[1]].SetParent(&m_stagecollider[score_min_idx[0]][score_min_idx[1]]);
+
+			}
+		}
+
+
 		if (isgoal)
 		{
 			break;
@@ -162,41 +205,56 @@ std::vector<XMFLOAT2> RouteSearch::SearchRoute(XMFLOAT3 start, XMFLOAT3 goal)
 			printf("ゴールへ到達不可能です");
 			break;
 		}
+		if (nothinggoal)
+		{
+			printf("ゴールがありません");
+			break;
+		}
+		if (nothingstart)
+		{
+			printf("スタートがありません");
+			break;
+		}
+		//∞ループ時は強制退出
+		if (loopcount > 1000)
+		{
+			break;
+		}
 	}
 	//テスト描画(コンソール)
-	system("cls");
+	//system("cls");
 
-	for (int i = 0; i < MAP_WIDTH; i++)
-	{
-		for (int j = 0; j < MAP_HEIGHT; j++)
-		{
-			switch (m_stagecollider[i][j].GetNumber())
-			{
-			case 0:
-				printf(".");
-				break;
+	//for (int i = 0; i < MAP_WIDTH; i++)
+	//{
+	//	for (int j = 0; j < MAP_HEIGHT; j++)
+	//	{
+	//		switch (m_stagecollider[i][j].GetNumber())
+	//		{
+	//		case 0:
+	//			printf(".");
+	//			break;
 
-			case 1:
-				printf("x");
-				break;
+	//		case 1:
+	//			printf("x");
+	//			break;
 
-			case 2:
-				printf("P");
-				break;
+	//		case 2:
+	//			printf("P");
+	//			break;
 
-			case 3:
-				printf("G");
-				break;
+	//		case 3:
+	//			printf("G");
+	//			break;
 
-			case 4:
-				printf("*");
-				break;
-			default:
-				break;
-			}
-		}
-		printf("\n");
-	}
+	//		case 4:
+	//			printf("*");
+	//			break;
+	//		default:
+	//			break;
+	//		}
+	//	}
+	//	printf("\n");
+	//}
 	return route;
 
 }

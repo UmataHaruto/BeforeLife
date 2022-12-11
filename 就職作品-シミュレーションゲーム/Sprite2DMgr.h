@@ -65,6 +65,8 @@ private:
 		
 		{UILIST::BLACKBACK_START ,"assets/sprite/UI/BlackBack.png",false,false,1,1,1},
 		{UILIST::BLACKBACK_END ,"assets/sprite/UI/BlackBack.png",false,false,1,1,1},
+		{UILIST::CLOUDBACK_START ,"assets/sprite/UI/cloudBack.png",false,false,1,1,1},
+		{UILIST::CLOUDBACK_END ,"assets/sprite/UI/cloudBack.png",false,false,1,1,1},
 		{UILIST::ICON_MOUSE ,"assets/sprite/UI/MouseIcon.png",false,false,1,1,1},
 
 	};

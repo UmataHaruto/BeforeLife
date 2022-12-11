@@ -181,7 +181,7 @@ void COBB::Draw() {
 
 }
 
-bool COBB::Collision(COBB& obb) {
+bool COBB::Collision(COBB obb) {
 	//•ª—£Ž²
 	XMFLOAT3 vecSeparate;
 

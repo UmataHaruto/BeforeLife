@@ -9,6 +9,7 @@
 #include	"DX11Settransform.h"
 #include	"quad2d.h"
 #include    "CDirectInput.h"
+#include "Sprite2DMgr.h"
 
 // comptr
 using Microsoft::WRL::ComPtr;
@@ -116,6 +117,30 @@ void Quad2D::Update()
 		break;
 	
 	case UILIST::BLACKBACK_END:
+		color = m_color;
+		color.w += 0.05;
+
+		SetColor(color);
+
+		if (color.w >= 10)
+		{
+			SetStatus(UISTATUS::DEAD);
+		}
+		break;
+
+	case UILIST::CLOUDBACK_START:
+		color = m_color;
+		color.w -= 0.05;
+
+		SetColor(color);
+
+		if (color.w <= 0)
+		{
+			SetStatus(UISTATUS::DEAD);
+		}
+		break;
+
+	case UILIST::CLOUDBACK_END:
 		color = m_color;
 		color.w += 0.05;
 

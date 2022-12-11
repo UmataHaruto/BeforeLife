@@ -17,6 +17,9 @@ public:
 	//村人を追加
 	void CreateVillager(Player::Data data);
 
+	//村人を一人のみ選択
+	void SelectOneVillager(int idx);
+
 	//村人
 	std::vector<Player*>m_villager;
 

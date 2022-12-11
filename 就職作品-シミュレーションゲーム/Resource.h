@@ -30,7 +30,8 @@ public:
 		int Endurance;            //耐久値
 		int Hardness;             //硬度
 		int amount;               //採集物の量
-
+		
+		bool isInstallation;      //設置状態
 	};
 
 	bool Init();

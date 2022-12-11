@@ -186,7 +186,9 @@
     <ClCompile Include="quad2d.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="Resource.cpp" />
+    <ClCompile Include="Road.cpp" />
     <ClCompile Include="RouteSearch.cpp" />
+    <ClCompile Include="SceneMgr.cpp" />
     <ClCompile Include="Setting.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Simulation.cpp" />
@@ -197,6 +199,7 @@
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="StageHitCollider.cpp" />
     <ClCompile Include="Terrain.cpp" />
+    <ClCompile Include="Title.cpp" />
     <ClCompile Include="utftosjisconv.cpp" />
     <ClCompile Include="VillagerMgr.cpp" />
     <ClCompile Include="WICTextureLoader.cpp" />
@@ -260,7 +263,9 @@
     <ClInclude Include="quad2d.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Road.h" />
     <ClInclude Include="RouteSearch.h" />
+    <ClInclude Include="SceneMgr.h" />
     <ClInclude Include="Setting.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="shaderhashmap.h" />
@@ -272,6 +277,7 @@
     <ClInclude Include="Stage.h" />
     <ClInclude Include="StageHitCollider.h" />
     <ClInclude Include="Terrain.h" />
+    <ClInclude Include="Title.h" />
     <ClInclude Include="uncopyable.h" />
     <ClInclude Include="utftosjisconv.h" />
     <ClInclude Include="vertexproto.h" />

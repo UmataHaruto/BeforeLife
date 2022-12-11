@@ -8,21 +8,12 @@
 #include <vector>
 #include "obb.h"
 
-class House : public GameObject
+class Road : public GameObject
 {
-
 public:
 
-	struct Data
-	{
-		GameButton::HouseButtonType type;    //タイプ
-		DirectX::XMFLOAT3 pos;               //座標
-		std::vector<Player*> residents;      //住人リスト
-		int residents_max;                   //最大収容人数
-	};
-
 	bool Init();
-	void Init(Data data,MODELID id);
+	void Init(XMFLOAT3 position,MODELID id);
 
 	//描画
 	void Draw();
@@ -58,10 +49,15 @@ public:
 		m_mtx._43 = m_pos.z;
 
 	}
+
+	//スピード倍率を取得
+	float GetSpeed()
+	{
+		return m_speed;
+	}
 private:
 	COBB m_obb;
-	COBB m_obb_entrance;
-	Data m_data;
+	float m_speed;    //スピード倍率
 	CModel* m_model;// モデルデータのポインタ
 };
 

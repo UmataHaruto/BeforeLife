@@ -64,4 +64,13 @@ void VillagerMgr::CreateVillager(Player::Data data)
 	Player* player = new Player();
 	player->Init(data);
 	m_villager.push_back(player);
+}
+void VillagerMgr::SelectOneVillager(int idx)
+{
+	for (int i = 0; i < m_villager.size(); i++)
+	{
+		m_villager[i]->SetSelect(false);
+	}
+	m_villager[idx]->SetSelect(true);
+
 };

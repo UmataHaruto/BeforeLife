@@ -106,6 +106,12 @@
     <Filter Include="ソース ファイル\Collider\TerrainCollision">
       <UniqueIdentifier>{43769b38-5674-4a53-b3e2-514057e01ef1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\title">
+      <UniqueIdentifier>{e7848bb5-96b9-4cb3-9c66-eecd30f5499a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\SceneMgr">
+      <UniqueIdentifier>{83d00bef-8ff1-4f90-83d2-74dda379c0f6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Effect.cpp">
@@ -299,6 +305,15 @@
     </ClCompile>
     <ClCompile Include="RouteSearch.cpp">
       <Filter>ソース ファイル\Collider\TerrainCollision</Filter>
+    </ClCompile>
+    <ClCompile Include="Road.cpp">
+      <Filter>ソース ファイル\game\Building</Filter>
+    </ClCompile>
+    <ClCompile Include="Title.cpp">
+      <Filter>ソース ファイル\title</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneMgr.cpp">
+      <Filter>ソース ファイル\SceneMgr</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -520,6 +535,15 @@
     </ClInclude>
     <ClInclude Include="RouteSearch.h">
       <Filter>ソース ファイル\Collider\TerrainCollision</Filter>
+    </ClInclude>
+    <ClInclude Include="Road.h">
+      <Filter>ソース ファイル\game\Building</Filter>
+    </ClInclude>
+    <ClInclude Include="Title.h">
+      <Filter>ソース ファイル\title</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneMgr.h">
+      <Filter>ソース ファイル\SceneMgr</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

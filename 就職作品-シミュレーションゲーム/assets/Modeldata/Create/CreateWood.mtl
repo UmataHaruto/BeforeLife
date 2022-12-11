@@ -1,4 +1,4 @@
-newmtl CreateIronOre:blinn1SG
+newmtl CreateWood:blinn1SG
 illum 4
 Kd 0.00 0.00 0.00
 Ka 0.00 0.00 0.00
@@ -7,10 +7,13 @@ map_Kd crate_2__pbr_diffuse.jpg
 Ni 1.00
 Ks 0.50 0.50 0.50
 Ns 0.06
-newmtl CreateIronOre:initialShadingGroup
+newmtl CreateWood:blinn1SG2
 illum 4
 Kd 0.00 0.00 0.00
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
-map_Kd initialShadingGroup_albedo.jpg
+map_Kd Log_512_Albedo.png
+bump  -bm 1 Log_512_Normal.png
 Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 0.06

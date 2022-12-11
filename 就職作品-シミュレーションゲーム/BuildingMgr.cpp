@@ -16,6 +16,10 @@ void BuildingMgr::Update()
 	{
 		m_soukos[i]->Update();
 	}
+	for (int i = 0; i < m_roads.size(); i++)
+	{
+		m_roads[i]->Update();
+	}
 }
 
 void BuildingMgr::Draw()
@@ -60,7 +64,12 @@ void BuildingMgr::Draw()
 			m_soukos[i]->Draw();
 		}
 	}
-
+	for (int i = 0; i < m_roads.size(); i++)
+	{
+		if (IsInFrustum(m_roads[i]->GetPos(), ans)) {
+			m_roads[i]->Draw();
+		}
+	}
 }
 
 void BuildingMgr::Uninit()
@@ -73,7 +82,10 @@ void BuildingMgr::Uninit()
 	{
 		m_soukos[i]->Finalize();
 	}
-
+	for (int i = 0; i < m_roads.size(); i++)
+	{
+		m_roads[i]->Finalize();
+	}
 }
 
 void BuildingMgr::CreateHouse(House::Data data, MODELID model)
@@ -89,6 +101,14 @@ void BuildingMgr::CreateSouko(Souko::Data data, MODELID model)
 	Souko* souko = new Souko();
 	souko->Init(data, model);
 	m_soukos.push_back(souko);
+}
+
+void BuildingMgr::CreateRoad(XMFLOAT3 position, MODELID model)
+{
+	Road* road = new Road();
+	road->Init(position, model);
+	m_roads.push_back(road);
+
 }
 
 int BuildingMgr::GetItemNum(ItemType tag)
@@ -147,6 +167,15 @@ std::vector<COBB> BuildingMgr::GetAllObb()
 	{
 		obbs.push_back(m_soukos[i]->GetOBB());
 	}
-
 	return obbs;
+}
+
+std::vector<Souko*> BuildingMgr::GetSouko()
+{
+	return m_soukos;
+}
+
+std::vector<Road*> BuildingMgr::GetRoad()
+{
+	return m_roads;
 }

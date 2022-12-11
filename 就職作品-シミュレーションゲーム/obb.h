@@ -113,7 +113,7 @@ public:
 
 	void Draw();
 
-	bool Collision(COBB& obb);
+	bool Collision(COBB obb);
 
 	void SetBoxColor(bool sts)
 	{
@@ -126,5 +126,9 @@ public:
 
 	OBBinfo GetOBB() {
 		return m_obbinfo;
+	}
+	XMFLOAT3 GetInterval()
+	{
+		return m_interval;
 	}
 };
