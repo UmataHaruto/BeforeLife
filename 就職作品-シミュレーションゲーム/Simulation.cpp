@@ -80,10 +80,6 @@ void SearchMousePosThread()
 	SearchMousePoint(g_nearp, g_farp);
 }
 void  SimulationInit() {
-
-	//ゲームボタン初期化
-	GameButton::GetInstance().Init();
-
 	// ASSIMPを使用したアニメーションの読み込み
 	bool sts = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::PLAYER)].modelname)->LoadAnimation("assets/ModelData/male_adult/animation/male_adult_ver1.1.fbx");
 	sts = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::CONIFER00)].modelname)->LoadAnimation("assets/Modeldata/tree/conifer00/conifer01.fbx");
@@ -91,6 +87,7 @@ void  SimulationInit() {
 	//ステージをロード
 	Stage::GetInstance().RoadStageData();
 
+	GameButton::GetInstance().Init();
 
 	//リソース初期化
 	ResourceManager::GetInstance().Init();
@@ -158,6 +155,9 @@ void  SimulationInit() {
 
 	//開始時間の設定
 	starttime = timeGetTime();
+
+	SoundMgr::GetInstance().XA_Play("assets/sound/BGM/Vopna.wav");
+
 }
 
 void  SimulationExit() {
@@ -302,7 +302,6 @@ void  SimulationUpdate() {
 		XMStoreFloat4x4(&FirstCameraPos, PositionMtx);
 
 		CCamera::GetInstance()->TPSCamera(FirstCameraPos);
-
 		if (io.MouseWheel != 0)
 		{
 			if (io.MouseWheel > 0)
@@ -319,8 +318,6 @@ void  SimulationUpdate() {
 
 		break;
 	}
-
-
 }
 
 void  SimulationDraw() {

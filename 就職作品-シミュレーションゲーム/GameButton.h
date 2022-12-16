@@ -152,6 +152,7 @@ private:
 	//選択範囲テクスチャ
 	ID3D11ShaderResourceView* m_selectarea_texture_view;
 
+	ID3D11ShaderResourceView* m_system_action_texture_view;
 
 	ID3D11ShaderResourceView* m_texture_view[GAMEBUTTON_MAX];
 
@@ -165,6 +166,7 @@ private:
 
 	ID3D11ShaderResourceView* m_build_road_texture_view[ROADBUTTON_MAX];
 
+	ID3D11ShaderResourceView* m_action_priority_texture;
 	//リソース表示用テクスチャ
 	ID3D11ShaderResourceView* m_resource_preview_texture[(int)ItemType::ITEM_MAX];
 
@@ -220,5 +222,9 @@ private:
 	ImVec4 m_bg_col;             // Black background
 	ImVec4* m_text_color;
 	ImGuiStyle* m_style;
+
+	//フォント
+	ImFont* font_medieval;
+	ImFont* font_genei;
 };
 

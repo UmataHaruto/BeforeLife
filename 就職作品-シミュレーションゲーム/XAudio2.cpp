@@ -196,7 +196,7 @@ void SoundMgr::XA_Play(std::string label)
 		// ソースボイス作成
 		g_pXAudio2->CreateSourceVoice(&(g_pSourceVoice[index]), &(g_wfx[index].Format));
 		g_pSourceVoice[index]->SubmitSourceBuffer(&(g_buffer[index]));	// ボイスキューに新しいオーディオバッファーを追加
-
+		g_pSourceVoice[index]->SetVolume(m_master_volume);
 		// 再生
 		g_pSourceVoice[index]->Start(0);
 	}

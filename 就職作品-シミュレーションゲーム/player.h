@@ -66,7 +66,7 @@ public:
 		WORK,
 		SLEEP,
 		ENTERTAINMENT,
-
+		REST,
 		ACTION_MAX
 	};
 
@@ -275,6 +275,16 @@ public:
 	{
 		return m_isselect;
 	}
+
+	std::vector<WorkPriority> GetWorkPriority()
+	{
+		return m_work_priority;
+	}
+
+	void SetWorkPriority(int idx, int priority)
+	{
+		m_work_priority[idx].priority = priority;
+	}
 private:
 	void AnimationUpdate();
 
@@ -289,6 +299,8 @@ private:
 	float m_hp;           //ヒットポイント
 	float m_stamina_max;  //最大スタミナ
 	float m_stamina;      //スタミナ
+
+
 
 	//運搬アイテム
 	Souko::Item m_carry;
@@ -327,7 +339,10 @@ private:
 	DirectX::XMFLOAT4X4			m_mtxlocalpose[PARTS_MAX];	// 自分のことだけを考えた行列
 	DirectX::XMFLOAT4X4			m_mtxParentChild[PARTS_MAX];	// 親子関係を考慮した行列
 
-	//作業関数
-	void Work_Mine(void);
-	void Work_Carry(void);
+	//行動関数
+	void Rest();
+
+	//作業関数(作業をしない場合 falseを返す)
+	bool Work_Mine(void);
+	bool Work_Carry(void);
 };

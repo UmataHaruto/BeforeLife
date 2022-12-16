@@ -35,6 +35,18 @@ public:
 	HRESULT XA_Initialize(void);
 	//音量調整
 	HRESULT SetVolume(float Volume, std::string label);
+
+	//マスターボリューム設定
+	void SetMasterVolume(float volume)
+	{
+		m_master_volume = volume;
+
+		for (int i = 0; i > g_soundlist.size(); i++)
+		{
+			SetVolume(m_master_volume,g_soundlist[i].filename);
+		}
+	}
+
 	//解放処理
 	void XA_Release(void);
 	//再生
@@ -50,6 +62,7 @@ public:
 	//ポーズ
 	void XA_Pause(std::string label);
 private:
+	float m_master_volume = 1;
 	IXAudio2* g_pXAudio2 = NULL;
 	IXAudio2MasteringVoice* g_pMasteringVoice = NULL;
 	IXAudio2SourceVoice* g_pSourceVoice[SOUND_MAX];

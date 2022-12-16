@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>G:\directxtex\include;G:\assimp\include;$(IncludePath)</IncludePath>
-    <LibraryPath>G:\assimp\lib;G:\directxtex\lib\x64\debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>E:\directxtex\include;E:\assimp\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\assimp\lib;E:\directxtex\lib\x64\debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>E:\directxtex\include;E:\assimp\include;$(IncludePath)</IncludePath>

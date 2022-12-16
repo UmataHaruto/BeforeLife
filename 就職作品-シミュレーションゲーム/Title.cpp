@@ -15,6 +15,7 @@
 #include "SceneMgr.h"
 #include "NameGenerator.h"
 #include <thread>
+#include "GameButton.h"
 
 ID3D11ShaderResourceView* m_title_button_texture[5];
 ID3D11ShaderResourceView* m_loading_bar_texture[3];
@@ -83,7 +84,9 @@ void TitleInit()
 	//MouseCursor生成
 	Sprite2DMgr::GetInstance().CreateUI(UILIST::ICON_MOUSE, 1000, 530, 0, 0.2, 0.2, XMFLOAT4(1, 1, 1, 1));
 
-	//SoundMgr::GetInstance().XA_Play("assets/sound/BGM/Vopna.wav");
+	SoundMgr::GetInstance().SetMasterVolume(0.1);
+
+	SoundMgr::GetInstance().XA_Play("assets/sound/BGM/Exploration.wav");
 
 }
 
@@ -145,6 +148,9 @@ void TitleDraw()
 
 	ImGui::Begin(u8"タイトル", m_windowActivate, window_flags);
 
+	static int SelectButton_old = -1;
+	static int SelectButton = -1;
+
 	if (!isloading) {
 		ImGui::Image(m_title_button_texture[0], ImVec2(1320, 800), ImVec2(0, 0), ImVec2(1, 1),ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
 		ImGui::SetCursorPos(ImVec2(520, 500));
@@ -152,8 +158,12 @@ void TitleDraw()
 		if (ImGui::ImageButton(m_title_button_texture[1], ImVec2(300, 70), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(1, 1, 1, 0), ImVec4(1, 1, 1, 1)))
 		{
 			Sprite2DMgr::GetInstance().CreateUI(UILIST::BLACKBACK_START, 1000, 530, 0, 11, 5.5, XMFLOAT4(1, 1, 1, 1));
-
+			SoundMgr::GetInstance().XA_Play("assets/sound/SE/Select_02.wav");
 			isloading = true;
+		}
+		if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenOverlapped))
+		{
+			SelectButton = 1;
 		}
 		ImGui::SetCursorPos(ImVec2(550, 570));
 		//PLAY02ボタン
@@ -161,11 +171,24 @@ void TitleDraw()
 		{
 			printf("hit");
 		}
+		if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenOverlapped))
+		{
+			SelectButton = 2;
+		}
 		ImGui::SetCursorPos(ImVec2(590, 640));
 		//PLAY02ボタン
 		if (ImGui::ImageButton(m_title_button_texture[3], ImVec2(150, 70), ImVec2(0, 0), ImVec2(1, 1), 0, ImVec4(1, 1, 1, 0), ImVec4(1, 1, 1, 1)))
 		{
 			SceneMgr::GetInstance().SetEndFlg(true);
+		}
+		if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenOverlapped))
+		{
+			SelectButton = 3;
+		}
+		if (SelectButton != -1 && SelectButton_old != SelectButton)
+		{
+			SelectButton_old = SelectButton;
+			SoundMgr::GetInstance().XA_Play("assets/sound/SE/Select_01.wav");
 		}
 	}
 	//ロード画面
@@ -175,15 +198,15 @@ void TitleDraw()
 		ImGui::Image(m_title_button_texture[4], ImVec2(1320, 800), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 0));
 
 		std::string name = std::to_string((int)(SceneMgr::GetInstance().GetLoadingRatio() * 100)) + std::string("%%");
-		ImGui::SetWindowFontScale(3.4);
+		ImGui::SetWindowFontScale(0.68);
 
 		ImGui::SetCursorPos(ImVec2(617, 547));
 		ImGui::TextColored(ImVec4(0, 0, 0, 1), name.c_str());
-		ImGui::SetWindowFontScale(3);
+		ImGui::SetWindowFontScale(0.6);
 
 		ImGui::SetCursorPos(ImVec2(620, 550));
 		ImGui::TextColored(ImVec4(1, 1, 1, 1), name.c_str());
-		ImGui::SetWindowFontScale(1);
+		ImGui::SetWindowFontScale(0.3);
 
 		//プログレスバー背景
 		ImGui::SetCursorPos(ImVec2(300, 600));
@@ -201,7 +224,7 @@ void TitleDraw()
 		{
 			//フェードイン
 			Sprite2DMgr::GetInstance().CreateUI(UILIST::CLOUDBACK_START, 1000, 530, 0, 11, 5.5, XMFLOAT4(1, 1, 1, 1));
-			SoundMgr::GetInstance().XA_Stop("assets/sound/BGM/Vopna.wav");
+			SoundMgr::GetInstance().XA_Stop("assets/sound/BGM/Exploration.wav");
 			SimulationInit();
 			SceneMgr::GetInstance().ChangeScene(SCENETYPE::GAME);
 		}

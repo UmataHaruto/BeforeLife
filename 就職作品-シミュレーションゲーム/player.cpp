@@ -30,9 +30,9 @@ bool Player::Init(Data data) {
 	m_obb.Init(m_model);
 	m_obb.CreateBox(250,1700,250,XMFLOAT3(0,0,0));
 	//髪モデル
-	model = new CModel();
-	*model = *ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::HAIR_00)].modelname);
-	m_hair = model;	
+	//model = new CModel();
+	//*model = *ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::HAIR_00)].modelname);
+	m_hair = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::HAIR_00)].modelname);
 	//必要になったらポインタを付与(nullは素手)
 	m_tools = nullptr;
 	XMMATRIX scale = XMMatrixScaling(0.03, 0.03, 0.03);
@@ -177,6 +177,7 @@ void Player::Update() {
 					30,
 					XMFLOAT4(1, 1, 1, 1),
 					nullptr);
+				SoundMgr::GetInstance().XA_Play("assets/sound/SE/Click_Walk_00.wav");
 
 				//移動先の指定
 				RouteSearch::GetInstance().InitStageCollider();
@@ -248,6 +249,8 @@ void Player::Update() {
 	}
 
 	//行動分岐
+	//行動が意味をなさない場合休憩状態へ移行
+	bool iswork = false;
 	switch (action)
 	{
 	case Player::ActionType::WORK:
@@ -258,14 +261,14 @@ void Player::Update() {
 			break;
 
 		case Player::WorkType::MINE:
-			Work_Mine();
+			iswork = Work_Mine();
 			break;
 
 		case Player::WorkType::COLLECT:
 			break;
 
 		case Player::WorkType::CARRY:
-			Work_Carry();
+			iswork = Work_Carry();
 			break;
 
 		case Player::WorkType::CONSTRUCTION:
@@ -285,6 +288,10 @@ void Player::Update() {
 	case Player::ActionType::ENTERTAINMENT:
 		break;
 
+	case Player::ActionType::REST:
+		Rest();
+		break;
+	
 	case Player::ActionType::ACTION_MAX:
 		break;
 
@@ -455,9 +462,11 @@ void Player::Update() {
 		if (fabs(m_pos.x - movepos.x) < 2.0f && fabs(m_pos.y - movepos.y) < 2.0f && fabs(m_pos.z - movepos.z) < 2.0f)
 		{
 			//最初の移動先をキューの最後にする
-			XMFLOAT2 backque = moveque[moveque.size() - 1];
-			moveque.pop_back();
-			movepos = XMFLOAT3(backque.x, m_pos.y, backque.y);
+			if (moveque.size() > 0) {
+				XMFLOAT2 backque = moveque[moveque.size() - 1];
+				moveque.pop_back();
+				movepos = XMFLOAT3(backque.x, m_pos.y, backque.y);
+			}
 		}
 		//目的地に到達
 		if (moveque.size() <= 0)
@@ -589,8 +598,13 @@ void Player::CaliculateParentChildMtx()
 
 }
 
-void Player::Work_Mine(void)
+void Player::Rest()
 {
+}
+
+bool Player::Work_Mine(void)
+{
+	bool iswork = false;
 	ImGuiIO& io = ImGui::GetIO();
 	//一番近くの鉱石を判断
 	int index = 0;
@@ -616,11 +630,13 @@ void Player::Work_Mine(void)
 	//資源が無い場合輸送を優先
 	if (ResourceManager::GetInstance().m_resources.size() == 0)
 	{
+		iswork = false;
 		Work_Carry();
 	}
 
 	//移動地点を指定
 	if (ResourceManager::GetInstance().m_resources.size() != 0 && ismine == false && m_ismoving == false) {
+		iswork = true;
 		m_ismoving = true;
 		movepos = ResourceManager::GetInstance().m_resources[index]->GetPos();
 
@@ -651,6 +667,7 @@ void Player::Work_Mine(void)
 	if (ResourceManager::GetInstance().m_resources.size() != 0) {
 		if (ismine && m_obb.Collision(*ResourceManager::GetInstance().m_resources[index]->GetOBB()))
 		{
+			iswork = true;
 			m_animdata.animno = AnimationType::MINE;
 			//初期処理
 			if (!mineinit)
@@ -708,11 +725,12 @@ void Player::Work_Mine(void)
 			}
 		}
 	}
+	return iswork;
 }
 
-void Player::Work_Carry(void)
+bool Player::Work_Carry(void)
 {
-
+	bool iswork = false;
 	int index = 0;
 	float maxlength = 0;
 	static bool routeinit = false;
@@ -733,6 +751,7 @@ void Player::Work_Carry(void)
 		}
 		//移動地点を指定
 		if (ResourceManager::GetInstance().GetInstallationResource().size() != 0 && m_ismoving == false) {
+			iswork = true;
 			m_ismoving = true;
 			movepos = ResourceManager::GetInstance().GetInstallationResource()[index]->GetPos();
 
@@ -753,6 +772,7 @@ void Player::Work_Carry(void)
 		if (ResourceManager::GetInstance().GetInstallationResource().size() != 0) {
 			if (m_obb.Collision(*ResourceManager::GetInstance().GetInstallationResource()[index]->GetOBB()) && moveque.size() == 0)
 			{
+				iswork = true;
 				routeinit = false;
 				m_ismoving = false;
 				m_carry_status = CarryStatus::CARRY;
@@ -800,6 +820,7 @@ void Player::Work_Carry(void)
 
 		//移動地点を指定
 		if (BuildingMgr::GetInstance().GetSouko().size() != 0 && m_ismoving == false && routeinit == false) {
+			iswork = true;
 			m_ismoving = true;
 			movepos = BuildingMgr::GetInstance().GetSouko()[index]->GetEntranceOBB().GetPosition();
 			movepos.x += BuildingMgr::GetInstance().GetSouko()[index]->GetEntranceOBB().GetInterval().x;
@@ -846,4 +867,12 @@ void Player::Work_Carry(void)
 	default:
 		break;
 	}
+
+	//倉庫が存在しない場合
+	if (BuildingMgr::GetInstance().GetSouko().size() == 0)
+	{
+		iswork = false;
+	};
+
+	return iswork;
 }
