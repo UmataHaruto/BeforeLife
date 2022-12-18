@@ -32,7 +32,7 @@ public:
 
 	Block GetField(int x,int y,int z);
 
-	static Stage& GetInstance() {
+	inline static Stage& GetInstance() {
 		static Stage Instance;
 		return Instance;
 	}

@@ -105,11 +105,6 @@ void Sprite2DMgr::Draw(XMFLOAT4X4 camera_mtx) {
 		g_bars[i].m_targetimage.DrawBillBoard(camera_mtx);
 
 	}
-	//ウィンドウの描画
-	for (int i = 0; i < g_Windows.size(); i++) {
-
-		g_Windows[i]->Draw();
-	}
 	//UIの描画
 	for (int i = 0; i < g_UserInterfaces.size(); i++) {
 
@@ -217,70 +212,6 @@ void Sprite2DMgr::Update() {
 			}
 		}
 	}
-	//ウィンドウの更新
-	for (int i = 0; i < g_Windows.size(); i++) {
-		g_Windows[i]->Update();
-
-		//更新
-		for (int j = 0; j < g_Windows[i]->m_Buttons.size(); j++) {
-			g_Windows[i]->m_Buttons[j].Update();
-			//クリックされているイベントを実行
-			if (g_Windows[i]->m_Buttons[j].GetSts()) {
-				switch (j)
-				{
-				case 0:
-					g_Windows[i]->ClickEvent_00();
-					break;
-				case 1:
-					g_Windows[i]->ClickEvent_01();
-					break;
-				case 2:
-					g_Windows[i]->ClickEvent_02();
-					break;
-				case 3:
-					g_Windows[i]->ClickEvent_03();
-					break;
-				case 4:
-					g_Windows[i]->ClickEvent_04();
-					break;
-				case 5:
-					g_Windows[i]->ClickEvent_05();
-					break;
-				case 6:
-					g_Windows[i]->ClickEvent_06();
-					break;
-				case 7:
-					g_Windows[i]->ClickEvent_07();
-					break;
-				case 8:
-					g_Windows[i]->ClickEvent_08();
-					break;
-				case 9:
-					g_Windows[i]->ClickEvent_09();
-					break;
-				default:
-					break;
-				}
-			}
-		}
-	}
-	//ウィンドウの破棄
-	{
-		auto it = g_Windows.begin();
-		while (it !=g_Windows.end())
-		{
-			//破壊フラグが建っている場合
-			if ((*it)->GetDestroy())
-			{
-				(*it)->UnInit();
-				it = g_Windows.erase(it);
-			}
-			else
-			{
-				++it;
-			}
-		}
-	}
 }
 
 void Sprite2DMgr::ClearEffect()
@@ -291,11 +222,6 @@ void Sprite2DMgr::ClearEffect()
 void Sprite2DMgr::ClearUi()
 {
 	g_UserInterfaces.clear();
-}
-
-void Sprite2DMgr::ClearWindow()
-{
-	g_Windows.clear();
 }
 
 void Sprite2DMgr::Finalize() {
@@ -326,12 +252,6 @@ void Sprite2DMgr::CreateUI(UILIST type, float x, float y, float z, float xsize, 
 
 	//エフェクトリストへ格納
 	g_UserInterfaces.push_back(board);
-}
-
-void Sprite2DMgr::CreateWindowSprite(DirectX::XMFLOAT2 Pos, DirectX::XMFLOAT2 Size, DirectX::XMFLOAT4 color,bool CancelKey, const char* TexturePath)
-{
-	Setting* board = new Setting(Pos,Size,color,CancelKey,TexturePath);
-	g_Windows.push_back(board);
 }
 
 void Sprite2DMgr::ResetTarget()

@@ -35,15 +35,15 @@ public:
 	std::vector<CollisionData> GetAllBuildingPosition();
 
 	std::vector<COBB> GetAllObb();
-	std::vector<Souko*> GetSouko();
-	std::vector <Road*> GetRoad();
+	std::vector<std::unique_ptr<Souko>>& GetSouko();
+	std::vector<std::unique_ptr<Road>>& GetRoad();
 private:
 	//–¯‰Æ
-	std::vector<House*>m_houses;
+	std::vector<std::unique_ptr<House>> m_houses;
 	//‘qŒÉ
-	std::vector<Souko*>m_soukos;
+	std::vector<std::unique_ptr<Souko>> m_soukos;
 	//“¹˜H
-	std::vector<Road*>m_roads;
+	std::vector<std::unique_ptr<Road>> m_roads;
 
 };
 

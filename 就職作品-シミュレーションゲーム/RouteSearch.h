@@ -15,17 +15,56 @@ public:
 		GOAL,
 	};
 
-	void SetId(int id);
-	void SetNumber(int num);
-	void SetStatus(Status sts);
-	void SetParent(AStar* parent);
-	void SetScore(int score);
+	inline void SetId(int id)
+	{
+		m_id = id;
+	}
 
-	int GetId();
-	int GetNumber();
-	AStar::Status GetStatus();
-	int GetScore();
-	AStar* GetParent();
+	inline void SetNumber(int num)
+	{
+		m_number = num;
+	}
+
+	inline void SetStatus(Status sts)
+	{
+		m_status = sts;
+	}
+
+	inline void SetParent(AStar* parent)
+	{
+		m_parent = parent;
+	}
+
+	inline void SetScore(int score)
+	{
+		m_score = score;
+	}
+
+	inline int GetId()
+	{
+		return m_id;
+	}
+
+	inline int GetNumber()
+	{
+		return m_number;
+	}
+
+	inline Status GetStatus()
+	{
+		return m_status;
+	}
+
+	inline int GetScore()
+	{
+		return m_score;
+	}
+
+	inline AStar* GetParent()
+	{
+		return m_parent;
+	}
+
 private:
 	Status m_status;
 	AStar* m_parent;

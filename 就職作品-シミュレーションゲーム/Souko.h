@@ -35,25 +35,25 @@ public:
 	void Finalize();
 
 	//バウンディングboxを取得
-	COBB GetOBB(void)
+	inline COBB GetOBB(void)
 	{
 		return m_obb;
 	}
 
 	//バウンディングboxを取得
-	COBB GetEntranceOBB(void)
+	inline COBB GetEntranceOBB(void)
 	{
 		return m_obb_entrance;
 	}
 
 	//データを取得
-	Data GetData()
+	inline Data GetData()
 	{
 		return m_data;
 	}
 
 	//モデルデータを取得
-	CModel* GetModel() {
+	inline CModel* GetModel() {
 		return m_model;
 	}
 
@@ -64,7 +64,7 @@ public:
 	}
 
 	//座標をセット
-	void SetPos(XMFLOAT3 pos)
+	inline void SetPos(XMFLOAT3 pos)
 	{
 		m_pos = pos;
 		m_mtx._41 = m_pos.x;
@@ -73,7 +73,7 @@ public:
 
 	}
 
-	int GetItemNum(ItemType tag)
+	inline int GetItemNum(ItemType tag)
 	{
 		for (int i = 0; i < m_data.items.size(); i++)
 		{

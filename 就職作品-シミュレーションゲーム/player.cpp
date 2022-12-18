@@ -396,29 +396,35 @@ void Player::Update() {
 			{
 				m_animdata.animno = AnimationType::CARRY_RUN;
 			}
-			XMVECTOR Pos = XMVectorSet(m_pos.x, m_pos.y, -m_pos.z, 0.0f);
-			XMVECTOR At = XMVectorSet(movepos.x, movepos.y, -movepos.z, 0.0f);;
-			XMVECTOR Up = XMVectorSet(0, 1, 0, 0.0f);
-			//Y軸回転以外を切る
-			ALIGN16 XMMATRIX lookat;
-			XMFLOAT4X4 lotateX;
-			XMMATRIX LotateXMtx;
-			XMFLOAT4X4 lotateZ;
-			XMMATRIX LotateZMtx;
 
-			DX11MtxRotationX(0, lotateX);
-			LotateXMtx = XMLoadFloat4x4(&lotateX);
-			DX11MtxRotationZ(0, lotateZ);
-			LotateZMtx = XMLoadFloat4x4(&lotateZ);
-			lookat = XMMatrixMultiply(LotateXMtx, lookat);
-			lookat = XMMatrixMultiply(LotateZMtx, lookat);
+			if (m_pos.x != movepos.x || m_pos.y != movepos.y || m_pos.z != movepos.z) {
 
-			XMMATRIX scale = XMMatrixScaling(0.03, 0.03, 0.03);
-			lookat = XMMatrixLookAtLH(Pos, At, Up);
-			lookat = XMMatrixMultiply(lookat, scale);
+				//向く場所が移動先と同じ場合振り向きをOFF
+				XMVECTOR Pos = XMVectorSet(m_pos.x, m_pos.y, -m_pos.z, 0.0f);
+				XMVECTOR At = XMVectorSet(movepos.x, movepos.y, -movepos.z, 0.0f);;
+				XMVECTOR Up = XMVectorSet(0, 1, 0, 0.0f);
 
-			XMStoreFloat4x4(&m_mtx, lookat);
-        
+				//Y軸回転以外を切る
+				ALIGN16 XMMATRIX lookat;
+				XMFLOAT4X4 lotateX;
+				XMMATRIX LotateXMtx;
+				XMFLOAT4X4 lotateZ;
+				XMMATRIX LotateZMtx;
+
+				DX11MtxRotationX(0, lotateX);
+				LotateXMtx = XMLoadFloat4x4(&lotateX);
+				DX11MtxRotationZ(0, lotateZ);
+				LotateZMtx = XMLoadFloat4x4(&lotateZ);
+				lookat = XMMatrixMultiply(LotateXMtx, lookat);
+				lookat = XMMatrixMultiply(LotateZMtx, lookat);
+
+				XMMATRIX scale = XMMatrixScaling(0.03, 0.03, 0.03);
+				lookat = XMMatrixLookAtLH(Pos, At, Up);
+				lookat = XMMatrixMultiply(lookat, scale);
+
+				XMStoreFloat4x4(&m_mtx, lookat);
+
+			}
 			//他の構造物とヒットしていないか
 			bool hit = false;
 

@@ -81,7 +81,6 @@ public:
 	//エフェクト格納ベクター
 	std::vector<CBillBoard>g_effects = {};
 	std::vector<Quad2D>g_UserInterfaces = {};
-	std::vector<Window*>g_Windows = {};
 	//プログレスバーデータ格納
 	std::vector<ProgressData>g_bars = {};
 

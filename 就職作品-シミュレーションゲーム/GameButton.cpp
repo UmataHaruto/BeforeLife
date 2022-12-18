@@ -29,7 +29,7 @@ GameButton::~GameButton()
 void GameButton::Init()
 {
 	//プレビューモデルを設定
-	Resource* resource = new Resource();
+	std::unique_ptr<Resource> resource = std::make_unique<Resource>();
 	Resource::Data data;
 	data.amount = 1;
 	data.Endurance = 100;
@@ -40,13 +40,12 @@ void GameButton::Init()
 	resource->Init(data,MODELID::SMALLHOUSE);
 	resource->SetModel(ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::SMALLHOUSE)].modelname));
 	resource->GetModel()->ChangeSelectType(SELECT_SHADER_TYPE::SELECT_SHADER_TYPE_CREATE);
-	modelpreview = resource;
+	modelpreview = std::move(resource);
 
 	m_Game_HoverButton = GAMEBUTTON_NONE;
 
 	m_io = &ImGui::GetIO();
-	m_windowActivate = new bool();
-	*m_windowActivate = true;
+	std::unique_ptr<bool>m_windowActivate = std::make_unique<bool>(true);
 
 
 
@@ -600,9 +599,9 @@ void GameButton::Draw()
 			}
 			characternum = VillagerMgr::GetInstance().m_villager.size();
 
-			bool* active = new bool(false);
+			std::unique_ptr<bool> active = std::make_unique<bool>();
 			ImGui::SetWindowFontScale(0.2);
-			ImGui::Begin(u8"アクション", active, window_flags);
+			ImGui::Begin(u8"アクション", active.get(), window_flags);
 
 			//ウィンドウ画像
 			ImGui::SetCursorPos(ImVec2(0, 0));
@@ -911,8 +910,9 @@ void GameButton::Draw()
 		window_flags |= ImGuiWindowFlags_NoResize;
 		window_flags |= ImGuiWindowFlags_NoBackground;
 
-		bool* windowactive = new bool(false);
-		ImGui::Begin(u8"住居",windowactive,window_flags);
+		std::unique_ptr<bool> windowactive = std::make_unique<bool>(false);
+
+		ImGui::Begin(u8"住居",windowactive.get(), window_flags);
 
 		XMFLOAT3 g_nerp;
 		XMFLOAT3 g_farp;
@@ -1024,9 +1024,9 @@ void GameButton::Draw()
 		window_flags |= ImGuiWindowFlags_NoResize;
 		window_flags |= ImGuiWindowFlags_NoBackground;
 
-		bool* windowactive = new bool(false);
+		std::unique_ptr<bool> windowactive = std::make_unique<bool>(false);
 
-		ImGui::Begin(u8"倉庫",windowactive,window_flags);
+		ImGui::Begin(u8"倉庫",windowactive.get(), window_flags);
 		XMFLOAT3 g_nerp;
 		XMFLOAT3 g_farp;
 		//ウィンドウ画像
@@ -1133,9 +1133,9 @@ void GameButton::Draw()
 		window_flags |= ImGuiWindowFlags_NoResize;
 		window_flags |= ImGuiWindowFlags_NoBackground;
 
-		bool* windowactive = new bool(false);
+		std::unique_ptr<bool> windowactive = std::make_unique<bool>(false);
 
-		ImGui::Begin(u8"道路",windowactive,window_flags);
+		ImGui::Begin(u8"道路",windowactive.get(), window_flags);
 
 		XMFLOAT3 g_nerp;
 		XMFLOAT3 g_farp;
@@ -1446,8 +1446,8 @@ void GameButton::Draw()
 	std::string str;
 
 	////フレームレート表示
-	//ImGui::SetWindowFontScale(0.3);
-	//str = u8"現在" + std::to_string((int)m_io->Framerate) + "FPS";
+	ImGui::SetWindowFontScale(0.3);
+	str = u8"現在" + std::to_string((int)m_io->Framerate) + "FPS";
 
 	ImGui::Text(str.c_str());
 	//ImGui::Text(u8"頂点数%d, インデックス数:%d (ポリゴン数%d)", m_io->MetricsRenderVertices, m_io->MetricsRenderIndices, m_io->MetricsRenderIndices / 3);

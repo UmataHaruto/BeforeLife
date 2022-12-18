@@ -24,24 +24,24 @@ public:
 	void Finalize();
 
 	//バウンディングスフィアを取得
-	COBB GetOBB(void)
+	inline COBB GetOBB(void)
 	{
 		return m_obb;
 	}
 
 	//モデルデータを取得
-	CModel* GetModel() {
+	inline CModel* GetModel() {
 		return m_model;
 	}
 
 	//モデルセット
-	void SetModel(CModel* pmodel)
+	inline void SetModel(CModel* pmodel)
 	{
 		m_model = pmodel;
 	}
 
 	//座標をセット
-	void SetPos(XMFLOAT3 pos)
+	inline void SetPos(XMFLOAT3 pos)
 	{
 		m_pos = pos;
 		m_mtx._41 = m_pos.x;
@@ -51,7 +51,7 @@ public:
 	}
 
 	//スピード倍率を取得
-	float GetSpeed()
+	inline float GetSpeed()
 	{
 		return m_speed;
 	}

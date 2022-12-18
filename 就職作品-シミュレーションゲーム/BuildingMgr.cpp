@@ -90,24 +90,24 @@ void BuildingMgr::Uninit()
 
 void BuildingMgr::CreateHouse(House::Data data, MODELID model)
 {
-	House* house = new House();
+	std::unique_ptr<House> house = std::make_unique<House>();
 	house->Init(data, model);
-	m_houses.push_back(house);
+	m_houses.push_back(std::move(house));
 
 }
 
 void BuildingMgr::CreateSouko(Souko::Data data, MODELID model)
 {
-	Souko* souko = new Souko();
+	std::unique_ptr<Souko> souko = std::make_unique<Souko>();
 	souko->Init(data, model);
-	m_soukos.push_back(souko);
+	m_soukos.push_back(std::move(souko));
 }
 
 void BuildingMgr::CreateRoad(XMFLOAT3 position, MODELID model)
 {
-	Road* road = new Road();
+	std::unique_ptr<Road> road = std::make_unique<Road>();
 	road->Init(position, model);
-	m_roads.push_back(road);
+	m_roads.push_back(std::move(road));
 
 }
 
@@ -170,12 +170,12 @@ std::vector<COBB> BuildingMgr::GetAllObb()
 	return obbs;
 }
 
-std::vector<Souko*> BuildingMgr::GetSouko()
+std::vector<std::unique_ptr<Souko>>& BuildingMgr::GetSouko()
 {
 	return m_soukos;
 }
 
-std::vector<Road*> BuildingMgr::GetRoad()
+std::vector<std::unique_ptr<Road>>& BuildingMgr::GetRoad()
 {
 	return m_roads;
 }

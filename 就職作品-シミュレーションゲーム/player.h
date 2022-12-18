@@ -162,24 +162,24 @@ public:
 	void SetCarryItem(ItemType tag,int num);
 
 	//モデルデータを取得
-	CModel* GetModel() {
+	inline CModel* GetModel() {
 		return m_model;
 	}
 
 	//バウンディングスフィアを取得
-	COBB GetOBB(void)
+	inline COBB GetOBB(void)
 	{
 		return m_obb;
 	}
 
 	//アニメーションデータ取得
-	AnimationData GetAnimData(void)
+	inline AnimationData GetAnimData(void)
 	{
 		return m_animdata;
 	}
 
 	//名前を取得
-	std::string GetName(NameGenerator::NAMETYPE type)
+	inline std::string GetName(NameGenerator::NAMETYPE type)
 	{
 		if (type == NameGenerator::NAMETYPE::FAMILLY)
 		{
@@ -193,19 +193,19 @@ public:
 	}
 
 	//モデルセット
-	void SetModel(CModel* pmodel)
+	inline void SetModel(CModel* pmodel)
 	{
 		m_model = pmodel;
 	}
 
 	//座標をセット
-	void SetPos(XMFLOAT3 pos)
+	inline void SetPos(XMFLOAT3 pos)
 	{
 		m_pos = pos;
 	}
 
 	//ヒットポイントをセット
-	void SetHitpoint(float max,float hp)
+	inline void SetHitpoint(float max,float hp)
 	{
 		m_hp_max = max;
 		if(hp >= 0)
@@ -223,7 +223,7 @@ public:
 	}
 
 	//スタミナをセット
-	void SetStamina(float max,float stamina)
+	inline void SetStamina(float max,float stamina)
 	{
 		m_stamina_max = max;
 		if (stamina >= 0)
@@ -241,47 +241,47 @@ public:
 	}
 
 	//最大ヒットポイントを取得
-	float GetMaxHitpoint()
+	inline float GetMaxHitpoint()
 	{
 		return m_hp_max;
 	}
 
 	//最大スタミナを取得
-	float GetMaxStamina()
+	inline float GetMaxStamina()
 	{
 		return m_stamina_max;
 	}
 
 	//ヒットポイントを取得
-	float GetHitpoint()
+	inline float GetHitpoint()
 	{
 		return m_hp;
 	}
 
 	//スタミナを取得
-	float GetStamina()
+	inline float GetStamina()
 	{
 		return m_stamina;
 	}
 
 	//機嫌を取得
-	float GetMood()
+	inline float GetMood()
 	{
 		return m_mood;
 	}
 
 	//選択状況を取得
-	bool GetSelect()
+	inline bool GetSelect()
 	{
 		return m_isselect;
 	}
 
-	std::vector<WorkPriority> GetWorkPriority()
+	inline std::vector<WorkPriority> GetWorkPriority()
 	{
 		return m_work_priority;
 	}
 
-	void SetWorkPriority(int idx, int priority)
+	inline void SetWorkPriority(int idx, int priority)
 	{
 		m_work_priority[idx].priority = priority;
 	}

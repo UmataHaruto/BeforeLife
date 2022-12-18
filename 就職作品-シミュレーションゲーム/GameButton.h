@@ -129,9 +129,9 @@ public:
 		return m_debug;
 	}
 
-	bool GetModelPreview()
+	Resource* GetModelPreview()
 	{
-		return modelpreview;
+		return modelpreview.get();
 	}
 
      void SetMouseWorld(XMFLOAT3 pos);
@@ -143,7 +143,7 @@ private:
 	ImGuiWindowFlags m_window_flags = 0;
 	
 	//配置プレビュー表示
-	Resource* modelpreview;
+	std::unique_ptr<Resource> modelpreview;
 
 	DirectX::XMFLOAT3 m_mouseworldpos;
 
