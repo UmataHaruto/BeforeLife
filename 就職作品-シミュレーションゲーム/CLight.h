@@ -2,13 +2,15 @@
 #include	<DirectXMath.h>
 #include	"memory.h"
 #include	"Shader.h"
-#include	"DX11util.h"
+#include	"CDirectxGraphics.h"
+#include	"dx11mathutil.h"
 
 class CLight {
-	ALIGN16 struct ConstantBufferLight {
+	struct ConstantBufferLight {
 		DirectX::XMFLOAT4 LightDirection;
 		DirectX::XMFLOAT4 EyePos;
-		DirectX::XMFLOAT4 Ambient;
+		DirectX::XMFLOAT4 invLightDirection;
+		DirectX::XMFLOAT4 invEyePos;
 	};
 
 	enum class LightType {
@@ -19,17 +21,20 @@ class CLight {
 	LightType			m_type;
 	DirectX::XMFLOAT3	m_eyepos;
 	DirectX::XMFLOAT4	m_lightpos;		// w=0の時は方向 w=1の時は位置
-	ID3D11Buffer*       m_pConstantBufferLight = nullptr;
-	DirectX::XMFLOAT4	m_ambient;
+	ID3D11Buffer* m_pConstantBufferLight = nullptr;
+	DirectX::XMFLOAT4X4 m_invworldmtx;		// ワールド変換行列の逆行列
 public:
-	bool Init(DirectX::XMFLOAT3 eyepos,DirectX::XMFLOAT4 lightpos) {
+	bool Init(DirectX::XMFLOAT3 eyepos, DirectX::XMFLOAT4 lightpos) {
 		m_lightpos = lightpos;
 		m_eyepos = eyepos;
 		m_type = LightType::DIRECTIONAL;
 
+		ID3D11Device* dev;
+		dev = CDirectXGraphics::GetInstance()->GetDXDevice();
+
 		// コンスタントバッファ作成
 		bool sts = CreateConstantBuffer(
-			GetDX11Device(),				// デバイス
+			dev,				// デバイス
 			sizeof(ConstantBufferLight),		// サイズ
 			&m_pConstantBufferLight);			// コンスタントバッファ４
 		if (!sts) {
@@ -40,6 +45,15 @@ public:
 		Update();
 
 		return true;
+	}
+
+	// ワールド変換行列を指定して
+	void SetMtxWorld(const DirectX::XMFLOAT4X4& worldmtx) {
+
+		// ワールド変換行列の逆行列を求める
+		DX11MtxInverse(m_invworldmtx, worldmtx);
+
+		Update();
 	}
 
 	void Update() {
@@ -55,19 +69,41 @@ public:
 		cb.LightDirection.z = m_lightpos.z;
 		cb.LightDirection.w = m_lightpos.w;
 
-		cb.Ambient = m_ambient;
+		// 視点位置に逆行列を掛けて変換する
+		DirectX::XMFLOAT3 inveye;
+		DX11Vec3MulMatrix(inveye, m_eyepos, m_invworldmtx);
 
-		GetDX11DeviceContext()->UpdateSubresource(m_pConstantBufferLight, 
-			0, 
-			nullptr, 
-			&cb, 
+		// 光の方向に逆行列を掛けて変換する
+		DirectX::XMFLOAT3 invlight;
+		DirectX::XMFLOAT3 lightdir;
+		lightdir.x = m_lightpos.x;
+		lightdir.y = m_lightpos.y;
+		lightdir.z = m_lightpos.z;
+		DX11Vec3MulMatrix(invlight, lightdir, m_invworldmtx);
+
+		cb.invEyePos.x = inveye.x;
+		cb.invEyePos.y = inveye.y;
+		cb.invEyePos.z = inveye.z;
+		cb.invEyePos.w = 1.0;
+
+		cb.invLightDirection.x = invlight.x;
+		cb.invLightDirection.y = invlight.y;
+		cb.invLightDirection.z = invlight.z;
+		cb.invLightDirection.w = 0.0f;
+
+		ID3D11DeviceContext* devcontext;
+		devcontext = CDirectXGraphics::GetInstance()->GetImmediateContext();
+
+		devcontext->UpdateSubresource(m_pConstantBufferLight,
+			0,
+			nullptr,
+			&cb,
 			0, 0);
 
 		// コンスタントバッファ4をｂ3レジスタへセット（頂点シェーダー用）
-		GetDX11DeviceContext()->VSSetConstantBuffers(4, 1, &m_pConstantBufferLight);
+		devcontext->VSSetConstantBuffers(4, 1, &m_pConstantBufferLight);
 		// コンスタントバッファ4をｂ3レジスタへセット(ピクセルシェーダー用)
-		GetDX11DeviceContext()->PSSetConstantBuffers(4, 1, &m_pConstantBufferLight);
-
+		devcontext->PSSetConstantBuffers(4, 1, &m_pConstantBufferLight);
 	}
 
 	void Uninit() {
@@ -83,9 +119,5 @@ public:
 
 	void SetLightPos(DirectX::XMFLOAT4 lightpos) {
 		m_lightpos = lightpos;
-	}
-
-	void SetAmbient(DirectX::XMFLOAT4 amb) {
-		m_ambient = amb;
 	}
 };

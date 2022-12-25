@@ -344,10 +344,10 @@ void Application :: Update(uint64_t deltataime)
 	if(GAME_SPEED != 0)
 	timecount += io.DeltaTime;
 
-	if (timecount >= 8.3f / GAME_SPEED)
+	if (timecount >= (8.3f / GAME_SPEED) / 10)
 	{
 		timecount = 0;
-		GAME_TIME += 10;
+		GAME_TIME += 1;
 
 		//24ŽžŠÔŒo‰ß
 		if (GAME_TIME >= 1440)

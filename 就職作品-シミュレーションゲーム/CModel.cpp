@@ -209,6 +209,21 @@ void CModel::Draw(XMFLOAT4X4& mtxworld) {
 	m_assimpfile.Draw(devcontext, mtxworld);
 }
 
+void CModel::DrawShadow(XMFLOAT4X4& mtxworld, ID3D11InputLayout* layout_in, ID3D11VertexShader* vs_in, ID3D11PixelShader* ps_in)
+{
+	ID3D11DeviceContext* devcontext;			// デバイスコンテキスト
+	devcontext = CDirectXGraphics::GetInstance()->GetImmediateContext();
+	// 頂点フォーマットをセット
+	devcontext->IASetInputLayout(layout_in);
+	// 頂点シェーダーをセット
+	devcontext->VSSetShader(vs_in, nullptr, 0);
+	// ピクセルシェーダーをセット(セレクト状態に応じる)
+	devcontext->PSSetShader(ps_in, nullptr, 0);
+
+	// 描画
+	m_assimpfile.Draw(devcontext, mtxworld);
+}
+
 void CModel::ChangeColor(XMFLOAT4 color)
 {	
 	//頂点カラーの変更

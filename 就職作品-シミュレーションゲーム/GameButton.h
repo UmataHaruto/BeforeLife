@@ -42,7 +42,7 @@ public:
 
 		BUILDBUTTON_MAX,
 		BUILDBUTTON_NONE = -1,
- 
+
 
 	};
 
@@ -85,6 +85,15 @@ public:
 
 		ROADBUTTON_MAX,
 		ROADBUTTON_NONE = -1,
+	};
+
+	struct ShadowParameter
+	{
+		float   LightPos[3];
+		float	nearclip;
+		float	farclip;
+		float	Aspect;
+		float	Fov;
 	};
 	//コンストラクタ
 	GameButton();
@@ -129,19 +138,29 @@ public:
 		return m_debug;
 	}
 
+    ID3D11Buffer* GetHairConstantBuffer()
+	{
+		return cb_HairColor;
+	}
+
+	ShadowParameter GetShadowParameter()
+	{
+		return m_shadow_parameter;
+	}
+
 	Resource* GetModelPreview()
 	{
 		return modelpreview.get();
 	}
 
-     void SetMouseWorld(XMFLOAT3 pos);
+	void SetMouseWorld(XMFLOAT3 pos);
 
 private:
 	ImGuiIO* m_io;
 	bool* m_windowActivate;
 	bool modelpreviewflg = false;
 	ImGuiWindowFlags m_window_flags = 0;
-	
+
 	//配置プレビュー表示
 	std::unique_ptr<Resource> modelpreview;
 
@@ -172,6 +191,11 @@ private:
 
 	//住人リスト用テクスチャ
 	ID3D11ShaderResourceView* m_party_list_texture[(int)PartyListType::LIST_MAX];
+
+	//環境光バッファ
+	ID3D11Buffer* cb_Ambient;
+	//髪色バッファ
+	ID3D11Buffer* cb_HairColor;
 
 	GameButtonType m_Game_HoverButton;
 	SelectButtonType m_Select_HoverButton;
@@ -222,6 +246,8 @@ private:
 	ImVec4 m_bg_col;             // Black background
 	ImVec4* m_text_color;
 	ImGuiStyle* m_style;
+
+	ShadowParameter m_shadow_parameter;
 
 	//フォント
 	ImFont* font_medieval;

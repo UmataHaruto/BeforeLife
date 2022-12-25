@@ -46,7 +46,7 @@ void Stage::Draw()
 			for (int x = 0; x < MAP_WIDTH; x++) {
 				XMFLOAT4X4 mtxtrans;
 				XMFLOAT4X4 mtxrottrans;
-				XMFLOAT3 trans = { (y * 12.5f),(z * -12.5f),(x * -12.5f) };
+				XMFLOAT3 trans = { (y * 12.5f) - 700,(z * -12.5f),(x * -12.5f) + 700 };
 
 				DX11MtxTranslation(trans, mtxtrans);
 				//ÉÇÉfÉãï`âÊ
@@ -61,6 +61,62 @@ void Stage::Draw()
 				case BLOCKTYPE::GRASS:
 					if(IsInFrustum(Field[z][x][y].GetPos(),ans))
 						Field[z][x][y].Draw();
+					break;
+				}
+
+			}
+		}
+	}
+}
+
+void Stage::DrawShadow(ID3D11InputLayout* layout_in, ID3D11VertexShader* vs_in, ID3D11PixelShader* ps_in)
+{
+	XMVECTOR Eye = XMVectorSet(
+		CCamera::GetInstance()->GetEye().x,
+		CCamera::GetInstance()->GetEye().y,
+		CCamera::GetInstance()->GetEye().z,
+		0.0f);
+
+	XMVECTOR At = XMVectorSet(
+		CCamera::GetInstance()->GetLookat().x,
+		CCamera::GetInstance()->GetLookat().y,
+		CCamera::GetInstance()->GetLookat().z,
+		0.0f);
+
+	XMVECTOR Up = XMVectorSet(
+		CCamera::GetInstance()->GetUp().x,
+		CCamera::GetInstance()->GetUp().y,
+		CCamera::GetInstance()->GetUp().z,
+		0.0f);
+
+	XMFLOAT4X4 pro = CCamera::GetInstance()->GetProjectionMatrix();
+	XMMATRIX projection = XMLoadFloat4x4(&pro);
+	XMMATRIX View = XMMatrixLookAtLH(Eye, At, Up);
+	View = XMMatrixMultiply(View, projection);
+
+	XMFLOAT4X4 ans;
+	XMStoreFloat4x4(&ans, View);
+	//ÉXÉeÅ[ÉWÇÃï`âÊ
+	for (int z = 0; z < MAP_DEPTH; z++) {
+		for (int y = 0; y < MAP_HEIGHT; y++) {
+			for (int x = 0; x < MAP_WIDTH; x++) {
+				XMFLOAT4X4 mtxtrans;
+				XMFLOAT4X4 mtxrottrans;
+				XMFLOAT3 trans = { (y * 12.5f) - 700,(z * -12.5f),(x * -12.5f) + 700 };
+
+				DX11MtxTranslation(trans, mtxtrans);
+				//ÉÇÉfÉãï`âÊ
+				//âÊñ ì‡Ç…Ç†ÇÈÇ‡ÇÃÇµÇ©ï`âÊÇµÇ»Ç¢
+				Field[z][x][y].SetPos(trans);
+				switch (Field[z][x][y].GetBlockId())
+				{
+				case BLOCKTYPE::EMPTY:
+
+					break;
+
+				case BLOCKTYPE::GRASS:
+					if (IsInFrustum(Field[z][x][y].GetPos(), ans))
+						Field[z][x][y].DrawShadow(layout_in, vs_in, ps_in);
 					break;
 				}
 
@@ -121,8 +177,7 @@ void Stage::RoadStageData()
 	for (int z = 0; z < MAP_DEPTH; z++) {
 		for (int y = 0; y < MAP_HEIGHT; y++) {
 			for (int x = 0; x < MAP_WIDTH; x++) {
-\
-				XMFLOAT3 trans = { (y * 12.5f),(z * -12.5f),(x * -12.5f) };
+				XMFLOAT3 trans = { (y * 12.5f) - 700,(z * -12.5f),(x * -12.5f) + 700 };
 
 				//ÉÇÉfÉãï`âÊ
 				//âÊñ ì‡Ç…Ç†ÇÈÇ‡ÇÃÇµÇ©ï`âÊÇµÇ»Ç¢

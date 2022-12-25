@@ -138,7 +138,7 @@ public:
 
 	//描画
 	void Draw();
-
+	void DrawShadow(ID3D11InputLayout* layout_in, ID3D11VertexShader* vs_in, ID3D11PixelShader* ps_in);
 	void DrawWithAxis();
 
 	//更新
@@ -157,6 +157,12 @@ public:
 	void SetMovePoint(XMFLOAT3 pos);
 	//カメラモードを取得
 	CameraMode GetCameraMode();
+
+	//髪色を設定
+	void SetHairColor(XMFLOAT4 color)
+	{
+		m_haircolor = color;
+	}
 
 	//輸送アイテムをセット
 	void SetCarryItem(ItemType tag,int num);
@@ -299,7 +305,7 @@ private:
 	float m_hp;           //ヒットポイント
 	float m_stamina_max;  //最大スタミナ
 	float m_stamina;      //スタミナ
-
+	XMFLOAT4 m_haircolor; //髪色
 
 
 	//運搬アイテム

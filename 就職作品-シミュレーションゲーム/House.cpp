@@ -34,6 +34,12 @@ void House::Draw()
 	}
 }
 
+void House::DrawShadow(ID3D11InputLayout* layout_in, ID3D11VertexShader* vs_in, ID3D11PixelShader* ps_in)
+{
+	// ƒ‚ƒfƒ‹•`‰æ
+	m_model->DrawShadow(m_mtx, layout_in, vs_in, ps_in);
+}
+
 void House::Update()
 {
 	//ˆÊ’u‚ðGameObject‚É”½‰f

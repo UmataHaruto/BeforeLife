@@ -42,6 +42,16 @@ void GameButton::Init()
 	resource->GetModel()->ChangeSelectType(SELECT_SHADER_TYPE::SELECT_SHADER_TYPE_CREATE);
 	modelpreview = std::move(resource);
 
+	m_shadow_parameter.LightPos[0] = -300;
+	m_shadow_parameter.LightPos[1] = 900;
+	m_shadow_parameter.LightPos[2] = 300;
+
+
+	m_shadow_parameter.Aspect = 10.0f;
+	m_shadow_parameter.farclip = 20000;
+	m_shadow_parameter.nearclip = 10;
+	m_shadow_parameter.Fov = XM_PI / 3;
+
 	m_Game_HoverButton = GAMEBUTTON_NONE;
 
 	m_io = &ImGui::GetIO();
@@ -121,6 +131,28 @@ void GameButton::Init()
 	CreatetSRVfromFile("assets/sprite/UI/PartyList/NameBar.png", device, device11Context, &m_party_list_texture[(int)PartyListType::BAR_NAME]);
 	CreatetSRVfromFile("assets/sprite/UI/PartyList/Bar_Stamina.png", device, device11Context, &m_party_list_texture[(int)PartyListType::BAR_STAMINA]);
 	CreatetSRVfromFile("assets/sprite/UI/PartyList/Emote.png", device, device11Context, &m_party_list_texture[(int)PartyListType::ICON_EMOTE]);
+
+	//環境光バッファ
+	ID3D11Device* dev;
+	dev = CDirectXGraphics::GetInstance()->GetDXDevice();
+
+	// コンスタントバッファ作成
+	bool sts = CreateConstantBuffer(
+		dev,				// デバイス
+		sizeof(XMFLOAT4),		// サイズ
+		&cb_Ambient);			// コンスタントバッファ7
+	if (!sts) {
+		MessageBox(NULL, "CreateBuffer(constant buffer Light) error", "Error", MB_OK);
+	}
+
+	// コンスタントバッファ作成
+	sts = CreateConstantBuffer(
+		dev,				// デバイス
+		sizeof(XMFLOAT4),		// サイズ
+		&cb_HairColor);			// コンスタントバッファ8
+	if (!sts) {
+		MessageBox(NULL, "CreateBuffer(constant buffer Light) error", "Error", MB_OK);
+	}
 }
 
 void GameButton::Update()
@@ -270,9 +302,10 @@ void GameButton::Draw()
 			ImGuiColorEditFlags misc_flags = (hdr ? ImGuiColorEditFlags_HDR : 0) | (drag_and_drop ? 0 : ImGuiColorEditFlags_NoDragDrop) | (alpha_half_preview ? ImGuiColorEditFlags_AlphaPreviewHalf : (alpha_preview ? ImGuiColorEditFlags_AlphaPreview : 0)) | (options_menu ? 0 : ImGuiColorEditFlags_NoOptions);
 			ImGui::ColorEdit4("Hair Color", (float*)&color, ImGuiColorEditFlags_DisplayRGB | misc_flags);
 
+			XMFLOAT4 xm_color = XMFLOAT4(color.x,color.y,color.z,color.w);
+
 			//髪色の変更
-			//VillagerMgr::GetInstance().m_villager[edit_select]->GetModel()->ChangeColor(XMFLOAT4(color.x, color.y, color.z, color.w));
-			VillagerMgr::GetInstance().m_villager[edit_select]->GetModel()->ChangeColor(XMFLOAT4(1, 1, 0, 1));
+			VillagerMgr::GetInstance().m_villager[edit_select]->SetHairColor(xm_color);
 
 			ImGui::EndMenu();
 		}
@@ -385,6 +418,47 @@ void GameButton::Draw()
 			{
 				SoundMgr::GetInstance().XA_StopAll();
 			}
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu(u8"ライティング"))
+		{
+			ImGui::SliderFloat3(u8"ライト座標",m_shadow_parameter.LightPos, 1, 3000);
+			ImGui::SliderFloat(u8"アスペクト比", &m_shadow_parameter.Aspect, 1, 1000);
+			ImGui::SliderFloat(u8"ニアクリップ", &m_shadow_parameter.nearclip, 1, 1000);
+			ImGui::SliderFloat(u8"ファークリップ", &m_shadow_parameter.farclip, 1, 20000);
+			ImGui::SliderFloat(u8"FOV", &m_shadow_parameter.Fov, 1, 300);
+
+			static ImVec4 color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 200.0f / 255.0f);
+
+			static bool alpha_preview = true;
+			static bool alpha_half_preview = true;
+			static bool drag_and_drop = true;
+			static bool options_menu = true;
+			static bool hdr = false;
+
+			ImGuiColorEditFlags misc_flags = (hdr ? ImGuiColorEditFlags_HDR : 0) | (drag_and_drop ? 0 : ImGuiColorEditFlags_NoDragDrop) | (alpha_half_preview ? ImGuiColorEditFlags_AlphaPreviewHalf : (alpha_preview ? ImGuiColorEditFlags_AlphaPreview : 0)) | (options_menu ? 0 : ImGuiColorEditFlags_NoOptions);
+			ImGui::ColorEdit4(u8"環境光Color", (float*)&color, ImGuiColorEditFlags_DisplayRGB | misc_flags);
+
+			XMFLOAT4 cb;
+			cb.x = color.x;
+			cb.y = color.y;
+			cb.z = color.z;
+			cb.w = color.w;
+
+			ID3D11DeviceContext* devcontext;
+			devcontext = CDirectXGraphics::GetInstance()->GetImmediateContext();
+
+			devcontext->UpdateSubresource(cb_Ambient,
+				0,
+				nullptr,
+				&cb,
+				0, 0);
+
+			// コンスタントバッファ4をｂ3レジスタへセット（頂点シェーダー用）
+			devcontext->VSSetConstantBuffers(7, 1, &cb_Ambient);
+			// コンスタントバッファ4をｂ3レジスタへセット(ピクセルシェーダー用)
+			devcontext->PSSetConstantBuffers(7, 1, &cb_Ambient);
+
 			ImGui::EndMenu();
 		}
 

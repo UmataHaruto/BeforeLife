@@ -24,6 +24,7 @@ public:
 	void Init();
 	void Update();
 	void Draw();
+	void DrawShadow(ID3D11InputLayout* layout_in, ID3D11VertexShader* vs_in, ID3D11PixelShader* ps_in);
 	void Uninit();
 
 	void CreateHouse(House::Data data, MODELID model);

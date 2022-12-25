@@ -28,6 +28,8 @@ public:
 	bool Init(Vector3 pos,BLOCKTYPE id);
 	//描画処理
 	void Draw();
+	void DrawShadow(ID3D11InputLayout* layout_in, ID3D11VertexShader* vs_in, ID3D11PixelShader* ps_in);
+
 	//モデルセット
 	void SetModel(CModel* pmodel)
 	{

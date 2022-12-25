@@ -30,7 +30,7 @@ public:
 		bool sts = CreatePixelShader(device,
 			filename.c_str(),
 			"main",
-			"ps_5_0",
+			"ps_4_0",
 			&psh);
 
 		if (!sts) {
@@ -65,7 +65,7 @@ public:
 		HRESULT hr = CompileShader(
 			filename.c_str(),
 			"main",
-			"vs_5_0",
+			"vs_4_0",
 			&ShaderObject,
 			ShaderObjectSize,
 			&pBlob);

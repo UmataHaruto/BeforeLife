@@ -19,6 +19,7 @@ public:
 	void Update();
 	//描画
 	void Draw();
+	void DrawShadow(ID3D11InputLayout* layout_in, ID3D11VertexShader* vs_in, ID3D11PixelShader* ps_in);
 
 	//フィールドをセット
 	void SetField(int x, int y, int z,Block data);

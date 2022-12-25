@@ -33,6 +33,13 @@ bool Player::Init(Data data) {
 	//model = new CModel();
 	//*model = *ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::HAIR_00)].modelname);
 	m_hair = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::HAIR_00)].modelname);
+	//髪色
+	m_haircolor.x = (float)(rand() % 255) / 255;
+	m_haircolor.y = (float)(rand() % 255) / 255;
+	m_haircolor.z = (float)(rand() % 255) / 255;
+
+
+
 	//必要になったらポインタを付与(nullは素手)
 	m_tools = nullptr;
 	XMMATRIX scale = XMMatrixScaling(0.03, 0.03, 0.03);
@@ -93,7 +100,23 @@ bool Player::Init(Data data) {
 }
 
 void Player::Draw() {
+	//髪色を適用
 
+	ID3D11DeviceContext* devcontext;
+	ID3D11Buffer* cb = GameButton::GetInstance().GetHairConstantBuffer();
+	devcontext = CDirectXGraphics::GetInstance()->GetImmediateContext();
+
+	devcontext->UpdateSubresource(cb,
+		0,
+		nullptr,
+		&m_haircolor,
+		0, 0);
+
+	// コンスタントバッファ4をｂ8レジスタへセット（頂点シェーダー用）
+	devcontext->VSSetConstantBuffers(8, 1, &cb);
+	// コンスタントバッファ4をｂ8レジスタへセット(ピクセルシェーダー用)
+	devcontext->PSSetConstantBuffers(8, 1, &cb);
+	
 	// モデル描画
 	m_model->Draw(m_mtxParentChild[0]);
 	m_hair->Draw(m_mtxParentChild[1]);
@@ -135,6 +158,17 @@ void Player::Draw() {
 		XMStoreFloat4x4(&mtx, PositionMtx);
 
 		ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::ROUTE_PREVIEW)].modelname)->Draw(mtx);
+	}
+}
+
+void Player::DrawShadow(ID3D11InputLayout* layout_in, ID3D11VertexShader* vs_in, ID3D11PixelShader* ps_in)
+{
+	// モデル描画
+	m_model->DrawShadow(m_mtxParentChild[0],layout_in, vs_in, ps_in);
+	m_hair->DrawShadow(m_mtxParentChild[1],layout_in, vs_in, ps_in);
+	//素手で無い時
+	if (m_tools != nullptr) {
+		m_tools->DrawShadow(m_mtxParentChild[2],layout_in, vs_in, ps_in);
 	}
 }
 

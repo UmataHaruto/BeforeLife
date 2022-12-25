@@ -634,5 +634,23 @@
     <FxCompile Include="shader\vs.fx">
       <Filter>ソース ファイル\shader\hlsl</Filter>
     </FxCompile>
+    <FxCompile Include="shader\ps_shadowmap.fx">
+      <Filter>ソース ファイル\shader\hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\shadowmapps.fx">
+      <Filter>ソース ファイル\shader\hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\shadowmapvs.fx">
+      <Filter>ソース ファイル\shader\hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\vs_shadowmap.fx">
+      <Filter>ソース ファイル\shader\hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\ps_Sea.fx">
+      <Filter>ソース ファイル\shader\hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\vs_Sea.fx">
+      <Filter>ソース ファイル\shader\hlsl</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

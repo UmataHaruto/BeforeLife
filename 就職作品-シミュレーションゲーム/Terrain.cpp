@@ -7,9 +7,9 @@ bool Terrain::Init()
 	DX11MtxIdentity(m_mtx);
 	m_model = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::TERRAIN)].modelname);
 
-	m_mtx._41 = 400;
+	m_mtx._41 = -300;
 	m_mtx._42 = -554;
-	m_mtx._43 = -1050;
+	m_mtx._43 = -350;
 
 
 	return true;

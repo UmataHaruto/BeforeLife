@@ -28,6 +28,11 @@ void Road::Draw()
 	}
 }
 
+void Road::DrawShadow(ID3D11InputLayout* layout_in, ID3D11VertexShader* vs_in, ID3D11PixelShader* ps_in)
+{
+	m_model->DrawShadow(m_mtx, layout_in, vs_in, ps_in);
+}
+
 void Road::Update()
 {
 	//ˆÊ’u‚ðGameObject‚É”½‰f

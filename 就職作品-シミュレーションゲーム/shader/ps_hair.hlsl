@@ -10,9 +10,10 @@ float4 main(VS_OUTPUT input) : SV_Target
 {
 	float4 col;
 	float4 texcol = g_Tex.Sample(g_SamplerLinear, input.Tex);
-	col.r = input.Color.r;
-	col.g = input.Color.g;
-	col.b = input.Color.b;
+	col = texcol;
+	col.r *= HairColor.r;
+	col.g *= HairColor.g;
+	col.b *= HairColor.b;
 	col.a = 1.0f;
 	return col;
 }

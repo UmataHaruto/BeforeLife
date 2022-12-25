@@ -72,6 +72,56 @@ void BuildingMgr::Draw()
 	}
 }
 
+void BuildingMgr::DrawShadow(ID3D11InputLayout* layout_in, ID3D11VertexShader* vs_in, ID3D11PixelShader* ps_in)
+{
+	//ƒtƒ‰ƒXƒ^ƒ€“à‚É‘¶Ý‚·‚é‚©
+	XMVECTOR Eye = XMVectorSet(
+		CCamera::GetInstance()->GetEye().x,
+		CCamera::GetInstance()->GetEye().y,
+		CCamera::GetInstance()->GetEye().z,
+		0.0f);
+
+	XMVECTOR At = XMVectorSet(
+		CCamera::GetInstance()->GetLookat().x,
+		CCamera::GetInstance()->GetLookat().y,
+		CCamera::GetInstance()->GetLookat().z,
+		0.0f);
+
+	XMVECTOR Up = XMVectorSet(
+		CCamera::GetInstance()->GetUp().x,
+		CCamera::GetInstance()->GetUp().y,
+		CCamera::GetInstance()->GetUp().z,
+		0.0f);
+
+	XMFLOAT4X4 pro = CCamera::GetInstance()->GetProjectionMatrix();
+	XMMATRIX projection = XMLoadFloat4x4(&pro);
+	XMMATRIX View = XMMatrixLookAtLH(Eye, At, Up);
+	View = XMMatrixMultiply(View, projection);
+
+	XMFLOAT4X4 ans;
+	XMStoreFloat4x4(&ans, View);
+
+	for (int i = 0; i < m_houses.size(); i++)
+	{
+		if (IsInFrustum(m_houses[i]->GetPos(), ans)) {
+			m_houses[i]->DrawShadow(layout_in, vs_in, ps_in);
+		}
+	}
+
+	for (int i = 0; i < m_soukos.size(); i++)
+	{
+		if (IsInFrustum(m_soukos[i]->GetPos(), ans)) {
+			m_soukos[i]->DrawShadow(layout_in, vs_in, ps_in);
+		}
+	}
+	for (int i = 0; i < m_roads.size(); i++)
+	{
+		if (IsInFrustum(m_roads[i]->GetPos(), ans)) {
+			m_roads[i]->DrawShadow(layout_in, vs_in, ps_in);
+		}
+	}
+}
+
 void BuildingMgr::Uninit()
 {
 	for (int i = 0; i < m_houses.size(); i++)

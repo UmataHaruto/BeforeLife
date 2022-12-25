@@ -2,6 +2,7 @@
 #include	<d3d11.h>
 #include	<DirectXMath.h>
 #include	"CDirectxGraphics.h"
+#include    "CLight.h"
 
 CDirectXGraphics* GetDX11Obj();
 ID3D11Device* GetDX11Device();
@@ -18,6 +19,7 @@ void DX11AfterRender();
 
 int DX11GetScreenWidth();
 int DX11GetScreenHeight();
+CLight* GetDirectionallight();
 
 void TurnOffZbuffer();
 void TurnOnZbuffer();
