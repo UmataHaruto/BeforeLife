@@ -32,6 +32,7 @@ enum class MODELID {
 	CREATE_GOLD,
 	ROUTE_PREVIEW,
 	ROAD_DIRT,
+	SEA,
 };
 
 //モデルデータリスト
@@ -96,8 +97,9 @@ public:
 	{(const MODELID)MODELID::CREATE_COAL,"assets/Modeldata/Create/CreateCoalOre.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Create/"},
 	{(const MODELID)MODELID::CREATE_IRON,"assets/Modeldata/Create/CreateIronOre.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Create/"},
 	{(const MODELID)MODELID::CREATE_GOLD,"assets/Modeldata/Create/CreateGoldOre.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Create/"},
-	{(const MODELID)MODELID::ROUTE_PREVIEW,"assets/Modeldata/RoutePreview.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/"},
+	{(const MODELID)MODELID::ROUTE_PREVIEW,"assets/Modeldata/RoutePreview.obj","shader/vs.fx","shader/ps_shadowmap.fx","assets/Modeldata/"},
 	{(const MODELID)MODELID::ROAD_DIRT,"assets/Modeldata/Block/Road_Dirt.obj","shader/vs_shadowmap.fx","shader/ps_Sea.fx","assets/Modeldata/Block/"},
+	{(const MODELID)MODELID::SEA,"assets/Modeldata/Sea/Sea.obj","shader/vs_shadowmap.fx","shader/ps_Sea.fx","assets/Modeldata/Sea/"},
 
 	};
 

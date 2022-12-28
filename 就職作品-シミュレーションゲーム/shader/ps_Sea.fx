@@ -173,7 +173,7 @@ float4 main(VS_OUTPUT input) : SV_Target
     float2 resolution;
    
     resolution.x = 1000;
-    resolution.y = 2000;
+    resolution.y = 1000;
     float EPSILON_NRM;
 
     EPSILON_NRM = 0.1 / resolution.x;

@@ -5,7 +5,7 @@ bool Sea::Init()
 {
 	//çsóÒèâä˙âª
 	DX11MtxIdentity(m_mtx);
-	m_model = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::ROAD_DIRT)].modelname);
+	m_model = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::SEA)].modelname);
 
 	m_mtx._41 = -300;
 	m_mtx._42 = -604;
