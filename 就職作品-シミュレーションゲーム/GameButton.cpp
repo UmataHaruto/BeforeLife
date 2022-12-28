@@ -142,7 +142,15 @@ void GameButton::Init()
 		sizeof(XMFLOAT4),		// サイズ
 		&cb_Ambient);			// コンスタントバッファ7
 	if (!sts) {
-		MessageBox(NULL, "CreateBuffer(constant buffer Light) error", "Error", MB_OK);
+		MessageBox(NULL, "CreateBuffer(constant buffer Ambient) error", "Error", MB_OK);
+	}
+	// コンスタントバッファ作成
+	sts = CreateConstantBuffer(
+		dev,				// デバイス
+		sizeof(XMFLOAT4),		// サイズ
+		&cb_time);			// コンスタントバッファ9
+	if (!sts) {
+		MessageBox(NULL, "CreateBuffer(constant buffer Time) error", "Error", MB_OK);
 	}
 
 	// コンスタントバッファ作成
@@ -151,12 +159,14 @@ void GameButton::Init()
 		sizeof(XMFLOAT4),		// サイズ
 		&cb_HairColor);			// コンスタントバッファ8
 	if (!sts) {
-		MessageBox(NULL, "CreateBuffer(constant buffer Light) error", "Error", MB_OK);
+		MessageBox(NULL, "CreateBuffer(constant bufferHairColor) error", "Error", MB_OK);
 	}
+
 }
 
 void GameButton::Update()
 {
+	ImGuiIO& io = ImGui::GetIO();
 	modelpreview->SetPos(m_mouseworldpos);
 	modelpreview->Update();
 
@@ -184,6 +194,23 @@ void GameButton::Update()
 	{
 		Application::Instance()->GAME_SPEED = 5;
 	}
+	//時間経過バッファを更新
+	static float time = 0;
+	time += io.DeltaTime;
+
+	ID3D11DeviceContext* devcontext;
+	devcontext = CDirectXGraphics::GetInstance()->GetImmediateContext();
+
+	devcontext->UpdateSubresource(cb_time,
+		0,
+		nullptr,
+		&time,
+		0, 0);
+
+	// コンスタントバッファ4をｂ3レジスタへセット（頂点シェーダー用）
+	devcontext->VSSetConstantBuffers(9, 1, &cb_time);
+	// コンスタントバッファ4をｂ3レジスタへセット(ピクセルシェーダー用)
+	devcontext->PSSetConstantBuffers(9, 1, &cb_time);
 }
 
 void GameButton::Draw()

@@ -294,7 +294,7 @@
     <ClCompile Include="Box.cpp">
       <Filter>ソース ファイル\Collider</Filter>
     </ClCompile>
-    <ClCompile Include="Terrain.cpp">
+    <ClCompile Include="Sea.cpp">
       <Filter>ソース ファイル\game\gameobject\Terrain</Filter>
     </ClCompile>
     <ClCompile Include="StageHitCollider.cpp">
@@ -524,7 +524,7 @@
     <ClInclude Include="Box.h">
       <Filter>ソース ファイル\Collider</Filter>
     </ClInclude>
-    <ClInclude Include="Terrain.h">
+    <ClInclude Include="Sea.h">
       <Filter>ソース ファイル\game\gameobject\Terrain</Filter>
     </ClInclude>
     <ClInclude Include="StageHitCollider.h">
@@ -646,10 +646,10 @@
     <FxCompile Include="shader\vs_shadowmap.fx">
       <Filter>ソース ファイル\shader\hlsl</Filter>
     </FxCompile>
-    <FxCompile Include="shader\ps_Sea.fx">
+    <FxCompile Include="shader\vs_Sea.fx">
       <Filter>ソース ファイル\shader\hlsl</Filter>
     </FxCompile>
-    <FxCompile Include="shader\vs_Sea.fx">
+    <FxCompile Include="shader\ps_Sea.fx">
       <Filter>ソース ファイル\shader\hlsl</Filter>
     </FxCompile>
   </ItemGroup>

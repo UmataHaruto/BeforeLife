@@ -39,18 +39,20 @@ VS_OUTPUT main(
 
 	output.Normal = N;
 
-	float4 L = LightDirection;
-	L = normalize(L);
-	L.w = 0.0f;
-
-	float d;
-	d = max(0.0f, dot(L, N));	// ランバートの余弦則で陰影を付ける
-
-	float4 diffuse;
-	diffuse = d;
-
 	output.Tex = Tex;
 
-	output.Color = diffuse;
+	output.Color = 0;
+	output.Color2 = 0;
+
+	// 光源からの距離を計算
+	float4 lengthfromlight;
+	lengthfromlight = mul(Pos, World);
+	lengthfromlight = mul(lengthfromlight, ViewFromLight);
+	lengthfromlight = mul(lengthfromlight, ProjectionFromLight);
+	output.LengthFromLight = lengthfromlight;
+
+	// シャドウマップを参照するためのＵＶ座標作成
+	output.ShadowTex = mul(lengthfromlight, ScreenToUVCoord);
+
 	return output;
 }

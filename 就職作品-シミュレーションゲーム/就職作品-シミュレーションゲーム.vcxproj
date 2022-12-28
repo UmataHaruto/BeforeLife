@@ -198,7 +198,7 @@
     <ClCompile Include="Sprite2DMgr.cpp" />
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="StageHitCollider.cpp" />
-    <ClCompile Include="Terrain.cpp" />
+    <ClCompile Include="Sea.cpp" />
     <ClCompile Include="Title.cpp" />
     <ClCompile Include="utftosjisconv.cpp" />
     <ClCompile Include="VillagerMgr.cpp" />
@@ -276,7 +276,7 @@
     <ClInclude Include="Sprite2DMgr.h" />
     <ClInclude Include="Stage.h" />
     <ClInclude Include="StageHitCollider.h" />
-    <ClInclude Include="Terrain.h" />
+    <ClInclude Include="Sea.h" />
     <ClInclude Include="Title.h" />
     <ClInclude Include="uncopyable.h" />
     <ClInclude Include="utftosjisconv.h" />

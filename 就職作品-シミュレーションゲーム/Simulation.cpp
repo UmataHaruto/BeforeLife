@@ -28,7 +28,7 @@
 #include "ResourceManager.h"
 #include "XAudio2.h"
 #include "StageHitCollider.h"
-#include "Terrain.h"
+#include "Sea.h"
 #include <thread>
 #include "BuildingMgr.h"
 #include "RouteSearch.h"
@@ -36,7 +36,7 @@
 #include "DX11util.h"
 
 Skydome g_skybox;       // スカイドーム
-Terrain g_terrain;    //地形(外側)
+Sea g_terrain;    //地形(外側)
 XMFLOAT4X4 FirstCameraPos;
 //環境光バッファ
 ID3D11Buffer* cb_Ambient;
@@ -275,8 +275,8 @@ void  SimulationInit() {
 	CCamera::GetInstance()->SetEye(VillagerMgr::GetInstance().m_villager[0]->GetPos());
 	CCamera::GetInstance()->CreateCameraMatrix();
 
-	//SetTime = 6:00
-	Application::GAME_TIME = 360;
+	//SetTime = 11:00
+	Application::GAME_TIME = 660;
 
 	Sprite2DMgr::GetInstance().CreateUI(UILIST::BLACKBACK_START, 1000, 530, 0, 11, 5.5, XMFLOAT4(1, 1, 1, 1));
 
@@ -415,7 +415,7 @@ void  SimulationUpdate() {
 	XMFLOAT3 Position = CCamera::GetInstance()->GetEye();
 	XMFLOAT4X4 CameraMtx = CCamera::GetInstance()->GetCameraMatrix();
 	XMFLOAT3 FocusPos = CCamera::GetInstance()->GetLookat();
-	float speed = 1;
+	float speed = 5;
 	float dot = 0;
 
 
@@ -463,6 +463,7 @@ void  SimulationUpdate() {
 		PositionMtx = XMLoadFloat4x4(&FirstCameraPos);
 		PositionMtx = XMMatrixMultiply(RotationMtx, PositionMtx);
 		XMStoreFloat4x4(&FirstCameraPos, PositionMtx);
+		CCamera::GetInstance()->SetEye(XMFLOAT3(FirstCameraPos._41, FirstCameraPos._42, FirstCameraPos._43));
 
 		CCamera::GetInstance()->TPSCamera(FirstCameraPos);
 		if (io.MouseWheel != 0)
@@ -533,7 +534,7 @@ void  SimulationDraw() {
 	//村人描画
 	VillagerMgr::GetInstance().Draw();
 
-	//g_skybox.Draw();
+	g_skybox.Draw();
 
 	g_terrain.Draw();
 

@@ -223,16 +223,3 @@ void CModel::DrawShadow(XMFLOAT4X4& mtxworld, ID3D11InputLayout* layout_in, ID3D
 	// 描画
 	m_assimpfile.Draw(devcontext, mtxworld);
 }
-
-void CModel::ChangeColor(XMFLOAT4 color)
-{	
-	//頂点カラーの変更
-	for (int i = 0; i < m_assimpfile.m_meshes.size(); i++)
-	{
-		for (int j = 0; j < m_assimpfile.m_meshes[i].m_vertices.size(); j++)
-		{
-			m_assimpfile.m_meshes[i].m_vertices[j].m_color = color;
-		}
-		m_assimpfile.m_meshes[i].updatevertexbuffer();
-	}
-}

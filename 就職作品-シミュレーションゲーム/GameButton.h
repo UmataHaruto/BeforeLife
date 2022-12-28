@@ -196,6 +196,8 @@ private:
 	ID3D11Buffer* cb_Ambient;
 	//髪色バッファ
 	ID3D11Buffer* cb_HairColor;
+	//経過時間バッファ
+	ID3D11Buffer* cb_time;
 
 	GameButtonType m_Game_HoverButton;
 	SelectButtonType m_Select_HoverButton;

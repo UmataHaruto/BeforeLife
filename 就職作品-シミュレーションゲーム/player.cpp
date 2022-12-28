@@ -30,8 +30,6 @@ bool Player::Init(Data data) {
 	m_obb.Init(m_model);
 	m_obb.CreateBox(250,1700,250,XMFLOAT3(0,0,0));
 	//髪モデル
-	//model = new CModel();
-	//*model = *ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::HAIR_00)].modelname);
 	m_hair = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::HAIR_00)].modelname);
 	//髪色
 	m_haircolor.x = (float)(rand() % 255) / 255;
@@ -230,12 +228,10 @@ void Player::Update() {
 	}
 	//ノーマルシェーダーに変更
 	m_model->ChangeSelectType(SELECT_SHADER_TYPE::SELECT_SHADER_TYPE_NONE);
-	m_hair->ChangeSelectType(SELECT_SHADER_TYPE::SELECT_SHADER_TYPE_NONE);
 	//選択判定
 	if (m_isselect)
 	{
 		m_model->ChangeSelectType(SELECT_SHADER_TYPE::SELECT_SHADER_TYPE_NORMAL);
-		m_hair->ChangeSelectType(SELECT_SHADER_TYPE::SELECT_SHADER_TYPE_NORMAL);
 	}
 	if (CheckMouseSelect(XMFLOAT3(m_mtx._41, m_mtx._42, m_mtx._43))) {
 		m_isselect = true;

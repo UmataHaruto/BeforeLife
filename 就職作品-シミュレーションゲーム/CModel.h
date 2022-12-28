@@ -45,7 +45,6 @@ public:
 		const XMFLOAT4X4& mtxworld);
 	void Draw(XMFLOAT4X4& mtxworld);
 	void DrawShadow(XMFLOAT4X4& mtxworld,ID3D11InputLayout* layout_in, ID3D11VertexShader* vs_in, ID3D11PixelShader* ps_in);
-	void ChangeColor(XMFLOAT4 color);
 	unsigned int GetAnimationNum() {	// アニメーション総数を取得
 
 		return m_animationcontainer[m_AnimFileIdx]->GetScene()->mNumAnimations;

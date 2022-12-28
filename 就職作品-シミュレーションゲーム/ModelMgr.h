@@ -23,7 +23,6 @@ enum class MODELID {
 	CONIFER00,
 	ORE_IRON,
 	SMALLHOUSE,
-	TERRAIN,
 	TERRAIN_COLLISION,
 	SMALLSOUKO,
 	CREATE_PLANE,
@@ -80,7 +79,7 @@ public:
 	ModelMgr& operator=(ModelMgr&&) = delete;
 
 	std::vector<ModelDataList> g_modellist = {
-	{MODELID::PLAYER,"assets/ModelData/male_adult/male_adult.fbx","shader/vsoneskin.fx","shader/ps.fx","assets/ModelData/male_adult/"},
+	{MODELID::PLAYER,"assets/ModelData/male_adult/male_adult.fbx","shader/vsoneskin.fx","shader/ps_shadowmap.fx","assets/ModelData/male_adult/"},
 	{(const MODELID)MODELID::HAIR_00,"assets/ModelData/male_adult/Hair/Hair_00.obj","shader/vs_hair.hlsl","shader/ps_hair.hlsl","assets/ModelData/male_adult/Hair/"},
 	{(const MODELID)MODELID::PICKAXE,"assets/ModelData/Tools/Pickaxe/Pickaxe.obj","shader/vs.fx","shader/ps.fx","assets/ModelData/Tools/Pickaxe/"},
 	{(const MODELID)MODELID::AXE,"assets/ModelData/Tools/Axe/Axe.obj","shader/vs.fx","shader/ps.fx","assets/ModelData/Tools/Axe/"},
@@ -90,8 +89,7 @@ public:
 	{(const MODELID)MODELID::CONIFER00,"assets/Modeldata/tree/conifer00/conifer01.fbx","shader/vsoneskin.fx","shader/ps.fx","assets/Modeldata/tree/conifer00/"},
 	{(const MODELID)MODELID::ORE_IRON,"assets/Modeldata/Ore/Normal/Ore_Normal.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Ore/Normal/"},
 	{(const MODELID)MODELID::SMALLHOUSE,"assets/Modeldata/House/House_Small.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/House/"},
-	{(const MODELID)MODELID::TERRAIN,"assets/Modeldata/terrain/terrain.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/terrain/"},
-	{(const MODELID)MODELID::TERRAIN,"assets/Modeldata/terrain/terrainColision.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/terrain/"},
+	{(const MODELID)MODELID::TERRAIN_COLLISION,"assets/Modeldata/terrain/terrainColision.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/terrain/"},
 	{(const MODELID)MODELID::SMALLSOUKO,"assets/Modeldata/Souko/Souko.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Souko/"},
 	{(const MODELID)MODELID::CREATE_WOOD,"assets/Modeldata/Create/CreatePlane.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Create/"},
 	{(const MODELID)MODELID::CREATE_WOOD,"assets/Modeldata/Create/CreateWood.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Create/"},
@@ -99,7 +97,7 @@ public:
 	{(const MODELID)MODELID::CREATE_IRON,"assets/Modeldata/Create/CreateIronOre.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Create/"},
 	{(const MODELID)MODELID::CREATE_GOLD,"assets/Modeldata/Create/CreateGoldOre.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Create/"},
 	{(const MODELID)MODELID::ROUTE_PREVIEW,"assets/Modeldata/RoutePreview.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/"},
-	{(const MODELID)MODELID::ROAD_DIRT,"assets/Modeldata/Block/Road_Dirt.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Block/"},
+	{(const MODELID)MODELID::ROAD_DIRT,"assets/Modeldata/Block/Road_Dirt.obj","shader/vs_shadowmap.fx","shader/ps_Sea.fx","assets/Modeldata/Block/"},
 
 	};
 

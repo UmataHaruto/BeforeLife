@@ -45,7 +45,7 @@ uint32_t			Application::SYSTEM_HEIGHT = 0;
 const float			Application::FPS = 60;
 
 float               Application::GAME_SPEED = 1.0f;
-int                 Application::GAME_TIME = 0;
+int                 Application::GAME_TIME = 240;
 
 
 //==============================================================================

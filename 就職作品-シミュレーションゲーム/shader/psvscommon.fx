@@ -56,6 +56,10 @@ cbuffer ConstantBufferHairColor : register(b8)
 {
 	float4 HairColor;
 }
+cbuffer ConstantBufferTime : register(b9)
+{
+	float TIME;
+}
 //--------------------------------------------------------------------------------------
 // \‘¢‘Ì’è‹`
 //--------------------------------------------------------------------------------------

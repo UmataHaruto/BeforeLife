@@ -3,7 +3,7 @@
 #include "CModel.h"
 
 
-class Terrain :public GameObject
+class Sea :public GameObject
 {
 private:
 	CModel* m_model;
