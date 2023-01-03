@@ -158,16 +158,15 @@ std::vector<XMFLOAT2> RouteSearch::SearchRoute(XMFLOAT3 start, XMFLOAT3 goal)
 				m_stagecollider[score_min_idx[0]][score_min_idx[1] - 1].SetParent(&m_stagecollider[score_min_idx[0]][score_min_idx[1]]);
 			}
 		}
-		//右を確認
-		if (score_min_idx[1] + 1 <= MAP_WIDTH)
+		//左上を確認
+		if (score_min_idx[1] - 1 >= 0 && score_min_idx[0] - 1 >= 0)
 		{
-			if (m_stagecollider[score_min_idx[0]][score_min_idx[1] + 1].GetStatus() != AStar::Status::CLOSE && m_stagecollider[score_min_idx[0]][score_min_idx[1] + 1].GetNumber() != 1)
+			if (m_stagecollider[score_min_idx[0] - 1][score_min_idx[1] - 1].GetStatus() != AStar::Status::CLOSE && m_stagecollider[score_min_idx[0] - 1][score_min_idx[1] - 1].GetNumber() != 1)
 			{
-				int score = fabs(goalpos.x - (score_min_idx[1] + 1)) + fabs(goalpos.y - score_min_idx[0]);
-				m_stagecollider[score_min_idx[0]][score_min_idx[1] + 1].SetScore(score);
-				m_stagecollider[score_min_idx[0]][score_min_idx[1] + 1].SetStatus(AStar::Status::OPEN);
-				m_stagecollider[score_min_idx[0]][score_min_idx[1] + 1].SetParent(&m_stagecollider[score_min_idx[0]][score_min_idx[1]]);
-
+				int score = fabs(goalpos.x - (score_min_idx[1] - 1)) + fabs(goalpos.y - (score_min_idx[0] - 1));
+				m_stagecollider[score_min_idx[0] - 1][score_min_idx[1] - 1].SetScore(score);
+				m_stagecollider[score_min_idx[0] - 1][score_min_idx[1] - 1].SetStatus(AStar::Status::OPEN);
+				m_stagecollider[score_min_idx[0] - 1][score_min_idx[1] - 1].SetParent(&m_stagecollider[score_min_idx[0]][score_min_idx[1]]);
 			}
 		}
 		//上を確認
@@ -182,6 +181,40 @@ std::vector<XMFLOAT2> RouteSearch::SearchRoute(XMFLOAT3 start, XMFLOAT3 goal)
 
 			}
 		}
+		//右上を確認
+		if (score_min_idx[1] + 1 <= MAP_WIDTH && score_min_idx[0] - 1 >= 0)
+		{
+			if (m_stagecollider[score_min_idx[0] - 1][score_min_idx[1] + 1].GetStatus() != AStar::Status::CLOSE && m_stagecollider[score_min_idx[0] - 1][score_min_idx[1] + 1].GetNumber() != 1)
+			{
+				int score = fabs(goalpos.x - (score_min_idx[1] + 1)) + fabs(goalpos.y - (score_min_idx[0] - 1));
+				m_stagecollider[score_min_idx[0] - 1][score_min_idx[1] + 1].SetScore(score);
+				m_stagecollider[score_min_idx[0] - 1][score_min_idx[1] + 1].SetStatus(AStar::Status::OPEN);
+				m_stagecollider[score_min_idx[0] - 1][score_min_idx[1] + 1].SetParent(&m_stagecollider[score_min_idx[0]][score_min_idx[1]]);
+			}
+		}
+		//右を確認
+		if (score_min_idx[1] + 1 <= MAP_WIDTH)
+		{
+			if (m_stagecollider[score_min_idx[0]][score_min_idx[1] + 1].GetStatus() != AStar::Status::CLOSE && m_stagecollider[score_min_idx[0]][score_min_idx[1] + 1].GetNumber() != 1)
+			{
+				int score = fabs(goalpos.x - (score_min_idx[1] + 1)) + fabs(goalpos.y - score_min_idx[0]);
+				m_stagecollider[score_min_idx[0]][score_min_idx[1] + 1].SetScore(score);
+				m_stagecollider[score_min_idx[0]][score_min_idx[1] + 1].SetStatus(AStar::Status::OPEN);
+				m_stagecollider[score_min_idx[0]][score_min_idx[1] + 1].SetParent(&m_stagecollider[score_min_idx[0]][score_min_idx[1]]);
+
+			}
+		}
+		//右下を確認
+		if (score_min_idx[1] + 1 <= MAP_WIDTH && score_min_idx[0] + 1 <= MAP_HEIGHT)
+		{
+			if (m_stagecollider[score_min_idx[0] + 1][score_min_idx[1] + 1].GetStatus() != AStar::Status::CLOSE && m_stagecollider[score_min_idx[0] + 1][score_min_idx[1] + 1].GetNumber() != 1)
+			{
+				int score = fabs(goalpos.x - (score_min_idx[1] + 1)) + fabs(goalpos.y - (score_min_idx[0] + 1));
+				m_stagecollider[score_min_idx[0] + 1][score_min_idx[1] + 1].SetScore(score);
+				m_stagecollider[score_min_idx[0] + 1][score_min_idx[1] + 1].SetStatus(AStar::Status::OPEN);
+				m_stagecollider[score_min_idx[0] + 1][score_min_idx[1] + 1].SetParent(&m_stagecollider[score_min_idx[0]][score_min_idx[1]]);
+			}
+		}
 		//下を確認
 		if (score_min_idx[0] + 1 <= MAP_HEIGHT)
 		{
@@ -192,6 +225,17 @@ std::vector<XMFLOAT2> RouteSearch::SearchRoute(XMFLOAT3 start, XMFLOAT3 goal)
 				m_stagecollider[score_min_idx[0] + 1][score_min_idx[1]].SetStatus(AStar::Status::OPEN);
 				m_stagecollider[score_min_idx[0] + 1][score_min_idx[1]].SetParent(&m_stagecollider[score_min_idx[0]][score_min_idx[1]]);
 
+			}
+		}
+		//左下を確認
+		if (score_min_idx[0] + 1 <= MAP_HEIGHT && score_min_idx[1] - 1 >= 0)
+		{
+			if (m_stagecollider[score_min_idx[0] + 1][score_min_idx[1] - 1].GetStatus() != AStar::Status::CLOSE && m_stagecollider[score_min_idx[0] + 1][score_min_idx[1] - 1].GetNumber() != 1)
+			{
+				int score = fabs(goalpos.x - (score_min_idx[1] - 1)) + fabs(goalpos.y - (score_min_idx[0] + 1));
+				m_stagecollider[score_min_idx[0] + 1][score_min_idx[1] - 1].SetScore(score);
+				m_stagecollider[score_min_idx[0] + 1][score_min_idx[1] - 1].SetStatus(AStar::Status::OPEN);
+				m_stagecollider[score_min_idx[0] + 1][score_min_idx[1] - 1].SetParent(&m_stagecollider[score_min_idx[0]][score_min_idx[1]]);
 			}
 		}
 

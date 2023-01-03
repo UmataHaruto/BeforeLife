@@ -33,6 +33,15 @@ public:
 	void Draw(ID3D11DeviceContext* devcon);
 	void Close();
 	void updatevertexbuffer();
+	ID3D11Buffer* GetVertexBuffer()
+	{
+		return m_VertexBuffer;
+	}
+	ID3D11Buffer* GetIndexBuffer()
+	{
+		return m_IndexBuffer;
+	}
+
 private:
 	ID3D11Buffer* m_VertexBuffer = nullptr;	// 頂点バッファ
 	ID3D11Buffer* m_IndexBuffer = nullptr;		// インデックスバッファ

@@ -15,6 +15,13 @@ using namespace DirectX;
 class ModelData
 {
 public:
+	// 定数バッファ定義（マテリアル単位）
+	struct ConstantBufferMaterial {
+		XMFLOAT4	AmbientMaterial;		// 環境光の反射率
+		XMFLOAT4	DiffuseMaterial;		// ディフューズ光の反射率
+		XMFLOAT4	SpecularMaterial;		// スペキュラ光の反射率
+	};
+
 	std::vector<Mesh> m_meshes;					// メッシュの集合がモデル
 
 	ModelData();
@@ -28,7 +35,7 @@ public:
 		std::vector<AnimationDataAssimp*>& animationcontainer);
 
 	void Draw(ID3D11DeviceContext* devcon, XMFLOAT4X4& mtxworld);
-
+	void DrawInstance(ID3D11Buffer* InstanceBuffer, int instancecount);
 	void DrawOBB();
 
 	void Exit();
@@ -60,6 +67,7 @@ private:
 	ID3D11Buffer* m_constantbufferbonematrix;	// ボーン行列格納用定数バッファ	
 
 	std::vector<Texture> m_texturesloaded;		// 既にロードされているテクスチャ
+	ID3D11Buffer* m_cb3;					// コンスタントバッファ(マテリアル用)
 
 	void processNode(aiNode* node, const aiScene* scene);				// ノードを解析
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene, int meshidx);	// メッシュを解析

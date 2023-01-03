@@ -120,7 +120,15 @@ bool ModelData::Load(std::string resourcefolder,
 		MessageBox(nullptr, "ModelData load error", "error", MB_OK);
 		return false;
 	}
-
+	// コンスタントバッファ作成
+	sts = CreateConstantBuffer(
+		CDirectXGraphics::GetInstance()->GetDXDevice(),
+		sizeof(ConstantBufferMaterial),
+		&m_cb3);
+	if (!sts) {
+		MessageBox(NULL, "CreateBuffer(constant buffer Material) error", "Error", MB_OK);
+		return false;
+	}
 	m_directory = resourcefolder;		// このモデルのテクスチャが存在するディレクトリ
 
 	// ボーンを生成する
@@ -164,6 +172,90 @@ void ModelData::Draw(ID3D11DeviceContext* devcon, XMFLOAT4X4& mtxworld)
 		// 定数バッファセット処理
 		m_meshes[i].Draw(devcon);
 	}
+}
+
+void ModelData::DrawInstance(ID3D11Buffer* InstanceBuffer, int instancecount)
+{
+	int indexnum = 0;
+	int indexstart = 0;
+
+	ID3D11DeviceContext* device = CDirectXGraphics::GetInstance()->GetImmediateContext();
+
+	ConstantBufferMaterial		cb;					// コンスタントバッファ３用構造体（マテリアルの値）
+
+	// 入力する頂点バッファとインスタンスバッファ
+	ID3D11Buffer* vbuffer[2] = { m_meshes[0].GetVertexBuffer(),InstanceBuffer };
+
+
+	// それぞれのストライドをセット
+	unsigned int stride[2] = { sizeof(Vertex),sizeof(XMMATRIX) };
+	// オフセットをセット
+	unsigned  offset[2] = { 0,0 };
+
+	// 頂点バッファをセット	
+	device->IASetVertexBuffers(0, 2, vbuffer, stride, offset);
+
+	// インデックスバッファをセット
+	device->IASetIndexBuffer(m_meshes[0].GetIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+
+	// トポロジーをセット（旧プリミティブタイプ）
+	device->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	//  sprintf_s(str, "m_Subset[0].m_VertexSuu %d mm_Subset[1].m_VertexSuu %d \0", m_xfile->m_Subset[0].m_VertexSuu, m_xfile->m_Subset[1].m_VertexSuu);
+	//	MessageBox(nullptr, str, str, MB_OK);
+
+	device->PSSetShaderResources(0, 1, &m_texturesloaded[0].texture);
+
+	// マテリアルに該当するサブセットを取得する
+		cb.AmbientMaterial.x = m_meshes[0].m_mtrl.m_Ambient.x;					// 環境光の反射率
+		cb.AmbientMaterial.y = m_meshes[0].m_mtrl.m_Ambient.y;
+		cb.AmbientMaterial.z = m_meshes[0].m_mtrl.m_Ambient.z;
+		cb.AmbientMaterial.w = 1.0f;
+
+		cb.DiffuseMaterial.x = m_meshes[0].m_mtrl.m_Diffuse.x;					// ディフューズ光の反射率
+		cb.DiffuseMaterial.y = m_meshes[0].m_mtrl.m_Diffuse.y;
+		cb.DiffuseMaterial.z = m_meshes[0].m_mtrl.m_Diffuse.z;
+		cb.DiffuseMaterial.w = 1.0f;
+
+		cb.SpecularMaterial.w = 1.0f;
+
+		cb.SpecularMaterial.x = m_meshes[0].m_mtrl.m_Specular.x;				// スペキュラ光の反射率
+		cb.SpecularMaterial.y = m_meshes[0].m_mtrl.m_Specular.x;
+		cb.SpecularMaterial.z = m_meshes[0].m_mtrl.m_Specular.x;
+
+
+		// 定数バッファ更新
+		//device->UpdateSubresource(
+		//	m_cb3,			// コンスタントバッファ
+		//	0,				// コピー先サブリソース
+		//	nullptr,		// サブリソースを定義するボックス　ＮＵＬＬの場合オフセットなし
+		//	&cb,			// コピー元データ
+		//	0,				// 1行のサイズ
+		//	0);				// 1深度スライスのサイズ
+
+		//					// 定数バッファ3をピクセルシェーダーへセット
+		//device->VSSetConstantBuffers(
+		//	3,				// スタートスロット
+		//	1,				// 個数
+		//	&m_cb3);		// コンスタントバッファ
+
+		//					// 定数バッファ3をピクセルシェーダーへセット
+		//device->PSSetConstantBuffers(
+		//	3,				// スタートスロット
+		//	1,				// 個数
+		//	&m_cb3);		// コンスタントバッファ
+
+		device->DrawIndexedInstanced(
+			m_meshes[0].m_indices.size(),
+			// 描画するインデックス数(Face*3)
+			instancecount,
+			// 繰り返し描画回数
+			0,
+			// 最初のインデックスバッファの位置
+			0,
+			// 頂点バッファの最初から使う
+			0);
+		// インスタンスの開始位置
 }
 
 void ModelData::DrawOBB() {

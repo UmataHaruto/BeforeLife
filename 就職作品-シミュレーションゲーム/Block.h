@@ -39,6 +39,10 @@ public:
 	CModel* GetModel() {
 		return m_model;
 	}
+	XMFLOAT4X4 GetMtx()
+	{
+		return m_mtx;
+	}
 	void SetPos(DirectX::XMFLOAT3 pos);
 
 	BLOCKTYPE GetBlockId()

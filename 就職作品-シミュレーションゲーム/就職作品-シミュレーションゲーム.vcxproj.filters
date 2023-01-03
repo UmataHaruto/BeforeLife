@@ -652,5 +652,11 @@
     <FxCompile Include="shader\ps_Sea.fx">
       <Filter>ソース ファイル\shader\hlsl</Filter>
     </FxCompile>
+    <FxCompile Include="shader\vsinstance.fx">
+      <Filter>ソース ファイル\shader\hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="shader\ps_stage_shadow.fx">
+      <Filter>ソース ファイル\shader\hlsl</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

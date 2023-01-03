@@ -90,7 +90,7 @@ public:
 	{(const MODELID)MODELID::CONIFER00,"assets/Modeldata/tree/conifer00/conifer01.fbx","shader/vsoneskin.fx","shader/ps.fx","assets/Modeldata/tree/conifer00/"},
 	{(const MODELID)MODELID::ORE_IRON,"assets/Modeldata/Ore/Normal/Ore_Normal.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Ore/Normal/"},
 	{(const MODELID)MODELID::SMALLHOUSE,"assets/Modeldata/House/House_Small.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/House/"},
-	{(const MODELID)MODELID::TERRAIN_COLLISION,"assets/Modeldata/terrain/terrainColision.obj","shader/vs.fx","shader/ps.fx","assets/Modeldata/terrain/"},
+	{(const MODELID)MODELID::TERRAIN_COLLISION,"assets/Modeldata/terrain/terrainColision.obj","shader/vs_shadowmap.fx","shader/ps_stage_shadow.fx","assets/Modeldata/terrain/"},
 	{(const MODELID)MODELID::SMALLSOUKO,"assets/Modeldata/Souko/Souko.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Souko/"},
 	{(const MODELID)MODELID::CREATE_WOOD,"assets/Modeldata/Create/CreatePlane.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Create/"},
 	{(const MODELID)MODELID::CREATE_WOOD,"assets/Modeldata/Create/CreateWood.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Create/"},
@@ -98,7 +98,7 @@ public:
 	{(const MODELID)MODELID::CREATE_IRON,"assets/Modeldata/Create/CreateIronOre.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Create/"},
 	{(const MODELID)MODELID::CREATE_GOLD,"assets/Modeldata/Create/CreateGoldOre.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Create/"},
 	{(const MODELID)MODELID::ROUTE_PREVIEW,"assets/Modeldata/RoutePreview.obj","shader/vs.fx","shader/ps_shadowmap.fx","assets/Modeldata/"},
-	{(const MODELID)MODELID::ROAD_DIRT,"assets/Modeldata/Block/Road_Dirt.obj","shader/vs_shadowmap.fx","shader/ps_Sea.fx","assets/Modeldata/Block/"},
+	{(const MODELID)MODELID::ROAD_DIRT,"assets/Modeldata/Block/Road_Dirt.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Block/"},
 	{(const MODELID)MODELID::SEA,"assets/Modeldata/Sea/Sea.obj","shader/vs_shadowmap.fx","shader/ps_Sea.fx","assets/Modeldata/Sea/"},
 
 	};

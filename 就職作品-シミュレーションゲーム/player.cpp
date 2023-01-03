@@ -36,8 +36,6 @@ bool Player::Init(Data data) {
 	m_haircolor.y = (float)(rand() % 255) / 255;
 	m_haircolor.z = (float)(rand() % 255) / 255;
 
-
-
 	//必要になったらポインタを付与(nullは素手)
 	m_tools = nullptr;
 	XMMATRIX scale = XMMatrixScaling(0.03, 0.03, 0.03);
@@ -70,6 +68,7 @@ bool Player::Init(Data data) {
 	m_animdata.animno = AnimationType::IDLE_00;
 
 	//座標を指定
+	data.pos.y += 9.5;
 	SetPos(data.pos);
 	m_first_name = data.firstname;
 	m_last_name = data.lastname;

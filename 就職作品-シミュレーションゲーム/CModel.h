@@ -30,6 +30,9 @@ private:
 	ID3D11PixelShader* m_pPixelShader = nullptr;		// ピクセルシェーダー入れ物
 	ID3D11PixelShader* m_pSelectPixelShader[SELECT_SHADER_TYPE_MAX];    //セレクト時シェーダー入れ物
 	ID3D11InputLayout* m_pVertexLayout = nullptr;		// 頂点フォーマット定義
+	void* m_initdata = nullptr;			// インスタンスバッファの初期化データ
+	ID3D11Buffer* m_pInstanceBuffer;				// インスタンス用行列格納頂点バッファ
+	int						m_instancecount = 0;			// インスタンシング数
 
 	ID3D11ShaderResourceView* m_texSRV = nullptr;			// テクスチャＳＲＶ
 	//セレクト状態
@@ -37,14 +40,16 @@ private:
 public:
 	std::vector<AnimationDataAssimp*> m_animationcontainer;
 	unsigned int	m_AnimFileIdx = 0;
-
+	bool InitiInstancing(int instancecnt, const char* filename, const char* vsfile, const char* psfile, std::string texfolder);
 	bool Init(const char* filename, const char* vsfile, const char* psfile, std::string texfolder);
 	void Uninit();
 	void Update(
 		unsigned int animno,
 		const XMFLOAT4X4& mtxworld);
+	void InstanceUpdate(std::vector<XMFLOAT4X4>mtx);
 	void Draw(XMFLOAT4X4& mtxworld);
 	void DrawShadow(XMFLOAT4X4& mtxworld,ID3D11InputLayout* layout_in, ID3D11VertexShader* vs_in, ID3D11PixelShader* ps_in);
+	void DrawInstance(int instancecount);
 	unsigned int GetAnimationNum() {	// アニメーション総数を取得
 
 		return m_animationcontainer[m_AnimFileIdx]->GetScene()->mNumAnimations;

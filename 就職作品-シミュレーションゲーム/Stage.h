@@ -15,8 +15,9 @@ public:
 
 	//初期化
 	void Init();
-	//更新
+	//更新(マップ変動時のみ)
 	void Update();
+
 	//描画
 	void Draw();
 	void DrawShadow(ID3D11InputLayout* layout_in, ID3D11VertexShader* vs_in, ID3D11PixelShader* ps_in);
@@ -40,8 +41,11 @@ public:
 
 private:
 	Block Field[MAP_WIDTH][MAP_HEIGHT][MAP_DEPTH];    //フィールド
-
-
+	//ブロックのインスタンシング描画
+	CModel blocks;
+	CModel* blocks_shadow;
+	XMFLOAT4X4 shadow_mtx;
+	std::vector<XMFLOAT4X4> blocks_pos_world;
 	int TimeLimit;    //タイムリミット
 	char Name[10];    //ステージ名前
 	int Record;       //レコード

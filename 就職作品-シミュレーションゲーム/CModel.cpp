@@ -132,7 +132,94 @@ bool CModel::Init(const char* filename, const char* vsfile, const char* psfile, 
 
 	return true;
 }
+bool CModel::InitiInstancing(int num, const char* filename, const char* vsfile, const char* psfile, std::string texfolder) {
 
+	bool sts;
+	ID3D11Device* device;
+	device = CDirectXGraphics::GetInstance()->GetDXDevice();
+
+	//シェーダーポインタをリセット
+	for (int i = 0; i < SELECT_SHADER_TYPE_MAX; i++)
+	{
+		m_pSelectPixelShader[i] = nullptr;
+	}
+
+	std::string fname(filename);
+
+	sts = m_assimpfile.Load(texfolder, fname);
+	if (!sts) {
+		char str[128];
+		sprintf_s(str, 128, "%s load ERROR!!", filename);
+		MessageBox(nullptr, str, "error", MB_OK);
+		return false;
+	}
+	m_filetype = eASSIMPFILE;
+
+	// インスタンシング数セット
+	m_instancecount = num;
+
+	m_initdata = _mm_malloc(sizeof(XMMATRIX) * num, 16);
+	XMMATRIX* pstart = static_cast<XMMATRIX*>(m_initdata);
+
+	// インスタンスバッファの初期行列をセット
+	for (int i = 0; i < m_instancecount; i++) {
+		*pstart = XMMatrixTranspose(XMMatrixTranslation(0, 0, 0));
+		pstart++;
+	}
+
+	sts = CreateVertexBufferWrite(
+		device,		// device11
+		sizeof(XMMATRIX),		// １頂点当たりバイト数
+		num,					// 頂点数
+		m_initdata,				// 初期化データ
+		&m_pInstanceBuffer);	// 頂点バッファ
+	if (!sts) {
+		MessageBox(nullptr, "CreateVertexBufferWrite(InstanceBuffer) error", "error", MB_OK);
+		return false;
+	}
+
+	// 頂点データの定義
+	D3D11_INPUT_ELEMENT_DESC layout[] =
+	{
+		// semantic name    index		format							slot	alignedbyteoffset				inputslotclass				instancedatasteprate
+		{ "POSITION",		0,		DXGI_FORMAT_R32G32B32_FLOAT,		0,		D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA,	0 },
+		{ "NORMAL",			0,		DXGI_FORMAT_R32G32B32_FLOAT,	    0,		D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA,	0 },
+		{ "TEXCOORD",		0,		DXGI_FORMAT_R32G32_FLOAT,			0,		D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA,	0 },
+		{ "LocalToWorld",	0,		DXGI_FORMAT_R32G32B32A32_FLOAT,		1,		0,								D3D11_INPUT_PER_INSTANCE_DATA,	1 },
+		{ "LocalToWorld",	1,		DXGI_FORMAT_R32G32B32A32_FLOAT,		1,		16,								D3D11_INPUT_PER_INSTANCE_DATA,	1 },
+		{ "LocalToWorld",	2,		DXGI_FORMAT_R32G32B32A32_FLOAT,		1,		32,								D3D11_INPUT_PER_INSTANCE_DATA,	1 },
+		{ "LocalToWorld",	3,		DXGI_FORMAT_R32G32B32A32_FLOAT,		1,		48,								D3D11_INPUT_PER_INSTANCE_DATA,	1 },
+	};
+	unsigned int numElements = ARRAYSIZE(layout);
+
+	// 頂点シェーダーオブジェクトを生成、同時に頂点レイアウトも生成
+	sts = CreateVertexShader(device,
+		vsfile,
+		"main",
+		"vs_4_0",
+		layout,
+		numElements,
+		&m_pVertexShader,
+		&m_pVertexLayout);
+	if (!sts) {
+		MessageBox(nullptr, "CreateVertexShader error", "error", MB_OK);
+		return false;
+	}
+
+	// ピクセルシェーダーを生成
+	sts = CreatePixelShader(			// ピクセルシェーダーオブジェクトを生成
+		device,		// デバイスオブジェクト
+		psfile,
+		"main",
+		"ps_4_0",
+		&m_pPixelShader);
+	if (!sts) {
+		MessageBox(nullptr, "CreatePixelShader error", "error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
 void CModel::Uninit() {
 
 	//// アニメーションデータ解放
@@ -170,6 +257,26 @@ void CModel::Update(
 
 	// OBBを更新
 	m_assimpfile.UpdateOBB(mtxworld);
+}
+
+void CModel::InstanceUpdate(std::vector<XMFLOAT4X4> mtx)
+{
+	D3D11_MAPPED_SUBRESOURCE pData;
+
+	XMMATRIX* pstart = static_cast<XMMATRIX*>(m_initdata);
+
+	// インスタンスバッファの初期行列をセット
+	for (int i = 0; i < mtx.size(); i++) {
+		*pstart = XMMatrixTranspose(XMLoadFloat4x4(&mtx[i]));
+		pstart++;
+	}
+
+	HRESULT hr = CDirectXGraphics::GetInstance()->GetImmediateContext()->Map(m_pInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &pData);
+	if (SUCCEEDED(hr)) {
+		memcpy_s(pData.pData, pData.RowPitch, (void*)(m_initdata), sizeof(XMMATRIX) * mtx.size());
+
+		CDirectXGraphics::GetInstance()->GetImmediateContext()->Unmap(m_pInstanceBuffer, 0);
+	}
 }
 
 void CModel::Draw(XMFLOAT4X4& mtxworld) {
@@ -222,4 +329,18 @@ void CModel::DrawShadow(XMFLOAT4X4& mtxworld, ID3D11InputLayout* layout_in, ID3D
 
 	// 描画
 	m_assimpfile.Draw(devcontext, mtxworld);
+}
+
+void CModel::DrawInstance(int instancecount)
+{
+	ID3D11DeviceContext* devcontext;			// デバイスコンテキスト
+	devcontext = CDirectXGraphics::GetInstance()->GetImmediateContext();
+	// 頂点フォーマットをセット
+	devcontext->IASetInputLayout(m_pVertexLayout);
+	// 頂点シェーダーをセット
+	devcontext->VSSetShader(m_pVertexShader, nullptr, 0);
+	// ピクセルシェーダーをセット(セレクト状態に応じる)
+	devcontext->PSSetShader(m_pPixelShader, nullptr, 0);
+	// 描画
+	m_assimpfile.DrawInstance(m_pInstanceBuffer,instancecount);
 }

@@ -47,6 +47,7 @@ DWORD endtime;
 DWORD timer;
 
 void RenderDepthMap(CLight& light);
+void SimulationUpdate();
 
 // 頂点シェーダー
 const char* vs_shadowmap_filename[] = {
@@ -234,6 +235,7 @@ void  SimulationInit() {
 	
 	//ステージをロード
 	Stage::GetInstance().RoadStageData();
+	Stage::GetInstance().Init();
 
 	GameButton::GetInstance().Init();
 
@@ -321,6 +323,10 @@ void  SimulationInit() {
 
 	SoundMgr::GetInstance().XA_Play("assets/sound/BGM/Vopna.wav");
 
+	SimulationUpdate();
+
+	//ステージ更新
+	Stage::GetInstance().Update();
 }
 
 void  SimulationExit() {
@@ -364,7 +370,7 @@ void  SimulationUpdate() {
 	VillagerMgr::GetInstance().Update();
 
 	//ステージ更新
-	Stage::GetInstance().Update();
+	//Stage::GetInstance().Update();
 
 	//ブロック選択
 	//Stage::GetInstance().SearchBlock();
@@ -435,26 +441,32 @@ void  SimulationUpdate() {
 		//ズーム倍率 基準1.0f
 		float zoom;
 		if (CDirectInput::GetInstance().CheckKeyBuffer(DIK_A)) {
+			Stage::GetInstance().Update();
 			FirstCameraPos._41 -= speed * FirstCameraPos._11;
 			FirstCameraPos._43 -= speed * FirstCameraPos._13;
 		}
 		if (CDirectInput::GetInstance().CheckKeyBuffer(DIK_D)) {
+			Stage::GetInstance().Update();
 			FirstCameraPos._41 += speed * FirstCameraPos._11;
 			FirstCameraPos._43 += speed * FirstCameraPos._13;
 		}
 		if (CDirectInput::GetInstance().CheckKeyBuffer(DIK_W)) {
+			Stage::GetInstance().Update();
 			FirstCameraPos._41 += speed * FirstCameraPos._31;
 			FirstCameraPos._43 += speed * FirstCameraPos._33;
 		}
 		if (CDirectInput::GetInstance().CheckKeyBuffer(DIK_S)) {
+			Stage::GetInstance().Update();
 			FirstCameraPos._41 -= speed * FirstCameraPos._31;
 			FirstCameraPos._43 -= speed * FirstCameraPos._33;
 		}
 
 		if (CDirectInput::GetInstance().CheckKeyBuffer(DIK_LEFT)) {
+			Stage::GetInstance().Update();
 			CameraAngle.y-= 0.5;
 		}
 		if (CDirectInput::GetInstance().CheckKeyBuffer(DIK_RIGHT)) {
+			Stage::GetInstance().Update();
 			CameraAngle.y += 0.5;
 		}
 
@@ -470,9 +482,11 @@ void  SimulationUpdate() {
 		{
 			if (io.MouseWheel > 0)
 			{
+				Stage::GetInstance().Update();
 				CCamera::GetInstance()->SetZoom(CCamera::GetInstance()->GetZoom() - 0.1);
 			}
 			else {
+				Stage::GetInstance().Update();
 				CCamera::GetInstance()->SetZoom(CCamera::GetInstance()->GetZoom() + 0.1);
 			}
 		}
@@ -523,7 +537,10 @@ void  SimulationDraw() {
 	ID3D11PixelShader* psh;
 	psh = ShaderHashmap::GetInstance()->GetPixelShader(ps_shadowmap_filename[1]);
 
+	g_terrain.Draw();
+
 	Stage::GetInstance().Draw();
+
 	//資源描画
 	ResourceManager::GetInstance().Draw();
 
@@ -534,9 +551,8 @@ void  SimulationDraw() {
 	//村人描画
 	VillagerMgr::GetInstance().Draw();
 
-	g_skybox.Draw();
 
-	g_terrain.Draw();
+	g_skybox.Draw();
 
 	//2D描画
 	TurnOffZbuffer();

@@ -11,10 +11,10 @@ void Road::Init(XMFLOAT3 position,MODELID id)
 	m_model = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(id)].modelname);
 
 	m_model->ChangeSelectType(SELECT_SHADER_TYPE::SELECT_SHADER_TYPE_NONE);
-
 	m_pos = position;
+	m_pos.y += 4;
 
-	m_obb.Init(m_model);
+	//m_obb.Init(m_model);
 }
 
 void Road::Draw()
@@ -24,7 +24,7 @@ void Road::Draw()
 
 	//ã´äEboxï\é¶
 	if (!GameButton::GetInstance().GetDebug()) {
-		m_obb.Draw();
+		//m_obb.Draw();
 	}
 }
 
@@ -43,7 +43,7 @@ void Road::Update()
 	m_model->ChangeSelectType(SELECT_SHADER_TYPE::SELECT_SHADER_TYPE_NONE);
 
 	//ã´äEãÖÇÃçXêV
-	m_obb.Update(GetMtx());
+	//m_obb.Update(GetMtx());
 }
 
 void Road::Finalize()
