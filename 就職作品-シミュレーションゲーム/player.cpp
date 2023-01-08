@@ -192,7 +192,7 @@ void Player::Update() {
 	XMFLOAT3 angle = { 0,0,0 };
 	bool keyinput = false;
 	ImGuiIO& io = ImGui::GetIO();
-	// マウス座標をワールド座標に
+	// マウス座標をワールド座標に変換
 	XMFLOAT3 g_nearp = { 0,0,0 };
 	XMFLOAT3 g_farp = { 0,0,0 };
 
