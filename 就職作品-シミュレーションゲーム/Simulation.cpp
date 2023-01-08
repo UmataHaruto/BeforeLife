@@ -255,6 +255,22 @@ void  SimulationInit() {
 
 	InitShadowMap();
 
+	//初期建造物
+    //住居
+	{
+		House::Data initdata;
+		initdata.pos = XMFLOAT3(500, 0, -430);
+		initdata.type = GameButton::HouseButtonType::HOUSE_SMALL;
+		BuildingMgr::GetInstance().CreateHouse(initdata, MODELID::SMALLHOUSE);
+	}
+	//倉庫
+	{
+		Souko::Data initdata;
+		initdata.pos = XMFLOAT3(650, 0, -400);
+		initdata.type = GameButton::SoukoButtonType::SOUKO_SMALL;
+		BuildingMgr::GetInstance().CreateSouko(initdata, MODELID::SMALLSOUKO);
+	}
+
 	//村人マネージャーの初期化
 	VillagerMgr::GetInstance().Init();
 	Player::Data pdata;
@@ -640,9 +656,9 @@ void RenderDepthMap(CLight& light) {
 
 	}
 
-	LightPos.x = 2000 * cos(degree * XM_PI / 180.0f);
-	LightPos.z = 0;
-	LightPos.y = 2000 * sin(degree * XM_PI / 180.0f);
+	LightPos.x = (2000 * cos(degree * XM_PI / 180.0f)) + 700;
+	LightPos.z = -700;
+	LightPos.y = 3500 * sin(degree * XM_PI / 180.0f);
 
 
 	XMFLOAT4 l;

@@ -220,6 +220,11 @@ std::vector<COBB> BuildingMgr::GetAllObb()
 	return obbs;
 }
 
+std::vector<std::unique_ptr<House>>& BuildingMgr::GetHouse()
+{
+	return m_houses;
+}
+
 std::vector<std::unique_ptr<Souko>>& BuildingMgr::GetSouko()
 {
 	return m_soukos;

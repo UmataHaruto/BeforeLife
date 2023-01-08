@@ -86,6 +86,9 @@ public:
 	//ステージ当たり判定を更新
 	void InitStageCollider();
 
+	//座標基準で建築物に接触しているか(接触時 = true)
+	bool IsHitBuilding(XMFLOAT3 pos);
+
 	std::vector<XMFLOAT2> SearchRoute(XMFLOAT3 start,XMFLOAT3 goal);
 
 private:
@@ -97,5 +100,8 @@ private:
 	4 = route
 	*/
 	AStar m_stagecollider[MAP_WIDTH][MAP_HEIGHT];
+	//検索精度(最小12.5)
+	float SearchBlockLength = 12.5;
+
 };
 

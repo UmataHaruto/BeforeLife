@@ -33,6 +33,7 @@ enum class MODELID {
 	ROUTE_PREVIEW,
 	ROAD_DIRT,
 	SEA,
+	SEA_UNDER,
 };
 
 //モデルデータリスト
@@ -100,6 +101,7 @@ public:
 	{(const MODELID)MODELID::ROUTE_PREVIEW,"assets/Modeldata/RoutePreview.obj","shader/vs.fx","shader/ps_shadowmap.fx","assets/Modeldata/"},
 	{(const MODELID)MODELID::ROAD_DIRT,"assets/Modeldata/Block/Road_Dirt.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Block/"},
 	{(const MODELID)MODELID::SEA,"assets/Modeldata/Sea/Sea.obj","shader/vs_shadowmap.fx","shader/ps_Sea.fx","assets/Modeldata/Sea/"},
+	{(const MODELID)MODELID::SEA_UNDER,"assets/Modeldata/Sea/Sea_Under.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Sea/"},
 
 	};
 

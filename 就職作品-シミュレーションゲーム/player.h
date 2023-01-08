@@ -8,6 +8,8 @@
 #include    "Souko.h"
 #include    "obb.h"
 
+class House;
+
 enum class CameraMode
 {
 	TPS,    //三人称視点
@@ -16,7 +18,6 @@ enum class CameraMode
 
 class Player :public GameObject {
 public:
-
 	//パーツ
 	enum PARTS
 	{
@@ -209,7 +210,11 @@ public:
 	{
 		m_pos = pos;
 	}
-
+	//家をセット
+	inline void SetHouse(House* house)
+	{
+		m_house = house;
+	}
 	//ヒットポイントをセット
 	inline void SetHitpoint(float max,float hp)
 	{
@@ -318,6 +323,9 @@ private:
 	CModel* m_tools;// 道具
 	CModel* m_hair;//髪
 	COBB m_obb;    //コリジョン
+
+	//自宅
+	House* m_house;
 
 	//移動目標
 	XMFLOAT3 movepos;

@@ -62,7 +62,7 @@ public:
 	//É|Å[ÉY
 	void XA_Pause(std::string label);
 private:
-	float m_master_volume = 1;
+	float m_master_volume =0;
 	IXAudio2* g_pXAudio2 = NULL;
 	IXAudio2MasteringVoice* g_pMasteringVoice = NULL;
 	IXAudio2SourceVoice* g_pSourceVoice[SOUND_MAX];

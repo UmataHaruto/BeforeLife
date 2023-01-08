@@ -36,6 +36,7 @@ public:
 	std::vector<CollisionData> GetAllBuildingPosition();
 
 	std::vector<COBB> GetAllObb();
+	std::vector<std::unique_ptr<House>>& GetHouse();
 	std::vector<std::unique_ptr<Souko>>& GetSouko();
 	std::vector<std::unique_ptr<Road>>& GetRoad();
 private:

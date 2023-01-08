@@ -6,7 +6,8 @@
 class Sea :public GameObject
 {
 private:
-	CModel* m_model;
+	CModel* m_sea_model;
+	CModel* m_sea_under_model;
 
 public:
 	bool Init();
@@ -17,6 +18,6 @@ public:
 	//モデルセット
 	void SetModel(CModel* pmodel)
 	{
-		m_model = pmodel;
+		m_sea_model = pmodel;
 	}
 };

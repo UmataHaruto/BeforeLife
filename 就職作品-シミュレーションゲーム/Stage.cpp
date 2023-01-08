@@ -21,9 +21,9 @@ void Stage::Init()
 	*model = *ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::TERRAIN_COLLISION)].modelname);
 	blocks_shadow = model;
 
-	shadow_mtx._41 = 550;
+	shadow_mtx._41 = 1250;
 	shadow_mtx._42 = 10;
-	shadow_mtx._43 = -550;
+	shadow_mtx._43 = -1250;
 
 }
 
@@ -63,7 +63,7 @@ void Stage::Update()
 		for (int y = 0; y < MAP_HEIGHT; y++) {
 			for (int x = 0; x < MAP_WIDTH; x++) {
 				XMFLOAT4X4 mtxtrans;
-				XMFLOAT3 trans = { (y * 12.5f) - 700,(z * -12.5f),(x * -12.5f) + 700 };
+				XMFLOAT3 trans = { (y * 12.5f),(z * -12.5f),(x * -12.5f)};
 
 				//ƒ‚ƒfƒ‹•`‰æ
 				//‰æ–Ê“à‚É‚ ‚é‚à‚Ì‚µ‚©•`‰æ‚µ‚È‚¢

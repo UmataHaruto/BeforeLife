@@ -79,9 +79,9 @@ void StageHitInit(){
 		// 頂点データを取り出す
 	for (auto m : meshes) {
 		for (auto v : m.m_vertices) {
-			v.m_Pos.x += 550;
+			v.m_Pos.x += 1200;
 			v.m_Pos.y += 5;
-			v.m_Pos.z -= 550;
+			v.m_Pos.z -= 1200;
 			vertices.emplace_back(v.m_Pos);
 		}
 	}

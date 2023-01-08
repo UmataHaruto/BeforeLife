@@ -1,4 +1,5 @@
 #include "House.h"
+#include "player.h"
 
 bool House::Init()
 {
@@ -15,6 +16,16 @@ void House::Init(Data data, MODELID id)
 	m_model->ChangeSelectType(SELECT_SHADER_TYPE::SELECT_SHADER_TYPE_NONE);
 
 	m_pos = data.pos;
+
+	//Z‹ƒ^ƒCƒv‚É‰‚¶‚½‰Šúİ’è
+	switch (data.type)
+	{
+	case GameButton::HouseButtonType::HOUSE_SMALL:
+		Resident_max = 3;
+		break;
+	default:
+		break;
+	}
 
 	m_obb.Init(m_model);
 	m_obb_entrance.CreateBox(20, 60, 20, XMFLOAT3(-10,0,-55));

@@ -17,6 +17,7 @@
 #include "Souko.h"
 #include "Resource.h"
 #include "Road.h"
+#include "RouteSearch.h"
 
 GameButton::GameButton()
 {
@@ -47,10 +48,10 @@ void GameButton::Init()
 	m_shadow_parameter.LightPos[2] = 300;
 
 
-	m_shadow_parameter.Aspect = 10.0f;
+	m_shadow_parameter.Aspect = 1.0f;
 	m_shadow_parameter.farclip = 20000;
 	m_shadow_parameter.nearclip = 10;
-	m_shadow_parameter.Fov = XM_PI / 3;
+	m_shadow_parameter.Fov = 300;
 
 	m_Game_HoverButton = GAMEBUTTON_NONE;
 
@@ -192,7 +193,8 @@ void GameButton::Update()
 	}
 	if (m_RadioButton[GAMEBUTTON_PLAY_02])
 	{
-		Application::Instance()->GAME_SPEED = 5;
+		//初期値５
+		Application::Instance()->GAME_SPEED = 30;
 	}
 	//時間経過バッファを更新
 	static float time = 0;
@@ -452,7 +454,7 @@ void GameButton::Draw()
 			ImGui::SliderFloat3(u8"ライト座標",m_shadow_parameter.LightPos, 1, 3000);
 			ImGui::SliderFloat(u8"アスペクト比", &m_shadow_parameter.Aspect, 1, 1000);
 			ImGui::SliderFloat(u8"ニアクリップ", &m_shadow_parameter.nearclip, 1, 1000);
-			ImGui::SliderFloat(u8"ファークリップ", &m_shadow_parameter.farclip, 1, 20000);
+			ImGui::SliderFloat(u8"ファークリップ", &m_shadow_parameter.farclip, 1, 50000);
 			ImGui::SliderFloat(u8"FOV", &m_shadow_parameter.Fov, 1, 300);
 
 			static ImVec4 color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 200.0f / 255.0f);
@@ -1105,6 +1107,7 @@ void GameButton::Draw()
 					initdata.pos = m_mouseworldpos;
 					initdata.type = currentselect;
 					BuildingMgr::GetInstance().CreateHouse(initdata, createmodel);
+					RouteSearch::GetInstance().InitStageCollider();
 
 				}
 			}
@@ -1218,6 +1221,7 @@ void GameButton::Draw()
 					initdata.pos = m_mouseworldpos;
 					initdata.type = currentselect;
 					BuildingMgr::GetInstance().CreateSouko(initdata, createmodel);
+					RouteSearch::GetInstance().InitStageCollider();
 				}
 			}
 		}

@@ -26,11 +26,11 @@ void RouteSearch::InitStageCollider()
 		float x_max = collisiondata[i].position.x + (collisiondata[i].width / 2);
 		float y_max = fabs(collisiondata[i].position.z) + (collisiondata[i].height / 2);
 
-		int x_min_idx = x_min / 12.5f;
-		int y_min_idx = (y_min / 12.5f) - 2;
+		int x_min_idx = x_min / 12.5;
+		int y_min_idx = (y_min / 12.5) - 2;
 
-		int x_max_idx = x_max / 12.5f;
-		int y_max_idx = (y_max / 12.5f) + 3;
+		int x_max_idx = x_max / 12.5;
+		int y_max_idx = (y_max / 12.5) + 3;
 
 		//”ÍˆÍ‚ð‚P‚Å–„‚ß‚é
 		for (int y = y_min_idx; y < y_max_idx; y++) {
@@ -40,6 +40,20 @@ void RouteSearch::InitStageCollider()
 			}
 		}
 	}
+}
+
+bool RouteSearch::IsHitBuilding(XMFLOAT3 pos)
+{
+	XMINT2 position = { (int32_t)(pos.x / 12.5),(int32_t)(fabs(pos.z) / 12.5) };
+	if (position.x < 0 || position.y < 0)
+	{
+		return false;
+	}
+	if (m_stagecollider[position.y][position.x].GetNumber() == 1)
+	{
+		true;
+	}
+	return false;
 }
 
 std::vector<XMFLOAT2> RouteSearch::SearchRoute(XMFLOAT3 start, XMFLOAT3 goal)
@@ -132,12 +146,12 @@ std::vector<XMFLOAT2> RouteSearch::SearchRoute(XMFLOAT3 start, XMFLOAT3 goal)
 					parent->SetNumber(4);
 					XMFLOAT2 temp;
 					temp.x = parent->GetId() % MAP_HEIGHT;
-					temp.x *= 12.5;
-					temp.x += 12.5 / 2;
+					temp.x *= SearchBlockLength;
+					temp.x += SearchBlockLength / 2;
 
 					temp.y = ((parent->GetId() - (parent->GetId() % MAP_HEIGHT)) / MAP_WIDTH);
-					temp.y *= -12.5;
-					temp.y -= 12.5 / 2;
+					temp.y *= -SearchBlockLength;
+					temp.y -= SearchBlockLength / 2;
 					route.push_back(temp);
 					parent = parent->GetParent();
 				}
@@ -260,7 +274,7 @@ std::vector<XMFLOAT2> RouteSearch::SearchRoute(XMFLOAT3 start, XMFLOAT3 goal)
 			break;
 		}
 		//‡ƒ‹[ƒvŽž‚Í‹­§‘Þo
-		if (loopcount > 1000)
+		if (loopcount > 200)
 		{
 			break;
 		}

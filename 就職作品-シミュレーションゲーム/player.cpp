@@ -8,6 +8,7 @@
 #include "ResourceManager.h"
 #include "BuildingMgr.h"
 #include "RouteSearch.h"
+#include "House.h"
 
 Player::PlayerInitData Player::ObjectInitData[] = {
 	{ Player::NONE,				Player::PLAYER_BODY,			{ 0, 0, 0 },				{ 0, 0, 0 } },	// 本体
@@ -28,7 +29,7 @@ bool Player::Init(Data data) {
 	*model = *ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::PLAYER)].modelname);
 	m_model = model;
 	m_obb.Init(m_model);
-	m_obb.CreateBox(250,1700,250,XMFLOAT3(0,0,0));
+	m_obb.CreateBox(250, 1700, 250, XMFLOAT3(0, 0, 0));
 	//髪モデル
 	m_hair = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::HAIR_00)].modelname);
 	//髪色
@@ -41,9 +42,18 @@ bool Player::Init(Data data) {
 	XMMATRIX scale = XMMatrixScaling(0.03, 0.03, 0.03);
 	XMMATRIX mtx;
 
-    //輸送物をリセット
+	//輸送物をリセット
 	m_carry.num = 0;
 	m_carry.tag = ItemType::ITEM_NONE;
+
+	//既存の家がある場合登録
+	for (int i = 0; i < BuildingMgr::GetInstance().GetHouse().size(); i++)
+	{
+		if (BuildingMgr::GetInstance().GetHouse()[i]->SetResident(this))
+		{
+			break;
+		}
+	}
 
 	//行動優先度の初期化
 	for (int i = 0; i < (int)ActionType::ACTION_MAX; i++)
@@ -74,8 +84,8 @@ bool Player::Init(Data data) {
 	m_last_name = data.lastname;
 
 	m_mood = data.mood;
-	SetHitpoint(data.hp_max,data.hp);
-	SetStamina(data.stamina_max,data.stamina);
+	SetHitpoint(data.hp_max, data.hp);
+	SetStamina(data.stamina_max, data.stamina);
 
 	mtx = DirectX::XMLoadFloat4x4(&m_mtx);
 	mtx = XMMatrixMultiply(mtx, scale);
@@ -90,7 +100,7 @@ bool Player::Init(Data data) {
 	CaliculateParentChildMtx();					//グローバル座標に変換
 
 	//デバッグ用
-	m_action_priority[(int)ActionType::WORK].priority = 5;
+	m_action_priority[(int)ActionType::REST].priority = 5;
 	m_work_priority[(int)WorkType::MINE].priority = 5;
 
 	return true;
@@ -113,7 +123,7 @@ void Player::Draw() {
 	devcontext->VSSetConstantBuffers(8, 1, &cb);
 	// コンスタントバッファ4をｂ8レジスタへセット(ピクセルシェーダー用)
 	devcontext->PSSetConstantBuffers(8, 1, &cb);
-	
+
 	// モデル描画
 	m_model->Draw(m_mtxParentChild[0]);
 	m_hair->Draw(m_mtxParentChild[1]);
@@ -161,11 +171,11 @@ void Player::Draw() {
 void Player::DrawShadow(ID3D11InputLayout* layout_in, ID3D11VertexShader* vs_in, ID3D11PixelShader* ps_in)
 {
 	// モデル描画
-	m_model->DrawShadow(m_mtxParentChild[0],layout_in, vs_in, ps_in);
-	m_hair->DrawShadow(m_mtxParentChild[1],layout_in, vs_in, ps_in);
+	m_model->DrawShadow(m_mtxParentChild[0], layout_in, vs_in, ps_in);
+	m_hair->DrawShadow(m_mtxParentChild[1], layout_in, vs_in, ps_in);
 	//素手で無い時
 	if (m_tools != nullptr) {
-		m_tools->DrawShadow(m_mtxParentChild[2],layout_in, vs_in, ps_in);
+		m_tools->DrawShadow(m_mtxParentChild[2], layout_in, vs_in, ps_in);
 	}
 }
 
@@ -250,7 +260,7 @@ void Player::Update() {
 	//確定した行動
 	ActionType action = m_action_priority[0].action;
 	WorkType work = m_work_priority[0].work;
-	
+
 	//行動を確定
 	{
 		int index = 0;
@@ -280,6 +290,9 @@ void Player::Update() {
 	//行動分岐
 	//行動が意味をなさない場合休憩状態へ移行
 	bool iswork = false;
+	static float timer = 0;
+	timer += io.DeltaTime;
+
 	switch (action)
 	{
 	case Player::ActionType::WORK:
@@ -313,14 +326,18 @@ void Player::Update() {
 
 	case Player::ActionType::SLEEP:
 		break;
-		
+
 	case Player::ActionType::ENTERTAINMENT:
 		break;
 
 	case Player::ActionType::REST:
-		Rest();
+		//家が無い場合は徘徊しない
+		if (timer > 5 && m_house != nullptr) {
+			timer = 0;
+			Rest();
+		}
 		break;
-	
+
 	case Player::ActionType::ACTION_MAX:
 		break;
 
@@ -388,12 +405,12 @@ void Player::Update() {
 		XMFLOAT4 qt;    //クオータニオン
 
 		//行列からクオータニオンを生成
-		DX11GetQtfromMatrix(m_mtx,qt);
+		DX11GetQtfromMatrix(m_mtx, qt);
 
 		XMFLOAT4 qtx, qty, qtz;    //クオータニオン
 
 		//指定軸回転のクオータニオンを生成
-		DX11QtRotationAxis(qtx,axisX,angle.x);
+		DX11QtRotationAxis(qtx, axisX, angle.x);
 		DX11QtRotationAxis(qty, axisY, angle.y);
 		DX11QtRotationAxis(qtz, axisZ, angle.z);
 
@@ -405,7 +422,7 @@ void Player::Update() {
 		DX11QtMul(tempqt2, qty, qtz);
 
 		XMFLOAT4 tempqt3;
-		DX11QtMul(tempqt3, tempqt1,tempqt2);
+		DX11QtMul(tempqt3, tempqt1, tempqt2);
 
 		//クオータニオンをノーマライズ
 		DX11QtNormalize(tempqt3, tempqt3);
@@ -420,52 +437,52 @@ void Player::Update() {
 	if (m_ismoving && movepos.y > -50 && movepos.y < 50)
 	{
 		//walk animation
-		    m_animdata.animno = AnimationType::WALK;
-			if (m_carry.num > 0)
+		m_animdata.animno = AnimationType::WALK;
+		if (m_carry.num > 0)
+		{
+			m_animdata.animno = AnimationType::CARRY_RUN;
+		}
+
+		if (m_pos.x != movepos.x || m_pos.y != movepos.y || m_pos.z != movepos.z) {
+
+			//向く場所が移動先と同じ場合振り向きをOFF
+			XMVECTOR Pos = XMVectorSet(m_pos.x, m_pos.y, -m_pos.z, 0.0f);
+			XMVECTOR At = XMVectorSet(movepos.x, movepos.y, -movepos.z, 0.0f);;
+			XMVECTOR Up = XMVectorSet(0, 1, 0, 0.0f);
+
+			//Y軸回転以外を切る
+			ALIGN16 XMMATRIX lookat;
+			XMFLOAT4X4 lotateX;
+			XMMATRIX LotateXMtx;
+			XMFLOAT4X4 lotateZ;
+			XMMATRIX LotateZMtx;
+
+			DX11MtxRotationX(0, lotateX);
+			LotateXMtx = XMLoadFloat4x4(&lotateX);
+			DX11MtxRotationZ(0, lotateZ);
+			LotateZMtx = XMLoadFloat4x4(&lotateZ);
+			lookat = XMMatrixMultiply(LotateXMtx, lookat);
+			lookat = XMMatrixMultiply(LotateZMtx, lookat);
+
+			XMMATRIX scale = XMMatrixScaling(0.03, 0.03, 0.03);
+			lookat = XMMatrixLookAtLH(Pos, At, Up);
+			lookat = XMMatrixMultiply(lookat, scale);
+
+			XMStoreFloat4x4(&m_mtx, lookat);
+
+		}
+		//他の構造物とヒットしていないか
+		bool hit = false;
+
+		std::vector<COBB> obbs = BuildingMgr::GetInstance().GetAllObb();
+
+		for (int i = 0; i < obbs.size(); i++)
+		{
+			if (obbs[i].Collision(m_obb))
 			{
-				m_animdata.animno = AnimationType::CARRY_RUN;
+				hit = true;
 			}
-
-			if (m_pos.x != movepos.x || m_pos.y != movepos.y || m_pos.z != movepos.z) {
-
-				//向く場所が移動先と同じ場合振り向きをOFF
-				XMVECTOR Pos = XMVectorSet(m_pos.x, m_pos.y, -m_pos.z, 0.0f);
-				XMVECTOR At = XMVectorSet(movepos.x, movepos.y, -movepos.z, 0.0f);;
-				XMVECTOR Up = XMVectorSet(0, 1, 0, 0.0f);
-
-				//Y軸回転以外を切る
-				ALIGN16 XMMATRIX lookat;
-				XMFLOAT4X4 lotateX;
-				XMMATRIX LotateXMtx;
-				XMFLOAT4X4 lotateZ;
-				XMMATRIX LotateZMtx;
-
-				DX11MtxRotationX(0, lotateX);
-				LotateXMtx = XMLoadFloat4x4(&lotateX);
-				DX11MtxRotationZ(0, lotateZ);
-				LotateZMtx = XMLoadFloat4x4(&lotateZ);
-				lookat = XMMatrixMultiply(LotateXMtx, lookat);
-				lookat = XMMatrixMultiply(LotateZMtx, lookat);
-
-				XMMATRIX scale = XMMatrixScaling(0.03, 0.03, 0.03);
-				lookat = XMMatrixLookAtLH(Pos, At, Up);
-				lookat = XMMatrixMultiply(lookat, scale);
-
-				XMStoreFloat4x4(&m_mtx, lookat);
-
-			}
-			//他の構造物とヒットしていないか
-			bool hit = false;
-
-			std::vector<COBB> obbs = BuildingMgr::GetInstance().GetAllObb();
-
-			for (int i = 0; i < obbs.size(); i++)
-			{
-				if (obbs[i].Collision(m_obb))
-				{
-					hit = true;
-				}
-			}
+		}
 		if (m_pos.x > movepos.x)
 		{
 			m_pos.x--;
@@ -516,7 +533,7 @@ void Player::Update() {
 		}
 	}
 
-	m_model->Update((int)m_animdata.animno,m_mtx);
+	m_model->Update((int)m_animdata.animno, m_mtx);
 
 	//アニメーションを更新
 	AnimationUpdate();
@@ -579,7 +596,7 @@ void Player::AnimationUpdate()
 		m_animdata.timer = 0;
 	}
 	//Idle2から戻る
-	
+
 	if (m_animdata.animno == AnimationType::IDLE_02 && m_model->GetModelData().m_AnimFrame >= animation->mDuration)
 	{
 		m_animdata.animno = AnimationType::IDLE_00;
@@ -635,6 +652,56 @@ void Player::CaliculateParentChildMtx()
 
 void Player::Rest()
 {
+	//移動中の場合入らない
+	if (!m_ismoving)
+	{
+		//家の周辺を探索
+		XMFLOAT3 move_pos = XMFLOAT3(-999, -999, -999);
+
+		//移動先検索を最大２０回まで抽選
+		for (int i = 0; i < 20; i++)
+		{
+			move_pos.x = (rand() % (int)m_house->GetPos().x) + 200;
+			move_pos.z = (rand() % (int)m_house->GetPos().z) + 200;
+			switch (rand() % 3)
+			{
+			case 0:
+				move_pos.x = -move_pos.x;
+				break;
+			case 1:
+				move_pos.z = -move_pos.z;
+				break;
+			case 2:
+				move_pos.x = -move_pos.x;
+				move_pos.z = -move_pos.z;
+				break;
+			default:
+				break;
+			}
+			if (!RouteSearch::GetInstance().IsHitBuilding(move_pos))
+			{
+				move_pos.y = m_pos.y;
+				break;
+			}
+		}
+		//ルートが発見できた場合
+		if (move_pos.y != -999)
+		{
+			movepos = move_pos;
+			m_ismoving = true;
+			//移動先の指定
+			moveque = RouteSearch::GetInstance().SearchRoute(m_pos, movepos);
+			//最初の移動先をキューの最後にする
+			if (moveque.size() > 0) {
+				XMFLOAT2 backque = moveque[moveque.size() - 1];
+				moveque.pop_back();
+				movepos = XMFLOAT3(backque.x, m_pos.y, backque.y);
+
+				m_ismoving = true;
+			}
+		}
+	}
+
 }
 
 bool Player::Work_Mine(void)
@@ -688,7 +755,7 @@ bool Player::Work_Mine(void)
 		}
 	}
 	//目的地に到達した
-	if (ResourceManager::GetInstance().m_resources.size() != 0 &&m_obb.Collision(*ResourceManager::GetInstance().m_resources[index]->GetOBB()) && moveque.size() == 0)
+	if (ResourceManager::GetInstance().m_resources.size() != 0 && m_obb.Collision(*ResourceManager::GetInstance().m_resources[index]->GetOBB()) && moveque.size() == 0)
 	{
 		//m_ismoving = false;
 		ismine = true;
@@ -818,7 +885,6 @@ bool Player::Work_Carry(void)
 				item.num = ResourceManager::GetInstance().GetInstallationResource()[index]->GetData()->amount;
 				SetCarryItem(item.tag, item.num);
 				m_animdata.animno = AnimationType::CARRY_IDLE;
-
 				//設置物削除
 				ResourceManager::GetInstance().EraseInstallation(index);
 			}
@@ -882,7 +948,7 @@ bool Player::Work_Carry(void)
 				int remaining = BuildingMgr::GetInstance().GetSouko()[index]->PushItem(m_carry.tag, m_carry.num);
 
 				//倉庫に入り切る場合
-				if (remaining <= 0) 
+				if (remaining <= 0)
 				{
 					m_carry.tag = ItemType::ITEM_NONE;
 					m_carry.num = 0;

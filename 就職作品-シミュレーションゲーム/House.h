@@ -4,15 +4,18 @@
 #include "ModelMgr.h"
 #include "GameButton.h"
 #include "dx11mathutil.h"
-#include "player.h"
 #include <vector>
 #include "obb.h"
+#include "NameGenerator.h"
+#include "player.h"
+
+class Player;
 
 class House : public GameObject
 {
 
 public:
-
+	//Playerへの参照
 	struct Data
 	{
 		GameButton::HouseButtonType type;    //タイプ
@@ -32,6 +35,35 @@ public:
 	void Update();
 	//終了処理
 	void Finalize();
+
+	bool SetResident(Player* player)
+	{
+		//削除されたプレイヤーを参照していないか
+		if (player == nullptr)
+		{
+			return false;
+		}
+		//同じ住人が登録されていないか
+		bool overlap = false;
+		for (int i = 0; i < m_residents.size(); i++)
+		{
+			if (m_residents[i] == player)
+			{
+				overlap = true;
+			}
+			//同一苗字以外が入居していないか
+			if (m_residents[i]->GetName(NameGenerator::NAMETYPE::FAMILLY) != player->GetName(NameGenerator::NAMETYPE::FAMILLY))
+			{
+				overlap = true;
+			}
+		}
+		if (!overlap)
+		{
+			m_residents.push_back(player);
+			player->SetHouse(this);
+			return true;
+		}
+	}
 
 	//バウンディングスフィアを取得
 	COBB GetOBB(void)
@@ -64,5 +96,7 @@ private:
 	COBB m_obb_entrance;
 	Data m_data;
 	CModel* m_model;// モデルデータのポインタ
+	int Resident_max;
+	std::vector<Player*> m_residents;
 };
 
