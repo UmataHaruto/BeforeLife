@@ -11,7 +11,7 @@ void Stage::Init()
 		MAP_WIDTH * MAP_HEIGHT * MAP_DEPTH,
 		"assets/Modeldata/Block/GrassBlock.obj",
 		"shader/vsinstance.fx",
-		"shader/ps_shadowmap.fx",
+		"shader/ps.fx",
 		"assets/Modeldata/Block/"
 	);
 	// s—ñ‰Šú‰»

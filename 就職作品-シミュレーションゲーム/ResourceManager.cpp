@@ -4,6 +4,15 @@
 #include "BuildingMgr.h"
 void ResourceManager::Init()
 {
+	//インスタンシング描画初期化
+	m_resources_Instance.InitiInstancing(
+		1000,
+		"assets/Modeldata/tree/conifer00/conifer01.fbx",
+		"shader/vsinstance.fx",
+		"shader/ps.fx",
+		"assets/Modeldata/tree/conifer00/"
+	);
+
 	for (int i = 0; i < (int)ItemType::ITEM_MAX; i++)
 	{
 		m_item[i] = 0;
@@ -12,6 +21,7 @@ void ResourceManager::Init()
 
 void ResourceManager::Update()
 {
+	m_resources_pos_world.clear();
 	for (int i = 0; i < m_resources.size(); i++)
 	{
 		m_resources[i]->Update();
@@ -20,7 +30,11 @@ void ResourceManager::Update()
 		{
 			m_resources.erase(m_resources.begin() + i);
 		}
+		//描画用の座標のみをベクターに格納
+		m_resources_pos_world.push_back(m_resources[i]->GetMtx());
 	}
+
+	m_resources_Instance.InstanceUpdate(m_resources_pos_world);
 
 	for (int i = 0; i < (int)ItemType::ITEM_MAX; i++)
 	{
@@ -37,7 +51,7 @@ void ResourceManager::Update()
 			m_item[j] += BuildingMgr::GetInstance().GetSouko()[i]->GetItemNum((ItemType)j);
 		}
 	}
-	
+
 }
 
 void ResourceManager::Draw()
@@ -69,7 +83,7 @@ void ResourceManager::Draw()
 	XMFLOAT4X4 ans;
 	XMStoreFloat4x4(&ans, View);
 
-	for (int i = 0; i < m_resources.size(); i++)
+	/*for (int i = 0; i < m_resources.size(); i++)
 	{
 		if(IsInFrustum(m_resources[i]->GetPos(),ans)){
 			m_resources[i]->Draw();
@@ -81,7 +95,9 @@ void ResourceManager::Draw()
 		if (IsInFrustum(m_installation_resources[i]->GetPos(), ans)) {
 			m_installation_resources[i]->Draw();
 		}
-	}
+	}*/
+	m_resources_Instance.DrawInstance(m_resources_pos_world.size());
+
 }
 
 void ResourceManager::DrawShadow(ID3D11InputLayout* layout_in, ID3D11VertexShader* vs_in, ID3D11PixelShader* ps_in)

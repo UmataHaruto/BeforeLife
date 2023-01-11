@@ -291,7 +291,7 @@ unsigned long Application :: MainLoop()
 				break;
 			}
 
-			int64_t sleep_time = 16666 - delta_time;
+			int64_t sleep_time = 6944 - delta_time;
 
 			if (sleep_time > 0) {
 				float tt = sleep_time / 1000.0f;
