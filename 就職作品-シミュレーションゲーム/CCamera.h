@@ -84,13 +84,13 @@ public:
 
 	void SetZoom(float Zoom)
 	{
-		if (m_Zoom < m_MinZoom) {
+		if (Zoom < m_MinZoom) {
 			m_Zoom = m_MinZoom;
 		}
-		if (m_Zoom > m_MinZoom) {
+		if (Zoom > m_MinZoom && Zoom < m_MaxZoom) {
 			m_Zoom = Zoom;
 		}
-		if (m_Zoom > m_MaxZoom) {
+		if (Zoom > m_MaxZoom) {
 			m_Zoom = m_MaxZoom;
 		}
 	}
@@ -156,8 +156,8 @@ private:
 	XMFLOAT3		m_Up;				// 上向きベクトル
 
 	float           m_Zoom = 1.0f;                  //ズーム率
-	float           m_MaxZoom = 100;         //最大ズーム率
-	float           m_MinZoom = -100;           //最小ズーム率
+	float           m_MaxZoom = 2.6;         //最大ズーム率
+	float           m_MinZoom = 0.5;           //最小ズーム率
 
 	float			m_near;
 	float			m_Aspect;

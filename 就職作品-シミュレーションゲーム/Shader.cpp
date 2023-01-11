@@ -294,10 +294,16 @@ bool CreateIndexBufferWrite(ID3D11Device* device, unsigned int indexnum, void* i
 	ZeroMemory(&InitData, sizeof(InitData));
 	InitData.pSysMem = indexdata;
 
-	HRESULT hr = device->CreateBuffer(&bd, &InitData, pIndexBuffer);
-	if (FAILED(hr)) {
+	if (*pIndexBuffer != nullptr) {
+		HRESULT hr = device->CreateBuffer(&bd, &InitData, pIndexBuffer);
+		if (FAILED(hr)) {
 			MessageBox(nullptr, "CreateBuffer(index buffer) error", "Error", MB_OK);
 			return false;
+		}
+	}
+	else
+	{
+		return false;
 	}
 	return true;
 }

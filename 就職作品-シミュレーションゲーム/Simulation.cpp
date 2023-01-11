@@ -5,7 +5,6 @@
 #include    "skydome.h"
 #include    "Effect.h"
 #include    "DX11util.h"
-#include    "mystring.h"
 #include    "2dsystem.h"
 #include    "Shader.h"
 #include "DirectXMath.h"
@@ -34,6 +33,7 @@
 #include "RouteSearch.h"
 #include "shaderhashmap.h"
 #include "DX11util.h"
+#include "PerlinNoise.h"
 
 Skydome g_skybox;       // スカイドーム
 Sea g_terrain;    //地形(外側)
@@ -248,10 +248,42 @@ void  SimulationInit() {
 	//ステージコリジョンを作成
 	StageHitInit();
 
+	//地形生成パーリンノイズ
+	Resource::Data resource_data;
+	//スポーン座標
+	int endurance = 100;
+	int endurancemax = 100;
+	int hardness = 0;
+	int amount = 1;
+
+	int model_select = 0;
+	int modeltype_select = 1;
+
+	PerlinNoise noise;
+	std::array < PerlinNoise::Pint, 40000 > noise_array;
+	noise_array = noise.setSeed(1);
+
+	for (int j = 0; j < 200; j++)
+	{
+	    for (int i = 0; i < 200; i++)
+	    {
+	        if (noise_array[i + (j * 200)] > 30 && noise_array[i + (j * 200)] < 32) {
+				resource_data.type = ItemType::WOOD;
+				resource_data.pos = XMFLOAT3(i * 12.5,0,-j * 12.5);
+				resource_data.Endurance = endurance;
+				resource_data.EnduranceMax = endurancemax;
+				resource_data.Hardness = hardness;
+				resource_data.amount = amount;
+				ResourceManager::GetInstance().CreateResource(resource_data,MODELID::CONIFER00);
+			}
+	    }
+	}
+
+	//ノイズから資源を生成
+
+
 	//２Dの初期化
 	Init2D();
-	//２Dテキスト初期化
-	MyString::InitMyString();
 
 	InitShadowMap();
 
@@ -354,8 +386,6 @@ void  SimulationExit() {
 
 	BuildingMgr::GetInstance().Uninit();
 
-	MyString::ClearMyString();
-
 	//スカイドーム終了処理
 	g_skybox.Finalize();
 
@@ -440,7 +470,10 @@ void  SimulationUpdate() {
 	float speed = 5;
 	float dot = 0;
 
+	XMFLOAT3 MaxEyePos = XMFLOAT3(2500, 1000,200);
+	XMFLOAT3 MinEyePos = XMFLOAT3(0, -50, -2500);
 
+	XMFLOAT4X4 CameraPos_old = FirstCameraPos;
 	DX11MtxIdentity(Rotation);
 	//カメラタイプに応じて設定
 	switch (cameratype)
@@ -458,25 +491,28 @@ void  SimulationUpdate() {
 		float zoom;
 		if (CDirectInput::GetInstance().CheckKeyBuffer(DIK_A)) {
 			Stage::GetInstance().Update();
-			FirstCameraPos._41 -= speed * FirstCameraPos._11;
-			FirstCameraPos._43 -= speed * FirstCameraPos._13;
+				CameraPos_old._41 -= speed * FirstCameraPos._11;
+				CameraPos_old._43 -= speed * FirstCameraPos._13;
 		}
 		if (CDirectInput::GetInstance().CheckKeyBuffer(DIK_D)) {
 			Stage::GetInstance().Update();
-			FirstCameraPos._41 += speed * FirstCameraPos._11;
-			FirstCameraPos._43 += speed * FirstCameraPos._13;
+				CameraPos_old._41 += speed * FirstCameraPos._11;
+				CameraPos_old._43 += speed * FirstCameraPos._13;
 		}
 		if (CDirectInput::GetInstance().CheckKeyBuffer(DIK_W)) {
 			Stage::GetInstance().Update();
-			FirstCameraPos._41 += speed * FirstCameraPos._31;
-			FirstCameraPos._43 += speed * FirstCameraPos._33;
+				CameraPos_old._41 += speed * FirstCameraPos._31;
+				CameraPos_old._43 += speed * FirstCameraPos._33;
 		}
 		if (CDirectInput::GetInstance().CheckKeyBuffer(DIK_S)) {
-			Stage::GetInstance().Update();
-			FirstCameraPos._41 -= speed * FirstCameraPos._31;
-			FirstCameraPos._43 -= speed * FirstCameraPos._33;
+				Stage::GetInstance().Update();
+				CameraPos_old._41 -= speed * FirstCameraPos._31;
+				CameraPos_old._43 -= speed * FirstCameraPos._33;
 		}
-
+		if (CameraPos_old._41 < MaxEyePos.x && CameraPos_old._42 < MaxEyePos.y && CameraPos_old._43 < MaxEyePos.z && CameraPos_old._41 > MinEyePos.x && CameraPos_old._42 > MinEyePos.y && CameraPos_old._43 > MinEyePos.z)
+		{
+			FirstCameraPos = CameraPos_old;
+		}
 		if (CDirectInput::GetInstance().CheckKeyBuffer(DIK_LEFT)) {
 			Stage::GetInstance().Update();
 			CameraAngle.y-= 0.5;
@@ -485,25 +521,27 @@ void  SimulationUpdate() {
 			Stage::GetInstance().Update();
 			CameraAngle.y += 0.5;
 		}
-
-		DX11MtxRotationY(CameraAngle.y, Rotation);
-		RotationMtx = XMLoadFloat4x4(&Rotation);
-		PositionMtx = XMLoadFloat4x4(&FirstCameraPos);
-		PositionMtx = XMMatrixMultiply(RotationMtx, PositionMtx);
-		XMStoreFloat4x4(&FirstCameraPos, PositionMtx);
-		CCamera::GetInstance()->SetEye(XMFLOAT3(FirstCameraPos._41, FirstCameraPos._42, FirstCameraPos._43));
-
-		CCamera::GetInstance()->TPSCamera(FirstCameraPos);
-		if (io.MouseWheel != 0)
+		if (FirstCameraPos._41 < MaxEyePos.x && FirstCameraPos._42 < MaxEyePos.y && FirstCameraPos._43 < MaxEyePos.z && FirstCameraPos._41 > MinEyePos.x && FirstCameraPos._42 > MinEyePos.y && FirstCameraPos._43 > MinEyePos.z)
 		{
-			if (io.MouseWheel > 0)
+			DX11MtxRotationY(CameraAngle.y, Rotation);
+			RotationMtx = XMLoadFloat4x4(&Rotation);
+			PositionMtx = XMLoadFloat4x4(&FirstCameraPos);
+			PositionMtx = XMMatrixMultiply(RotationMtx, PositionMtx);
+			XMStoreFloat4x4(&FirstCameraPos, PositionMtx);
+			CCamera::GetInstance()->SetEye(XMFLOAT3(FirstCameraPos._41, FirstCameraPos._42, FirstCameraPos._43));
+
+			CCamera::GetInstance()->TPSCamera(FirstCameraPos);
+			if (io.MouseWheel != 0)
 			{
-				Stage::GetInstance().Update();
-				CCamera::GetInstance()->SetZoom(CCamera::GetInstance()->GetZoom() - 0.1);
-			}
-			else {
-				Stage::GetInstance().Update();
-				CCamera::GetInstance()->SetZoom(CCamera::GetInstance()->GetZoom() + 0.1);
+				if (io.MouseWheel > 0)
+				{
+					Stage::GetInstance().Update();
+					CCamera::GetInstance()->SetZoom(CCamera::GetInstance()->GetZoom() - 0.1);
+				}
+				else {
+					Stage::GetInstance().Update();
+					CCamera::GetInstance()->SetZoom(CCamera::GetInstance()->GetZoom() + 0.1);
+				}
 			}
 		}
 		break;
@@ -568,7 +606,7 @@ void  SimulationDraw() {
 	VillagerMgr::GetInstance().Draw();
 
 
-	g_skybox.Draw();
+	//g_skybox.Draw();
 
 	//2D描画
 	TurnOffZbuffer();

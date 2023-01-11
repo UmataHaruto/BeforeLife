@@ -182,6 +182,7 @@
     <ClCompile Include="mystring.cpp" />
     <ClCompile Include="NameGenerator.cpp" />
     <ClCompile Include="obb.cpp" />
+    <ClCompile Include="PerlinNoise.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="quad2d.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
@@ -259,6 +260,7 @@
     <ClInclude Include="mystring.h" />
     <ClInclude Include="NameGenerator.h" />
     <ClInclude Include="obb.h" />
+    <ClInclude Include="PerlinNoise.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="quad2d.h" />
     <ClInclude Include="ResourceManager.h" />

@@ -20,14 +20,8 @@ void Resource::Init(Data input, MODELID model)
 
 	std::vector<XMFLOAT3> vertices;
 
-	for (auto& m : meshes) {
-		for (auto& v : m.m_vertices) {
-			vertices.emplace_back(v.m_Pos);
-		}
-	}
-
 	// ‹«ŠE‹…‰Šú‰»
-	m_obb.Init(m_model);
+	//m_obb.Init(m_model);
 
 	data = input;
 }
@@ -39,7 +33,7 @@ void Resource::Draw()
 
 	//‹«ŠEbox•\¦
 	if (!GameButton::GetInstance().GetDebug()) {
-		m_obb.Draw();
+	//	m_obb.Draw();
 	}
 }
 

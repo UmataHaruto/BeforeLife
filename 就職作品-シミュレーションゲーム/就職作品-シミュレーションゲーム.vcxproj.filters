@@ -315,6 +315,9 @@
     <ClCompile Include="SceneMgr.cpp">
       <Filter>ソース ファイル\SceneMgr</Filter>
     </ClCompile>
+    <ClCompile Include="PerlinNoise.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Effect.h">
@@ -544,6 +547,9 @@
     </ClInclude>
     <ClInclude Include="SceneMgr.h">
       <Filter>ソース ファイル\SceneMgr</Filter>
+    </ClInclude>
+    <ClInclude Include="PerlinNoise.h">
+      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

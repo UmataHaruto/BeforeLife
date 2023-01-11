@@ -87,7 +87,7 @@ public:
 	{(const MODELID)MODELID::AXE,"assets/ModelData/Tools/Axe/Axe.obj","shader/vs.fx","shader/ps.fx","assets/ModelData/Tools/Axe/"},
 	{(const MODELID)MODELID::BASKET,"assets/ModelData/Tools/Basket/Basket.obj","shader/vs.fx","shader/ps.fx","assets/ModelData/Tools/Basket/"},
 	{(const MODELID)MODELID::SKYBOX,"assets/skydome/Dome_X502.x","shader/vs.fx","shader/ps.fx","assets/skydome/"},
-	{(const MODELID)MODELID::GRASS,"assets/Modeldata/Block/GrassBlock.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Block/"},
+	{(const MODELID)MODELID::GRASS,"assets/Modeldata/Block/GrassBlock.obj","shader/vs_shadowmap.fx","shader/ps.fx","assets/Modeldata/Block/"},
 	{(const MODELID)MODELID::CONIFER00,"assets/Modeldata/tree/conifer00/conifer01.fbx","shader/vsoneskin.fx","shader/ps.fx","assets/Modeldata/tree/conifer00/"},
 	{(const MODELID)MODELID::ORE_IRON,"assets/Modeldata/Ore/Normal/Ore_Normal.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Ore/Normal/"},
 	{(const MODELID)MODELID::SMALLHOUSE,"assets/Modeldata/House/House_Small.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/House/"},

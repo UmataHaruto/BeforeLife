@@ -215,7 +215,7 @@ namespace MyString {
 		// インデックスバッファ生成
 		sts = CreateIndexBufferWrite(device, MAXMOJICNT * 4 * 2, g_indices.data(), &g_IndexBuffer);
 		if (!sts) {
-			MessageBox(nullptr, "CreateIndexBuffer error", "error", MB_OK);
+			MessageBox(nullptr, "MyString CreateIndexBuffer error", "error", MB_OK);
 			return false;
 		}
 

@@ -86,7 +86,7 @@ bool Quad2D::Init(uint32_t width,
 		&m_indexbuffer				// インデックスバッファ
 	);
 	if (!sts) {
-		MessageBox(nullptr, "CreateIndexBuffer error", "error", MB_OK);
+		MessageBox(nullptr, "Quad2D CreateIndexBuffer error", "error", MB_OK);
 		return false;
 	}
 

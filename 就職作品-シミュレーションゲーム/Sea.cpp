@@ -8,9 +8,9 @@ bool Sea::Init()
 	m_sea_model = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::SEA)].modelname);
 	m_sea_under_model = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::SEA_UNDER)].modelname);
 
-	m_mtx._41 = -300;
+	m_mtx._41 =  800;
 	m_mtx._42 = -604;
-	m_mtx._43 = -350;
+	m_mtx._43 = -500;
 
 
 	return true;
