@@ -456,6 +456,8 @@ void GameButton::Draw()
 			ImGui::SliderFloat(u8"ニアクリップ", &m_shadow_parameter.nearclip, 1, 1000);
 			ImGui::SliderFloat(u8"ファークリップ", &m_shadow_parameter.farclip, 1, 50000);
 			ImGui::SliderFloat(u8"FOV", &m_shadow_parameter.Fov, 1, 300);
+			ImGui::SliderInt(u8"フレームレート", &Application::FPS, 1, 300);
+
 
 			static ImVec4 color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 200.0f / 255.0f);
 

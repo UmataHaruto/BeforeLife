@@ -42,7 +42,7 @@ const uint32_t		Application::CLIENT_HEIGHT = 720;
 uint32_t			Application::SYSTEM_WIDTH = 0;
 uint32_t			Application::SYSTEM_HEIGHT = 0;
 
-const float			Application::FPS = 60;
+int		        	Application::FPS = 60;
 
 float               Application::GAME_SPEED = 1.0f;
 int                 Application::GAME_TIME = 240;
@@ -291,7 +291,7 @@ unsigned long Application :: MainLoop()
 				break;
 			}
 
-			int64_t sleep_time = 6944 - delta_time;
+			int64_t sleep_time = (1000000 / (Application::FPS + 35)) - delta_time;
 
 			if (sleep_time > 0) {
 				float tt = sleep_time / 1000.0f;

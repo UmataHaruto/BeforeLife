@@ -34,9 +34,9 @@ public:
 	static uint32_t				SYSTEM_WIDTH;					// = 0;
 	static uint32_t				SYSTEM_HEIGHT;					// = 0;
 
-	static const float			FPS;							// = 60;
+	static int			    FPS;							// = 60;
 	static float                GAME_SPEED;                     //ゲームの進行スピード
-	static int                GAME_TIME;                      //ゲーム時間
+	static int                  GAME_TIME;                      //ゲーム時間
 
 private:
 	HWND					m_hWnd;							// Windowハンドル
