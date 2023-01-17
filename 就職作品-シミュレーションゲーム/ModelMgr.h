@@ -6,6 +6,7 @@
 #include    <vector>
 #include	"dx11mathutil.h"
 #include    <locale.h>
+#include    "obb.h"
 
 #define ALIGN16 _declspec(align(16))
 
@@ -67,11 +68,17 @@ struct MY_MATERIAL
 	CHAR szTextureName[110];//テクスチャーファイル名
 };
 
+struct modelhashdata
+{
+	CModel m_model;
+	COBB m_collider;
+};
+
 class ModelMgr {
 private:
 	ModelMgr(){
 	}
-	std::unordered_map<std::string, std::unique_ptr<CModel>> m_modelhashmap;
+	std::unordered_map<std::string, std::unique_ptr<modelhashdata>> m_modelhashmap;
 	//マテリアル情報
 	MY_MATERIAL m_Material;
 public:
@@ -93,7 +100,7 @@ public:
 	{(const MODELID)MODELID::SMALLHOUSE,"assets/Modeldata/House/House_Small.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/House/"},
 	{(const MODELID)MODELID::TERRAIN_COLLISION,"assets/Modeldata/terrain/terrainColision.obj","shader/vs_shadowmap.fx","shader/ps_stage_shadow.fx","assets/Modeldata/terrain/"},
 	{(const MODELID)MODELID::SMALLSOUKO,"assets/Modeldata/Souko/Souko.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Souko/"},
-	{(const MODELID)MODELID::CREATE_WOOD,"assets/Modeldata/Create/CreatePlane.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Create/"},
+	{(const MODELID)MODELID::CREATE_PLANE,"assets/Modeldata/Create/CreatePlane.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Create/"},
 	{(const MODELID)MODELID::CREATE_WOOD,"assets/Modeldata/Create/CreateWood.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Create/"},
 	{(const MODELID)MODELID::CREATE_COAL,"assets/Modeldata/Create/CreateCoalOre.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Create/"},
 	{(const MODELID)MODELID::CREATE_IRON,"assets/Modeldata/Create/CreateIronOre.obj","shader/vs_shadowmap.fx","shader/ps_shadowmap.fx","assets/Modeldata/Create/"},
@@ -117,15 +124,16 @@ public:
 	//終了処理
 	void Finalize() {
 		for (auto itr = m_modelhashmap.begin(); itr != m_modelhashmap.end(); ++itr) {
-			(itr->second)->Uninit();
+			//(itr->second)->Uninit();
+			(itr->second)->m_model.Uninit();
 		}
 	}
 	//モデルを読み込み(モデル名,vsファイル,psファイル,テクスチャファイル)
 	bool LoadModel(std::string modelfilename, std::string vsfilename,std::string psfilename,std::string texfilefolder) {
 
-		std::unique_ptr<CModel>	p;
+		std::unique_ptr<modelhashdata>	p;
 
-		p = std::make_unique<CModel>();
+		p = std::make_unique<modelhashdata>();
 
 		ID3D11Device* pdevice = CDirectXGraphics::GetInstance()->GetDXDevice();
 		ID3D11DeviceContext* m_DeviceContext = CDirectXGraphics::GetInstance()->GetImmediateContext();
@@ -183,10 +191,12 @@ public:
 
 
 		// モデル読み込み
-		bool sts = p->Init(modelfilename.c_str(), vsfilename.c_str(), psfilename.c_str(), texfilefolder.c_str());
+		bool sts = p->m_model.Init(modelfilename.c_str(), vsfilename.c_str(), psfilename.c_str(), texfilefolder.c_str());
 		if (!sts) {
 			return false;
 		}
+
+		p->m_collider.Init(&p->m_model);
 
 		// unordered_mapコンテナに格納
 		m_modelhashmap[modelfilename].swap(p);
@@ -201,7 +211,17 @@ public:
 		if (it == m_modelhashmap.end()) {
 			return nullptr;
 		}
-		return m_modelhashmap[key].get();
+		return &m_modelhashmap[key].get()->m_model;
+	}
+
+	//モデルの初期コライダーを取得
+	COBB GetModelCollider(std::string key)
+	{
+		auto it = m_modelhashmap.find(key);
+		if (it == m_modelhashmap.end()) {
+			return COBB();
+		}
+		return m_modelhashmap[key].get()->m_collider;
 	}
 
 	void CreateShaderResourceViewFromFile(ID3D11ShaderResourceView* m_pTexture, const wchar_t* FileName);

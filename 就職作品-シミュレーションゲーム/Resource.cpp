@@ -21,7 +21,7 @@ void Resource::Init(Data input, MODELID model)
 	std::vector<XMFLOAT3> vertices;
 
 	// ‹«ŠE‹…‰Šú‰»
-	//m_obb.Init(m_model);
+	m_obb = ModelMgr::GetInstance().GetModelCollider(ModelMgr::GetInstance().g_modellist[static_cast<int>(model)].modelname);
 
 	data = input;
 }
@@ -33,8 +33,13 @@ void Resource::Draw()
 
 	//‹«ŠEbox•\¦
 	if (!GameButton::GetInstance().GetDebug()) {
-	//	m_obb.Draw();
+		m_obb.Draw();
 	}
+}
+
+void Resource::DrawCollider()
+{
+	m_obb.Draw();
 }
 
 void Resource::DrawShadow(ID3D11InputLayout* layout_in, ID3D11VertexShader* vs_in, ID3D11PixelShader* ps_in)

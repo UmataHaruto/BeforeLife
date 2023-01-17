@@ -130,6 +130,13 @@ public:
 		AnimationType animno;
 
 	};
+
+	struct ResourceMemoryData
+	{
+		ItemType m_type;
+		XMFLOAT3 m_pos;
+	};
+
 	//初期配置
 	static PlayerInitData ObjectInitData[];
 
@@ -323,14 +330,16 @@ private:
 	CModel* m_tools;// 道具
 	CModel* m_hair;//髪
 	COBB m_obb;    //コリジョン
+	COBB m_perceptual_area;    //知覚領域
 
 	//自宅
 	House* m_house;
 
 	//移動目標
-	XMFLOAT3 movepos;
+	XMFLOAT3 m_movepos;
 	//移動目標キュー
-	std::vector<XMFLOAT2> moveque;
+	std::vector<XMFLOAT2> m_moveque;
+	std::vector<ResourceMemoryData> m_resource_memory;
 
 	//移動中
 	bool m_ismoving = false;

@@ -1,4 +1,4 @@
-newmtl CreateIronOre:blinn1SG
+newmtl CreateCoalOre:blinn1SG
 illum 4
 Kd 0.00 0.00 0.00
 Ka 0.00 0.00 0.00
@@ -6,11 +6,13 @@ Tf 1.00 1.00 1.00
 map_Kd crate_2__pbr_diffuse.jpg
 Ni 1.00
 Ks 0.50 0.50 0.50
-Ns 0.06
-newmtl CreateIronOre:initialShadingGroup
+Ns 18.00
+newmtl CreateCoalOre:initialShadingGroup
 illum 4
 Kd 0.00 0.00 0.00
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
 map_Kd initialShadingGroup_albedo.jpg
 Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 18.00

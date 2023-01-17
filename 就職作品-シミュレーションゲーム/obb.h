@@ -1,7 +1,7 @@
 #pragma once
 #include	<DirectXMath.h>
-#include	"CModel.h"
 #include	"Box.h"
+#include "CModel.h"
 
 class COBB
 {

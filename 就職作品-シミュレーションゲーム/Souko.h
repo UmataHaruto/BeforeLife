@@ -85,6 +85,11 @@ public:
 		return 0;
 	}
 
+	inline int GetAllItemNum()
+	{
+		return m_itemnum;
+	}
+
 	//ƒAƒCƒeƒ€‚ğŠi”[(–ß‚è’l:Ši”[‚Å‚«‚È‚©‚Á‚½”)
 	int PushItem(ItemType tag,int input);
 private:

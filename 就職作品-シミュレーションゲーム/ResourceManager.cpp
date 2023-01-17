@@ -30,8 +30,11 @@ void ResourceManager::Update()
 		{
 			m_resources.erase(m_resources.begin() + i);
 		}
-		//描画用の座標のみをベクターに格納
-		m_resources_pos_world.push_back(m_resources[i]->GetMtx());
+		else
+		{
+			//描画用の座標のみをベクターに格納
+			m_resources_pos_world.push_back(m_resources[i]->GetMtx());
+		}
 	}
 
 	m_resources_Instance.InstanceUpdate(m_resources_pos_world);
@@ -83,10 +86,12 @@ void ResourceManager::Draw()
 	XMFLOAT4X4 ans;
 	XMStoreFloat4x4(&ans, View);
 
-	/*for (int i = 0; i < m_resources.size(); i++)
-	{
-		if(IsInFrustum(m_resources[i]->GetPos(),ans)){
-			m_resources[i]->Draw();
+	//デバッグ時のみコライダー描画
+		//境界box表示
+	if (!GameButton::GetInstance().GetDebug()) {
+		for (int i = 0; i < m_resources.size(); i++)
+		{
+			m_resources[i]->DrawCollider();
 		}
 	}
 
@@ -95,7 +100,7 @@ void ResourceManager::Draw()
 		if (IsInFrustum(m_installation_resources[i]->GetPos(), ans)) {
 			m_installation_resources[i]->Draw();
 		}
-	}*/
+	}
 	m_resources_Instance.DrawInstance(m_resources_pos_world.size());
 
 }

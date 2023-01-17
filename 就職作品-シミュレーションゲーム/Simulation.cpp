@@ -263,7 +263,7 @@ void  SimulationInit() {
 	std::array < PerlinNoise::Pint, 40000 > noise_array;
 	noise_array = noise.setSeed(1);
 
-	for (int j = 0; j < 200; j++)
+	/*for (int j = 0; j < 200; j++)
 	{
 	    for (int i = 0; i < 200; i++)
 	    {
@@ -277,7 +277,7 @@ void  SimulationInit() {
 				ResourceManager::GetInstance().CreateResource(resource_data,MODELID::CONIFER00);
 			}
 	    }
-	}
+	}*/
 
 	//ノイズから資源を生成
 
@@ -300,6 +300,7 @@ void  SimulationInit() {
 		Souko::Data initdata;
 		initdata.pos = XMFLOAT3(650, 0, -400);
 		initdata.type = GameButton::SoukoButtonType::SOUKO_SMALL;
+		initdata.store_max = 20;
 		BuildingMgr::GetInstance().CreateSouko(initdata, MODELID::SMALLSOUKO);
 	}
 

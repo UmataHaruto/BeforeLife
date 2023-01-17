@@ -411,10 +411,14 @@ void ModelData::Update(
 	const XMFLOAT4X4& mtxworld,
 	unsigned int animfileno,
 	std::vector<AnimationDataAssimp*>& animationcontainer) {
-
+	const aiScene* s;
 	// 0番目のシーンを取り出し
-	const aiScene* s = animationcontainer[animfileno]->GetScene();
+	if (animationcontainer.size() == 0)
+	{
+		return void();
+	}
 
+	s = animationcontainer[animfileno]->GetScene();
 	 //アニメーションデータを持っているか？
 	if (s->HasAnimations())
 	{

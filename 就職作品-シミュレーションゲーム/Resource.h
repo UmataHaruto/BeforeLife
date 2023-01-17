@@ -39,6 +39,7 @@ public:
 
 	//•`‰æ
 	void Draw();
+	void DrawCollider();
 	void DrawShadow(ID3D11InputLayout* layout_in, ID3D11VertexShader* vs_in, ID3D11PixelShader* ps_in);
 
 	//XV
