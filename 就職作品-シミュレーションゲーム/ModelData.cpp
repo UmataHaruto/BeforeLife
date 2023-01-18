@@ -83,7 +83,7 @@ ModelData::ModelData()
 ModelData::~ModelData()
 {
 
-	Exit();
+	//Exit();
 }
 
 void ModelData::CreateBone(aiNode* node)

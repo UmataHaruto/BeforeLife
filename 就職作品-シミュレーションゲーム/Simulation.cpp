@@ -263,7 +263,7 @@ void  SimulationInit() {
 	std::array < PerlinNoise::Pint, 40000 > noise_array;
 	noise_array = noise.setSeed(1);
 
-	/*for (int j = 0; j < 200; j++)
+	for (int j = 0; j < 200; j++)
 	{
 	    for (int i = 0; i < 200; i++)
 	    {
@@ -276,8 +276,17 @@ void  SimulationInit() {
 				resource_data.amount = amount;
 				ResourceManager::GetInstance().CreateResource(resource_data,MODELID::CONIFER00);
 			}
+			if (noise_array[i + (j * 200)] > 40 && noise_array[i + (j * 200)] < 42) {
+				resource_data.type = ItemType::ORE_IRON;
+				resource_data.pos = XMFLOAT3(i * 12.5, 0, -j * 12.5);
+				resource_data.Endurance = endurance;
+				resource_data.EnduranceMax = endurancemax;
+				resource_data.Hardness = hardness;
+				resource_data.amount = amount;
+				ResourceManager::GetInstance().CreateResource(resource_data, MODELID::ORE_IRON);
+			}
 	    }
-	}*/
+	}
 
 	//ノイズから資源を生成
 

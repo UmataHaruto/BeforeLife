@@ -55,6 +55,11 @@ public:
 		return m_animationcontainer[m_AnimFileIdx]->GetScene()->mNumAnimations;
 	}
 
+	void SetModelData(ModelData model)
+	{
+		m_assimpfile = model;
+	}
+
 	//Change Select type
 	void ChangeSelectType(SELECT_SHADER_TYPE type)
 	{
@@ -93,22 +98,4 @@ public:
 	ModelData& GetModelData() {
 		return m_assimpfile;
 	}
-
-	//void DrawOBB() {
-	//	m_assimpfile.DrawOBB();
-	//}
-
-	//void GetOBBList(std::vector<COBB*>& obblist) {
-
-	//	// メッシュデータ取得
-	//	const std::vector<Mesh>& meshes = m_assimpfile.GetMeshes();
-
-	//	// OBB全件取得
-	//	for (int i = 0; i < meshes.size(); i++) {
-	//		const Mesh& m = meshes[i];
-	//		for (auto data : m.m_obbvectorcontainer) {
-	//			obblist.push_back(data);
-	//		}
-	//	}
-	//}
 };

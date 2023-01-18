@@ -32,7 +32,7 @@ private:
 	//ƒAƒCƒeƒ€Š”
 	int m_item[(int)ItemType::ITEM_MAX];
 
-	CModel m_resources_Instance;
+	std::vector<CModel> m_resources_Instance;
 	std::vector<XMFLOAT4X4> m_resources_pos_world;
 	//‘Œ¹
 	std::vector<Resource*>m_installation_resources;

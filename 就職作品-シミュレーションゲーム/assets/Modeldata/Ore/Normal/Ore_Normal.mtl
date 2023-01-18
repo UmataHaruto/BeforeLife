@@ -1,4 +1,4 @@
-newmtl blinn1SG
+newmtl Ore_Normal:blinn1SG
 illum 4
 Kd 0.00 0.00 0.00
 Ka 0.00 0.00 0.00
@@ -6,7 +6,8 @@ Tf 1.00 1.00 1.00
 map_Kd MainStone.png
 Ni 1.00
 Ks 0.50 0.50 0.50
-newmtl blinn2SG
+Ns 0.06
+newmtl Ore_Normal:blinn2SG
 illum 4
 Kd 0.00 0.00 0.00
 Ka 0.00 0.00 0.00
@@ -14,3 +15,4 @@ Tf 1.00 1.00 1.00
 map_Kd Ore.png
 Ni 1.00
 Ks 0.50 0.50 0.50
+Ns 0.06
