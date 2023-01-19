@@ -276,7 +276,7 @@ void  SimulationInit() {
 				resource_data.amount = amount;
 				ResourceManager::GetInstance().CreateResource(resource_data,MODELID::CONIFER00);
 			}
-			if (noise_array[i + (j * 200)] > 40 && noise_array[i + (j * 200)] < 42) {
+			if (noise_array[i + (j * 200)] > 80 && noise_array[i + (j * 200)] < 85) {
 				resource_data.type = ItemType::ORE_IRON;
 				resource_data.pos = XMFLOAT3(i * 12.5, 0, -j * 12.5);
 				resource_data.Endurance = endurance;

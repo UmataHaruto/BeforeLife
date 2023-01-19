@@ -101,7 +101,7 @@ bool Player::Init(Data data) {
 	CaliculateParentChildMtx();					//グローバル座標に変換
 
 	//デバッグ用
-	m_action_priority[(int)ActionType::WORK].priority = 5;
+	m_action_priority[(int)ActionType::REST].priority = 5;
 	m_work_priority[(int)WorkType::MINE].priority = 5;
 
 	return true;
@@ -695,19 +695,19 @@ void Player::Rest()
 		//移動先検索を最大２０回まで抽選
 		for (int i = 0; i < 20; i++)
 		{
-			move_pos.x = (rand() % (int)m_house->GetPos().x) + 200;
-			move_pos.z = (rand() % (int)m_house->GetPos().z) + 200;
+			move_pos.x = (rand() % (int)m_house->GetPos().x) + 100;
+			move_pos.z = (rand() % (int)m_house->GetPos().z) + 100;
 			switch (rand() % 3)
 			{
 			case 0:
-				move_pos.x = -move_pos.x;
+				move_pos.x = move_pos.x - ((move_pos.x - m_house->GetPos().x)*2);
 				break;
 			case 1:
-				move_pos.z = -move_pos.z;
+				move_pos.z = move_pos.z - ((move_pos.z - m_house->GetPos().z) * 2);
 				break;
 			case 2:
-				move_pos.x = -move_pos.x;
-				move_pos.z = -move_pos.z;
+				move_pos.x = move_pos.x - ((move_pos.x - m_house->GetPos().x) * 2);
+				move_pos.z = move_pos.z - ((move_pos.z - m_house->GetPos().z) * 2);
 				break;
 			default:
 				break;
@@ -724,6 +724,7 @@ void Player::Rest()
 			m_movepos = move_pos;
 			m_ismoving = true;
 			//移動先の指定
+			RouteSearch::GetInstance().InitStageCollider();
 			m_moveque = RouteSearch::GetInstance().SearchRoute(m_pos, m_movepos);
 			//最初の移動先をキューの最後にする
 			if (m_moveque.size() > 0) {

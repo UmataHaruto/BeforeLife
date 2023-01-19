@@ -282,37 +282,37 @@ std::vector<XMFLOAT2> RouteSearch::SearchRoute(XMFLOAT3 start, XMFLOAT3 goal)
 	//テスト描画(コンソール)
 	//system("cls");
 
-	//for (int i = 0; i < MAP_WIDTH; i++)
-	//{
-	//	for (int j = 0; j < MAP_HEIGHT; j++)
-	//	{
-	//		switch (m_stagecollider[i][j].GetNumber())
-	//		{
-	//		case 0:
-	//			printf(".");
-	//			break;
+	/*for (int i = 0; i < MAP_WIDTH; i++)
+	{
+		for (int j = 0; j < MAP_HEIGHT; j++)
+		{
+			switch (m_stagecollider[i][j].GetNumber())
+			{
+			case 0:
+				printf(".");
+				break;
 
-	//		case 1:
-	//			printf("x");
-	//			break;
+			case 1:
+				printf("x");
+				break;
 
-	//		case 2:
-	//			printf("P");
-	//			break;
+			case 2:
+				printf("P");
+				break;
 
-	//		case 3:
-	//			printf("G");
-	//			break;
+			case 3:
+				printf("G");
+				break;
 
-	//		case 4:
-	//			printf("*");
-	//			break;
-	//		default:
-	//			break;
-	//		}
-	//	}
-	//	printf("\n");
-	//}
+			case 4:
+				printf("*");
+				break;
+			default:
+				break;
+			}
+		}
+		printf("\n");
+	}*/
 	return route;
 
 }
