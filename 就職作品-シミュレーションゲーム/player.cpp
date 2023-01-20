@@ -30,7 +30,7 @@ bool Player::Init(Data data) {
 	m_model = model;
 	m_obb.Init(m_model);
 	m_obb.CreateBox(250, 1700, 250, XMFLOAT3(0, 0, 0));
-	m_perceptual_area.CreateBox(10000,1700,10000, XMFLOAT3(0, 0, 0));
+	m_perceptual_area.CreateBox(10000,700,10000, XMFLOAT3(0, 0, 0));
 	//髪モデル
 	m_hair = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::HAIR_00)].modelname);
 	//髪色
@@ -101,7 +101,7 @@ bool Player::Init(Data data) {
 	CaliculateParentChildMtx();					//グローバル座標に変換
 
 	//デバッグ用
-	m_action_priority[(int)ActionType::REST].priority = 5;
+	m_action_priority[(int)ActionType::WORK].priority = 5;
 	m_work_priority[(int)WorkType::MINE].priority = 5;
 
 	return true;
@@ -255,19 +255,14 @@ void Player::Update() {
 	//感知領域に触れた資源を記憶する
 	for (int i = 0; i < ResourceManager::GetInstance().m_resources.size(); i++)
 	{
-		if (m_perceptual_area.Collision(*ResourceManager::GetInstance().m_resources[i]->GetOBB()))
+		if (m_ismoving&&m_perceptual_area.Collision(*ResourceManager::GetInstance().m_resources[i]->GetOBB()))
 		{
-			ResourceMemoryData data;
-			data.m_pos = ResourceManager::GetInstance().m_resources[i]->GetPos();
-			data.m_type = ResourceManager::GetInstance().m_resources[i]->GetData()->type;
 
 			//既存の記憶が無いかチェック
 			bool collect = false;
 			for (int j = 0; j < m_resource_memory.size(); j++)
 			{
-				if (m_resource_memory[j].m_pos.x == data.m_pos.x &&
-					m_resource_memory[j].m_pos.y == data.m_pos.y &&
-					m_resource_memory[j].m_pos.z == data.m_pos.z)
+				if (m_resource_memory[j] == ResourceManager::GetInstance().m_resources[i])
 				{
 					collect = true;
 					break;
@@ -276,7 +271,7 @@ void Player::Update() {
 			if (!collect)
 			{
 				//記憶を追加
-				m_resource_memory.push_back(data);
+				m_resource_memory.push_back(ResourceManager::GetInstance().m_resources[i]);
 			}
 		}
 	}
@@ -753,10 +748,10 @@ bool Player::Work_Mine(void)
 	static float miningtimer = 0;
 	miningtimer += io.DeltaTime;
 	//最短距離
-	for (int i = 0; i < ResourceManager::GetInstance().m_resources.size(); i++)
+	for (int i = 0; i < m_resource_memory.size(); i++)
 	{
 		float length;
-		DX11p2pLength(m_pos, ResourceManager::GetInstance().m_resources[i]->GetPos(), length);
+		DX11p2pLength(m_pos, m_resource_memory[i]->GetPos(), length);
 		if (maxlength > length)
 		{
 			index = i;
@@ -765,17 +760,17 @@ bool Player::Work_Mine(void)
 	}
 
 	//資源が無い場合輸送を優先
-	if (ResourceManager::GetInstance().m_resources.size() == 0)
+	if (m_resource_memory.size() == 0)
 	{
 		iswork = false;
-		Work_Carry();
+		Rest();
 	}
 
 	//移動地点を指定
-	if (ResourceManager::GetInstance().m_resources.size() != 0 && ismine == false && m_ismoving == false) {
+	if (m_resource_memory.size() != 0 && ismine == false && m_ismoving == false) {
 		iswork = true;
 		m_ismoving = true;
-		m_movepos = ResourceManager::GetInstance().m_resources[index]->GetPos();
+		m_movepos = m_resource_memory[index]->GetPos();
 
 		//移動先の指定
 		RouteSearch::GetInstance().InitStageCollider();
@@ -790,7 +785,7 @@ bool Player::Work_Mine(void)
 		}
 	}
 	//目的地に到達した
-	if (ResourceManager::GetInstance().m_resources.size() != 0 && m_obb.Collision(*ResourceManager::GetInstance().m_resources[index]->GetOBB()) && m_moveque.size() == 0)
+	if (m_resource_memory.size() != 0 && m_obb.Collision(*m_resource_memory[index]->GetOBB()) && m_moveque.size() == 0)
 	{
 		//m_ismoving = false;
 		ismine = true;
@@ -801,15 +796,15 @@ bool Player::Work_Mine(void)
 	}
 
 	//採掘
-	if (ResourceManager::GetInstance().m_resources.size() != 0) {
-		if (ismine && m_obb.Collision(*ResourceManager::GetInstance().m_resources[index]->GetOBB()))
+	if (m_resource_memory.size() != 0) {
+		if (ismine && m_obb.Collision(*m_resource_memory[index]->GetOBB()))
 		{
 			iswork = true;
 			m_animdata.animno = AnimationType::MINE;
 			//初期処理
 			if (!mineinit)
 			{
-				Sprite2DMgr::GetInstance().CreateCircleProgressBar(ResourceManager::GetInstance().m_resources[index]->GetData(), 15, 15);
+				Sprite2DMgr::GetInstance().CreateCircleProgressBar(m_resource_memory[index]->GetData(), 15, 15);
 				mineinit = true;
 			}
 			else
@@ -819,22 +814,22 @@ bool Player::Work_Mine(void)
 				{
 					miningtimer = 0;
 					if (rand() % 5 == 0) {
-						ResourceManager::GetInstance().m_resources[index]->HitDamage(10);
+						m_resource_memory[index]->HitDamage(10);
 						SoundMgr::GetInstance().XA_Play("assets/sound/SE/Mining_01.wav");
 						SoundMgr::GetInstance().SetVolume(0.1, "assets/sound/SE/Mining_01.wav");
 					}
 					else
 					{
-						ResourceManager::GetInstance().m_resources[index]->HitDamage(5);
+						m_resource_memory[index]->HitDamage(5);
 						SoundMgr::GetInstance().XA_Play("assets/sound/SE/Mining_00.wav");
 						SoundMgr::GetInstance().SetVolume(0.1, "assets/sound/SE/Mining_00.wav");
 					}
-					if (ResourceManager::GetInstance().m_resources[index]->GetData()->Endurance <= 0)
+					if (m_resource_memory[index]->GetData()->Endurance <= 0)
 					{
 						ismine = false;
 						mineinit = false;
 						//地面にアイテムを配置する
-						Resource::Data data = *ResourceManager::GetInstance().m_resources[index]->GetData();
+						Resource::Data data = *m_resource_memory[index]->GetData();
 						switch (data.type)
 						{
 						case ItemType::WOOD:
@@ -856,7 +851,7 @@ bool Player::Work_Mine(void)
 							break;
 						}
 						m_animdata.animno = AnimationType::IDLE_00;
-
+						m_resource_memory.erase(m_resource_memory.begin() + index);
 					}
 				}
 			}

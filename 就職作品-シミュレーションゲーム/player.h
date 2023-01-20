@@ -131,12 +131,6 @@ public:
 
 	};
 
-	struct ResourceMemoryData
-	{
-		ItemType m_type;
-		XMFLOAT3 m_pos;
-	};
-
 	//初期配置
 	static PlayerInitData ObjectInitData[];
 
@@ -339,7 +333,7 @@ private:
 	XMFLOAT3 m_movepos;
 	//移動目標キュー
 	std::vector<XMFLOAT2> m_moveque;
-	std::vector<ResourceMemoryData> m_resource_memory;
+	std::vector<Resource*> m_resource_memory;
 
 	//移動中
 	bool m_ismoving = false;
