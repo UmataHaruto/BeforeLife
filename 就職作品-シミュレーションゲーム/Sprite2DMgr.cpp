@@ -459,6 +459,57 @@ void Sprite2DMgr::CreateAnimation(EFFECTLIST type,float x, float y, float z, flo
 	g_effects[g_effects.size() - 1].m_vbuffer = vbuffer;
 }
 
+void Sprite2DMgr::CreateHormingEffect(EFFECTLIST type, float x, float y, float z, float xsize, float ysize, DirectX::XMFLOAT4 color, XMFLOAT3* ptarget, XMFLOAT3 pinterval)
+{
+	CBillBoard board = *Sprite2DMgr::GetInstance().GetModelPtr(type);
+
+	board.m_vbuffer = nullptr;
+
+	//ビルボード有効化
+	board.SetBillBoard(true);
+
+	//初期ライフを設定
+	board.SetLife(90);
+
+	//ビルボード初期化
+	board.SetPosition(x, y, z);
+	board.SetSize(xsize, ysize);
+	board.SetColor(color);
+	board.SetAnimationNo(0);
+	board.SetTargetP(ptarget);
+	board.SetInterval(pinterval);
+
+	//UVをセット
+	XMFLOAT2 uv[4];
+	uv[0].x = 0.0f;
+	uv[0].y = 0.0f;
+	uv[1].x = 1.0f;
+	uv[1].y = 0.0f;
+	uv[2].x = 0.0f;
+	uv[2].y = 1.0f;
+	uv[3].x = 1.0f;
+	uv[3].y = 1.0f;
+
+	board.SetUV(uv);
+
+	//エフェクトリストへ格納
+	g_effects.push_back(board);
+
+	//頂点バッファ生成
+	ID3D11Device* dev;
+	dev = GetDX11Device();
+
+	ID3D11Buffer* vbuffer = nullptr;		// 頂点バッファ
+
+	// 頂点バッファ作成（後で変更可能）
+	bool sts = CreateVertexBufferWrite(dev, sizeof(MyVertex), 4, board.m_Vertex, &vbuffer);
+	if (!sts) {
+		MessageBox(nullptr, "create vertex buffer error(CBillBoard)", "error", MB_OK);
+	}
+
+	g_effects[g_effects.size() - 1].m_vbuffer = vbuffer;
+}
+
 bool Sprite2DMgr::CheckFullTarget()
 {
 	return true;

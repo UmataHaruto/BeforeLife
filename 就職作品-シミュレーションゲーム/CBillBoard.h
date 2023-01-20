@@ -23,6 +23,10 @@ enum class EFFECTLIST
 	ORE_GOLD,
 	IRON,
 	GOLD,
+	HUKIDASHI_HEART,
+	HUKIDASHI_ONPU,
+	HUKIDASHI_ASE,
+	HUKIDASHI_TALK,
 	_MAX,
 };
 
@@ -49,6 +53,8 @@ class CBillBoard{
 	float						m_XSize=100.0f;		// ビルボードのＸサイズ
 	float						m_YSize=100.0f;		// ビルボードのＹサイズ
 	XMFLOAT3*                   m_Targetpos = nullptr;    //追尾先の移動量
+
+	XMFLOAT3                    m_interval;  //ホーミング時の原点からの距離
 
 	uint32_t                    m_life = 60; //HP
 	uint32_t                    m_Maxlife = 90;
@@ -151,6 +157,12 @@ public:
 	void SetHorming(bool trigger)
 	{
 		m_isHorming = trigger;
+	}
+
+	//インターバルを設定
+	void SetInterval(XMFLOAT3 pos)
+	{
+	     m_interval = pos;
 	}
 
 	void SetTargetP(XMFLOAT3* targetp)
@@ -316,6 +328,14 @@ public:
 
 				//uvをセット
 				SetUV(uv);
+
+				//ホーミングする場合
+				if (m_isHorming && m_Targetpos != nullptr)
+				{
+					m_x = m_Targetpos->x + m_interval.x;
+					m_y = m_Targetpos->y + m_interval.y;
+					m_z = m_Targetpos->z + m_interval.z;
+				}
 
 				//アニメーションカウントを進める
 				if (m_type != EFFECTLIST::PROGRESSBAR_CIRCLE) {

@@ -24,7 +24,7 @@ public:
 
 	int GetItem(ItemType type);
 
-	void EraseInstallation(int index);
+	void EraseInstallation(Resource* p);
 
 	std::vector<Resource*> GetInstallationResource();
 

@@ -63,6 +63,10 @@ public:
 			player->SetHouse(this);
 			return true;
 		}
+		else
+		{
+			return false;
+		}
 	}
 
 	//バウンディングスフィアを取得

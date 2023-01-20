@@ -213,9 +213,15 @@ int ResourceManager::GetItem(ItemType type)
 	return m_item[(int)type];
 }
 
-void ResourceManager::EraseInstallation(int index)
+void ResourceManager::EraseInstallation(Resource* p)
 {
-	m_installation_resources.erase(m_installation_resources.begin() + index);
+	for (int i = 0; i < m_installation_resources.size(); i++)
+	{
+		if (m_installation_resources[i] == p)
+		{
+			m_installation_resources.erase(m_installation_resources.begin() + i);
+		}
+	}
 }
 
 std::vector<Resource*> ResourceManager::GetInstallationResource()

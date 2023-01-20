@@ -333,8 +333,10 @@ private:
 	XMFLOAT3 m_movepos;
 	//移動目標キュー
 	std::vector<XMFLOAT2> m_moveque;
+	//資源記憶
 	std::vector<Resource*> m_resource_memory;
-
+	//設置物記憶
+	std::vector<Resource*> m_installation_memory;
 	//移動中
 	bool m_ismoving = false;
 

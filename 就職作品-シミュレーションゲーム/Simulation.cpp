@@ -245,6 +245,27 @@ void  SimulationInit() {
 	//建築物初期化
 	BuildingMgr::GetInstance().Init();
 
+	//初期建造物
+//住居
+	{
+		House::Data initdata;
+		initdata.pos = XMFLOAT3(500, 0, -430);
+		initdata.type = GameButton::HouseButtonType::HOUSE_SMALL;
+		BuildingMgr::GetInstance().CreateHouse(initdata, MODELID::SMALLHOUSE);
+		initdata.pos = XMFLOAT3(400, 0, -430);
+		BuildingMgr::GetInstance().CreateHouse(initdata, MODELID::SMALLHOUSE);
+	}
+	//倉庫
+	{
+		Souko::Data initdata;
+		initdata.pos = XMFLOAT3(650, 0, -400);
+		initdata.type = GameButton::SoukoButtonType::SOUKO_SMALL;
+		initdata.store_max = 20;
+		BuildingMgr::GetInstance().CreateSouko(initdata, MODELID::SMALLSOUKO);
+	}
+
+	RouteSearch::GetInstance().InitStageCollider();
+
 	//ステージコリジョンを作成
 	StageHitInit();
 
@@ -265,27 +286,33 @@ void  SimulationInit() {
 
 	for (int j = 0; j < 200; j++)
 	{
-	    for (int i = 0; i < 200; i++)
-	    {
-	        if (noise_array[i + (j * 200)] > 30 && noise_array[i + (j * 200)] < 32) {
+		for (int i = 0; i < 200; i++)
+		{
+			if (noise_array[i + (j * 200)] > 30 && noise_array[i + (j * 200)] < 32) {
 				resource_data.type = ItemType::WOOD;
-				resource_data.pos = XMFLOAT3(i * 12.5,0,-j * 12.5);
-				resource_data.Endurance = endurance;
-				resource_data.EnduranceMax = endurancemax;
-				resource_data.Hardness = hardness;
-				resource_data.amount = amount;
-				ResourceManager::GetInstance().CreateResource(resource_data,MODELID::CONIFER00);
+				resource_data.pos = XMFLOAT3(i * 12.5, 0, -j * 12.5);
+				if (!RouteSearch::GetInstance().IsHitBuilding(resource_data.pos))
+				{
+					resource_data.Endurance = endurance;
+					resource_data.EnduranceMax = endurancemax;
+					resource_data.Hardness = hardness;
+					resource_data.amount = amount;
+					ResourceManager::GetInstance().CreateResource(resource_data, MODELID::CONIFER00);
+				}
 			}
 			if (noise_array[i + (j * 200)] > 80 && noise_array[i + (j * 200)] < 85) {
 				resource_data.type = ItemType::ORE_IRON;
 				resource_data.pos = XMFLOAT3(i * 12.5, 0, -j * 12.5);
-				resource_data.Endurance = endurance;
-				resource_data.EnduranceMax = endurancemax;
-				resource_data.Hardness = hardness;
-				resource_data.amount = amount;
-				ResourceManager::GetInstance().CreateResource(resource_data, MODELID::ORE_IRON);
+				if (RouteSearch::GetInstance().IsHitBuilding(resource_data.pos))
+				{
+					resource_data.Endurance = endurance;
+					resource_data.EnduranceMax = endurancemax;
+					resource_data.Hardness = hardness;
+					resource_data.amount = amount;
+					ResourceManager::GetInstance().CreateResource(resource_data, MODELID::ORE_IRON);
+				}
 			}
-	    }
+		}
 	}
 
 	//ノイズから資源を生成
@@ -295,23 +322,6 @@ void  SimulationInit() {
 	Init2D();
 
 	InitShadowMap();
-
-	//初期建造物
-    //住居
-	{
-		House::Data initdata;
-		initdata.pos = XMFLOAT3(500, 0, -430);
-		initdata.type = GameButton::HouseButtonType::HOUSE_SMALL;
-		BuildingMgr::GetInstance().CreateHouse(initdata, MODELID::SMALLHOUSE);
-	}
-	//倉庫
-	{
-		Souko::Data initdata;
-		initdata.pos = XMFLOAT3(650, 0, -400);
-		initdata.type = GameButton::SoukoButtonType::SOUKO_SMALL;
-		initdata.store_max = 20;
-		BuildingMgr::GetInstance().CreateSouko(initdata, MODELID::SMALLSOUKO);
-	}
 
 	//村人マネージャーの初期化
 	VillagerMgr::GetInstance().Init();
@@ -324,6 +334,8 @@ void  SimulationInit() {
 	pdata.mood = 70;
 	pdata.stamina_max = 100;
 	pdata.stamina = 85;
+	VillagerMgr::GetInstance().CreateVillager(pdata);
+	pdata.firstname = NameGenerator::GetInstance().CreateName(NameGenerator::FEMALE);
 	VillagerMgr::GetInstance().CreateVillager(pdata);
 
 	//カメラ初期位置の初期化

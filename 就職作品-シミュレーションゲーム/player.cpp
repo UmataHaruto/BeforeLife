@@ -275,6 +275,28 @@ void Player::Update() {
 			}
 		}
 	}
+	for (int i = 0; i < ResourceManager::GetInstance().GetInstallationResource().size(); i++)
+	{
+		if (m_ismoving && m_perceptual_area.Collision(*ResourceManager::GetInstance().GetInstallationResource()[i]->GetOBB()))
+		{
+			//既存の記憶が無いかチェック
+			bool collect = false;
+
+			for (int j = 0; j < m_installation_memory.size(); j++)
+			{
+				if (m_installation_memory[j] == ResourceManager::GetInstance().GetInstallationResource()[i])
+				{
+					collect = true;
+					break;
+				}
+			}
+			if (!collect)
+			{
+				//記憶を追加
+				m_installation_memory.push_back(ResourceManager::GetInstance().GetInstallationResource()[i]);
+			}
+		}
+	}
 
 	//確定した行動
 	ActionType action = m_action_priority[0].action;
@@ -681,8 +703,8 @@ void Player::CaliculateParentChildMtx()
 
 void Player::Rest()
 {
-	//移動中の場合入らない
-	if (!m_ismoving)
+	//移動中の場合,家無しは入らない
+	if (!m_ismoving && m_house != nullptr)
 	{
 		//家の周辺を探索
 		XMFLOAT3 move_pos = XMFLOAT3(-999, -999, -999);
@@ -852,6 +874,17 @@ bool Player::Work_Mine(void)
 						}
 						m_animdata.animno = AnimationType::IDLE_00;
 						m_resource_memory.erase(m_resource_memory.begin() + index);
+						//感情エモートを生成
+						Sprite2DMgr::GetInstance().CreateHormingEffect(
+							EFFECTLIST::HUKIDASHI_ONPU,
+							m_pos.x,
+							m_pos.y,
+							m_pos.z,
+							20,
+							20,
+							XMFLOAT4(1, 1, 1, 1),
+							&m_pos,
+							XMFLOAT3(0,20,0));
 					}
 				}
 			}
@@ -871,10 +904,10 @@ bool Player::Work_Carry(void)
 	{
 	case Player::CarryStatus::NONE:
 		//最短距離
-		for (int i = 0; i < ResourceManager::GetInstance().GetInstallationResource().size(); i++)
+		for (int i = 0; i < m_installation_memory.size(); i++)
 		{
 			float length;
-			DX11p2pLength(m_pos, ResourceManager::GetInstance().GetInstallationResource()[index]->GetPos(), length);
+			DX11p2pLength(m_pos, m_installation_memory[index]->GetPos(), length);
 			if (maxlength > length)
 			{
 				index = i;
@@ -882,10 +915,10 @@ bool Player::Work_Carry(void)
 			}
 		}
 		//移動地点を指定
-		if (ResourceManager::GetInstance().GetInstallationResource().size() != 0 && m_ismoving == false) {
+		if (m_installation_memory.size() != 0 && m_ismoving == false) {
 			iswork = true;
 			m_ismoving = true;
-			m_movepos = ResourceManager::GetInstance().GetInstallationResource()[index]->GetPos();
+			m_movepos = m_installation_memory[index]->GetPos();
 
 			//移動先の指定
 			RouteSearch::GetInstance().InitStageCollider();
@@ -901,8 +934,8 @@ bool Player::Work_Carry(void)
 		}
 
 		//目的地に到達した
-		if (ResourceManager::GetInstance().GetInstallationResource().size() != 0) {
-			if (m_obb.Collision(*ResourceManager::GetInstance().GetInstallationResource()[index]->GetOBB()) && m_moveque.size() == 0)
+		if (m_installation_memory.size() != 0) {
+			if (m_obb.Collision(*m_installation_memory[index]->GetOBB()) && m_moveque.size() == 0)
 			{
 				iswork = true;
 				routeinit = false;
@@ -911,12 +944,13 @@ bool Player::Work_Carry(void)
 
 				//輸送アイテムの設定
 				Souko::Item item;
-				item.tag = ResourceManager::GetInstance().GetInstallationResource()[index]->GetData()->type;
-				item.num = ResourceManager::GetInstance().GetInstallationResource()[index]->GetData()->amount;
+				item.tag = m_installation_memory[index]->GetData()->type;
+				item.num = m_installation_memory[index]->GetData()->amount;
 				SetCarryItem(item.tag, item.num);
-				m_animdata.animno = AnimationType::CARRY_IDLE;
 				//設置物削除
-				ResourceManager::GetInstance().EraseInstallation(index);
+				ResourceManager::GetInstance().EraseInstallation(m_installation_memory[index]);
+				m_installation_memory.erase(m_installation_memory.begin() + index);
+				m_animdata.animno = AnimationType::CARRY_IDLE;
 			}
 		}
 		break;

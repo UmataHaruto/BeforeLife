@@ -58,6 +58,11 @@ private:
 	{EFFECTLIST::ORE_GOLD,"assets/sprite/UI/Resource/Goldore.png",false,false,false,1,1,1},
 	{EFFECTLIST::IRON,"assets/sprite/UI/Resource/Iron.png",false,false,false,1,1,1},
 	{EFFECTLIST::GOLD,"assets/sprite/UI/Resource/Gold.png",false,false,false,1,1,1},
+	{EFFECTLIST::HUKIDASHI_HEART,"assets/sprite/Hukidashi_Heart.png",true,false,true,5,10,1},
+	{EFFECTLIST::HUKIDASHI_ONPU,"assets/sprite/Hukidashi_Onpu.png",true,false,true,5,9,1},
+	{EFFECTLIST::HUKIDASHI_ASE,"assets/sprite/Hukidashi_Ase.png",true,false,true,5,4,1},
+	{EFFECTLIST::HUKIDASHI_TALK,"assets/sprite/Hukidashi_Talk.png",true,false,true,5,6,1},
+
 	};
 
 	//UIテンプレート格納ベクター
@@ -133,6 +138,9 @@ public:
 
 	//アニメーションエフェクトを作成
 	void CreateAnimation(EFFECTLIST type,float x, float y, float z, float xsize, float ysize, DirectX::XMFLOAT4 color,XMFLOAT3* ptarget);
+
+	//ホーミングエフェクトの生成
+	void CreateHormingEffect(EFFECTLIST type, float x, float y, float z, float xsize, float ysize, DirectX::XMFLOAT4 color, XMFLOAT3* ptarget,XMFLOAT3 pinterval);
 
 	//ターゲット範囲内かを判定
 	bool TargetSelect(XMFLOAT3* EnemyPos);
