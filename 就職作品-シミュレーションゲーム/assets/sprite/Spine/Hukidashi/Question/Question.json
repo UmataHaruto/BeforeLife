@@ -1,0 +1,48 @@
+{ "skeleton": { "images": "C:/Users/minec/source/repos/UmataHaruto/---/就職作品-シミュレーションゲーム/assets/sprite/Spine/Hukidashi/Question/images/" },
+"bones": [
+	{ "name": "root" }
+],
+"slots": [
+	{ "name": "e0252_0", "bone": "root", "attachment": "e0252_0" },
+	{ "name": "ase01", "bone": "root" },
+	{ "name": "ase00", "bone": "root" },
+	{ "name": "22916072", "bone": "root" },
+	{ "name": "レイヤー 1", "bone": "root" },
+	{ "name": "長方形 3", "bone": "root" },
+	{ "name": "長方形 2", "bone": "root" },
+	{ "name": "長方形 1", "bone": "root" },
+	{ "name": "ダウンロード (6)", "bone": "root", "attachment": "ダウンロード (6)" }
+],
+"skins": {
+	"default": {
+		"e0252_0": {
+			"e0252_0": { "x": 250, "y": -248, "width": 478, "height": 372 }
+		},
+		"ase01": {
+			"ase01": { "x": 349.5, "y": -291.5, "width": 61, "height": 85 }
+		},
+		"ase00": {
+			"ase00": { "x": 287.5, "y": -233.5, "width": 107, "height": 135 }
+		},
+		"22916072": {
+			"22916072": { "x": 250, "y": -249.5, "width": 172, "height": 161 }
+		},
+		"レイヤー 1": {
+			"レイヤー 1": { "x": 249.5, "y": -250, "width": 195, "height": 226 }
+		},
+		"長方形 3": {
+			"長方形 3": { "x": 150, "y": -250, "width": 58, "height": 58 }
+		},
+		"長方形 2": {
+			"長方形 2": { "x": 250, "y": -250, "width": 58, "height": 58 }
+		},
+		"長方形 1": {
+			"長方形 1": { "x": 350, "y": -250, "width": 58, "height": 58 }
+		},
+		"ダウンロード (6)": {
+			"ダウンロード (6)": { "x": 250, "y": -220, "width": 138, "height": 194 }
+		}
+	}
+},
+"animations": { "animation": {} }
+}

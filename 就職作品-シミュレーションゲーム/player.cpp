@@ -570,6 +570,9 @@ void Player::Update() {
 				m_moveque.pop_back();
 				m_movepos = XMFLOAT3(backque.x, m_pos.y, backque.y);
 			}
+			//スタミナ消費
+			DecreaseStamina(0.03);
+
 		}
 		//目的地に到達
 		if (m_moveque.size() <= 0)
@@ -781,7 +784,7 @@ bool Player::Work_Mine(void)
 		}
 	}
 
-	//資源が無い場合輸送を優先
+	//資源が無い場合探索を優先
 	if (m_resource_memory.size() == 0)
 	{
 		iswork = false;
@@ -875,16 +878,10 @@ bool Player::Work_Mine(void)
 						m_animdata.animno = AnimationType::IDLE_00;
 						m_resource_memory.erase(m_resource_memory.begin() + index);
 						//感情エモートを生成
-						Sprite2DMgr::GetInstance().CreateHormingEffect(
-							EFFECTLIST::HUKIDASHI_ONPU,
-							m_pos.x,
-							m_pos.y,
-							m_pos.z,
-							20,
-							20,
-							XMFLOAT4(1, 1, 1, 1),
-							&m_pos,
-							XMFLOAT3(0,20,0));
+						Emotion(EMOTION::NONE);
+						//スタミナ消費
+						DecreaseStamina(3);
+
 					}
 				}
 			}
@@ -895,6 +892,7 @@ bool Player::Work_Mine(void)
 
 bool Player::Work_Carry(void)
 {
+	ImGuiIO& io = ImGui::GetIO();
 	bool iswork = false;
 	int index = 0;
 	float maxlength = 0;
@@ -912,6 +910,18 @@ bool Player::Work_Carry(void)
 			{
 				index = i;
 				maxlength = length;
+			}
+		}
+		//記憶に無い場合は探索する
+		if (m_installation_memory.size() == 0)
+		{
+			Rest();
+			static float RestTimer = 0;
+			RestTimer += io.DeltaTime;
+			if (RestTimer >= 5)
+			{
+				RestTimer = 0;
+				Emotion(EMOTION::QUESTION);
 			}
 		}
 		//移動地点を指定
@@ -1031,6 +1041,10 @@ bool Player::Work_Carry(void)
 		if (BuildingMgr::GetInstance().GetSouko().size() != 0) {
 			if (fabs(m_pos.x - m_movepos.x) < 20.0f && fabs(m_pos.y - m_movepos.y) < 20.0f && fabs(m_pos.z - m_movepos.z) < 20.0f && m_moveque.size() == 0)
 			{
+				//感情エモートを生成
+				Emotion(EMOTION::NONE);
+                //スタミナ消費
+				DecreaseStamina(2);
 				int remaining = BuildingMgr::GetInstance().GetSouko()[index]->PushItem(m_carry.tag, m_carry.num);
 
 				//倉庫に入り切る場合
@@ -1062,4 +1076,75 @@ bool Player::Work_Carry(void)
 	};
 
 	return iswork;
+}
+
+void Player::Emotion(EMOTION emote)
+{
+
+	EFFECTLIST hukidashi = EFFECTLIST::HUKIDASHI_QUESTION;
+
+	switch (emote)
+	{
+	case Player::EMOTION::NONE:
+		//体調に応じて出力
+		if (m_stamina / m_stamina_max > 0.6)
+		{
+			hukidashi = EFFECTLIST::HUKIDASHI_ONPU;
+		}
+		else
+		{
+			hukidashi = EFFECTLIST::HUKIDASHI_ASE;
+		}
+		break;
+
+	case Player::EMOTION::HEART:
+		hukidashi = EFFECTLIST::HUKIDASHI_HEART;
+		break;
+
+	case Player::EMOTION::SWEATING:
+		hukidashi = EFFECTLIST::HUKIDASHI_ASE;
+		break;
+
+	case Player::EMOTION::FANNY:
+		hukidashi = EFFECTLIST::HUKIDASHI_ONPU;
+		break;
+
+	case Player::EMOTION::TALK:
+		hukidashi = EFFECTLIST::HUKIDASHI_TALK;
+		break;
+
+	case Player::EMOTION::QUESTION:
+		hukidashi = EFFECTLIST::HUKIDASHI_QUESTION;
+		break;
+
+	case Player::EMOTION::EMOTION_MAX:
+		break;
+
+	default:
+		break;
+	}
+
+	//感情エモートを生成
+	Sprite2DMgr::GetInstance().CreateHormingEffect(
+		hukidashi,
+		m_pos.x,
+		m_pos.y,
+		m_pos.z,
+		20,
+		20,
+		XMFLOAT4(1, 1, 1, 1),
+		&m_pos,
+		XMFLOAT3(0, 20, 0));
+}
+
+void Player::DecreaseStamina(float dec)
+{
+	if (m_stamina - dec < 0)
+	{
+		m_stamina = 0;
+	}
+	else
+	{
+		m_stamina -= dec;
+	}
 }

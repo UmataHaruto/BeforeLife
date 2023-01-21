@@ -42,7 +42,7 @@ const uint32_t		Application::CLIENT_HEIGHT = 720;
 uint32_t			Application::SYSTEM_WIDTH = 0;
 uint32_t			Application::SYSTEM_HEIGHT = 0;
 
-int		        	Application::FPS = 60;
+int		        	Application::FPS = 20;
 
 float               Application::GAME_SPEED = 1.0f;
 int                 Application::GAME_TIME = 240;

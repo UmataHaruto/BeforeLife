@@ -89,6 +89,17 @@ public:
 		CARRY,                  //運搬中
 	};
 
+	enum class EMOTION
+	{
+		NONE,
+		HEART,
+		SWEATING,
+		FANNY,
+		TALK,
+		QUESTION,
+		EMOTION_MAX,
+	};
+
 	// 構造体型タグ
 	struct	PlayerInitData {
 		Player::PARTS		ParentObjectNo;		// 親オブジェクトＮｏ
@@ -364,4 +375,6 @@ private:
 	//作業関数(作業をしない場合 falseを返す)
 	bool Work_Mine(void);
 	bool Work_Carry(void);
+	void Emotion(EMOTION emote);
+	void DecreaseStamina(float dec);
 };

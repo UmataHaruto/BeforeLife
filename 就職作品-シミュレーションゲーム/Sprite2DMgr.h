@@ -62,6 +62,7 @@ private:
 	{EFFECTLIST::HUKIDASHI_ONPU,"assets/sprite/Hukidashi_Onpu.png",true,false,true,5,9,1},
 	{EFFECTLIST::HUKIDASHI_ASE,"assets/sprite/Hukidashi_Ase.png",true,false,true,5,4,1},
 	{EFFECTLIST::HUKIDASHI_TALK,"assets/sprite/Hukidashi_Talk.png",true,false,true,5,6,1},
+	{EFFECTLIST::HUKIDASHI_QUESTION,"assets/sprite/Hukidashi_Question.png",true,false,true,5,8,2},
 
 	};
 

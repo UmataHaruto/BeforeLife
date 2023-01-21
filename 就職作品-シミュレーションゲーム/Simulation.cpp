@@ -330,10 +330,10 @@ void  SimulationInit() {
 	pdata.firstname = NameGenerator::GetInstance().CreateName(NameGenerator::MALE);
 	pdata.lastname = NameGenerator::GetInstance().CreateName(NameGenerator::FAMILLY);
 	pdata.hp_max = 100;
-	pdata.hp = 80;
-	pdata.mood = 70;
+	pdata.hp = 100;
+	pdata.mood = 100;
 	pdata.stamina_max = 100;
-	pdata.stamina = 85;
+	pdata.stamina = 100;
 	VillagerMgr::GetInstance().CreateVillager(pdata);
 	pdata.firstname = NameGenerator::GetInstance().CreateName(NameGenerator::FEMALE);
 	VillagerMgr::GetInstance().CreateVillager(pdata);
