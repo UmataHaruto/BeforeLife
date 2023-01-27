@@ -7,6 +7,7 @@
 #include    "NameGenerator.h"
 #include    "Souko.h"
 #include    "obb.h"
+#include    <array>
 
 class House;
 
@@ -98,6 +99,13 @@ public:
 		TALK,
 		QUESTION,
 		EMOTION_MAX,
+	};
+
+	enum class Schedule
+	{
+		WORK,
+		SLEEP,
+		FREE,
 	};
 
 	// 構造体型タグ
@@ -308,6 +316,16 @@ public:
 	{
 		m_work_priority[idx].priority = priority;
 	}
+
+	inline std::array<Schedule, 24> GetSchedule()
+	{
+		return m_schedule;
+	}
+
+	void SetSchedule(std::array<Schedule, 24> input)
+	{
+		m_schedule = input;
+	}
 private:
 	void AnimationUpdate();
 
@@ -323,7 +341,9 @@ private:
 	float m_stamina_max;  //最大スタミナ
 	float m_stamina;      //スタミナ
 	XMFLOAT4 m_haircolor; //髪色
-
+	bool at_entrance = false;
+	bool m_is_sleeping = false;//睡眠状態
+	bool m_is_talking = false;
 
 	//運搬アイテム
 	Souko::Item m_carry;
@@ -336,9 +356,11 @@ private:
 	CModel* m_hair;//髪
 	COBB m_obb;    //コリジョン
 	COBB m_perceptual_area;    //知覚領域
-
 	//自宅
 	House* m_house;
+
+	//１日のスケジュール
+	std::array<Schedule,24> m_schedule;
 
 	//移動目標
 	XMFLOAT3 m_movepos;
@@ -371,6 +393,10 @@ private:
 
 	//行動関数
 	void Rest();
+
+	void Sleep();
+
+	void Talk();
 
 	//作業関数(作業をしない場合 falseを返す)
 	bool Work_Mine(void);

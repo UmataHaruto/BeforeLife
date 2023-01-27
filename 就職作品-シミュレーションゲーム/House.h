@@ -75,6 +75,11 @@ public:
 		return m_obb;
 	}
 
+	COBB GetEntrance(void)
+	{
+		return m_obb_entrance;
+	}
+
 	//モデルデータを取得
 	CModel* GetModel() {
 		return m_model;

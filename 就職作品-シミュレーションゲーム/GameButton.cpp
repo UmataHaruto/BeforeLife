@@ -133,6 +133,11 @@ void GameButton::Init()
 	CreatetSRVfromFile("assets/sprite/UI/PartyList/Bar_Stamina.png", device, device11Context, &m_party_list_texture[(int)PartyListType::BAR_STAMINA]);
 	CreatetSRVfromFile("assets/sprite/UI/PartyList/Emote.png", device, device11Context, &m_party_list_texture[(int)PartyListType::ICON_EMOTE]);
 
+	//スケジュールリスト
+	CreatetSRVfromFile("assets/sprite/UI/SystemButton_Schedule.png", device, device11Context, &m_schedule_list_texture[(int)ScheduleButtonType::SCHEDULE_BUTTON]);
+	CreatetSRVfromFile("assets/sprite/Schedule_Time.png", device, device11Context, &m_schedule_list_texture[(int)ScheduleButtonType::SCHEDULE_TIME]);
+	CreatetSRVfromFile("assets/sprite/Schedule_Task_Button.png", device, device11Context, &m_schedule_list_texture[(int)ScheduleButtonType::SCHEDULE_TASK]);
+
 	//環境光バッファ
 	ID3D11Device* dev;
 	dev = CDirectXGraphics::GetInstance()->GetDXDevice();
@@ -226,6 +231,7 @@ void GameButton::Draw()
 	static bool villagerpropaty = false;
 	//仕事優先度ウィンドウを開いているか
 	static bool workpriority = false;
+	static bool schedulepriority = false;
 	static int edit_select = 0;
 	static int resource_select = 0;
 
@@ -668,21 +674,38 @@ void GameButton::Draw()
 			workpriority = 1 - workpriority;
 		}
 	}
-
+	ImGui::SetCursorPos(ImVec2(50, 30));
+	if (!schedulepriority)
+	{
+		if (ImGui::ImageButton(m_schedule_list_texture[ScheduleButtonType::SCHEDULE_BUTTON], ImVec2(30, 30), ImVec2(0, 0), ImVec2(1, 0.25), 0, ImVec4(1, 1, 1, 0), ImVec4(1, 1, 1, 1)))
+		{
+			SoundMgr::GetInstance().XA_Play("assets/sound/SE/SelectClick00.wav");
+			schedulepriority = 1 - schedulepriority;
+		}
+	}
+	else
+	{
+		if (ImGui::ImageButton(m_schedule_list_texture[ScheduleButtonType::SCHEDULE_BUTTON], ImVec2(30, 30), ImVec2(0, 0.5), ImVec2(1, 0.75), 0, ImVec4(1, 1, 1, 0), ImVec4(1, 1, 1, 1)))
+		{
+			SoundMgr::GetInstance().XA_Play("assets/sound/SE/SelectClick00.wav");
+			schedulepriority = 1 - schedulepriority;
+		}
+	}
 	ImGui::PopStyleColor(3);
 
 	//ウィンドウ更新,１フレームのみ描画を切る
+	//仕事ジャンル
 	{
 		static int window_update_cnt = 0;
 		static bool window_update_flg = false;
-		if (!workpriority && window_update_flg)
+		if (!schedulepriority && window_update_flg)
 		{
 			window_update_cnt++;
 		}
 		//スクロール用にウィンドウを更新
-		if (workpriority || window_update_cnt > 1)
+		if (schedulepriority || window_update_cnt > 1)
 		{
-			workpriority = true;
+			schedulepriority = true;
 			window_update_cnt = 0;
 			window_update_flg = false;
 			ImGui::SetNextWindowPos(ImVec2(200, 30), ImGuiCond_::ImGuiCond_Always);
@@ -699,93 +722,121 @@ void GameButton::Draw()
 			if (characternum != VillagerMgr::GetInstance().m_villager.size())
 			{
 				characternum = VillagerMgr::GetInstance().m_villager.size();
-				workpriority = false;
+				schedulepriority = false;
 				window_update_flg = true;
 			}
 			characternum = VillagerMgr::GetInstance().m_villager.size();
 
 			std::unique_ptr<bool> active = std::make_unique<bool>();
 			ImGui::SetWindowFontScale(0.2);
-			ImGui::Begin(u8"アクション", active.get(), window_flags);
+			ImGui::Begin(u8"スケジュールリスト", active.get(), window_flags);
 
 			//ウィンドウ画像
 			ImGui::SetCursorPos(ImVec2(0, 0));
-			ImGui::Image(m_windowback_texture_view, ImVec2(500, 50 + (VillagerMgr::GetInstance().m_villager.size() * 30)), ImVec2(0, 0), ImVec2(1, 1), m_tint_col, m_border_col);
+			ImGui::Image(m_windowback_texture_view, ImVec2(500, 90 + (VillagerMgr::GetInstance().m_villager.size() * 30)), ImVec2(0, 0), ImVec2(1, 1), m_tint_col, m_border_col);
+		    
+			//ペイントツール選択
+			static int corent_paint = 0;
+			{
+				for (int i = 0; i < 3; i++)
+				{
 
-			ImGui::SetCursorPos(ImVec2(153, 0));
-			ImGui::Image(m_action_priority_texture, ImVec2(200, 66), ImVec2(0, 0), ImVec2(1, 1), m_tint_col, m_border_col);
+					ImVec4 texcol = ImVec4(1, 1, 1, 1);
 
-			ImGui::SetCursorPos(ImVec2(10, 0));
-			ImGui::TextColored(ImVec4(1, 1, 1, 1),u8"アクション優先度");
+					if (i == corent_paint)
+					{
+						texcol = ImVec4(0.5, 0.5, 0.5, 1);
+					}
+
+					ImVec2 uv[2];
+					uv[0].x = 0;
+					uv[0].y = 0.333 * i;
+					uv[1].x = 1;
+					uv[1].y = 0.333 * (i + 1);
+					ImGui::SetCursorPos(ImVec2(130 +(i * 110), 10));
+					ImGui::ImageButton(m_schedule_list_texture[ScheduleButtonType::SCHEDULE_TASK], ImVec2(100, 30), uv[0], uv[1], 0, m_border_col, texcol);
+					//ホバーイベント
+					if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenOverlapped))
+					{
+						if (ImGui::IsMouseClicked(0))
+						{
+							corent_paint = i;
+						}
+					}
+
+				}
+			}
+
+			//時間帯テキスト
+			ImGui::SetWindowFontScale(0.2);
+			for (int i = 0; i < 24; i++)
+			{
+				ImGui::SetCursorPos(ImVec2(153 + (i * 12), 50));
+				std::string time = std::to_string(i);
+				ImGui::TextColored(ImVec4(1,1,1,1), time.c_str());
+
+			}
+			ImGui::SetWindowFontScale(0.3);
+			ImGui::SetCursorPos(ImVec2(10, 10));
+			ImGui::TextColored(ImVec4(1, 1, 1, 1),u8"スケジュール");
 
 			//名前表示
 			for (int i = 0; i < VillagerMgr::GetInstance().m_villager.size(); i++) {
 				//名前
 				std::string name = VillagerMgr::GetInstance().m_villager[i]->GetName(NameGenerator::NAMETYPE::FAMILLY) + VillagerMgr::GetInstance().m_villager[i]->GetName(NameGenerator::NAMETYPE::MALE);
-				ImGui::SetCursorPos(ImVec2(10, 40 + (i * 30)));
+				ImGui::SetCursorPos(ImVec2(10, 80 + (i * 30)));
 				ImGui::TextColored(ImVec4(1, 1, 1, 1), name.c_str());
 
-				//優先度変更
-				for (int j = 0; j < VillagerMgr::GetInstance().m_villager[i]->GetWorkPriority().size(); j++)
+				//スケジュール変更
+				for (int j = 0; j < VillagerMgr::GetInstance().m_villager[i]->GetSchedule().size(); j++)
 				{
-					ImGui::SetCursorPos(ImVec2(153 + (j * 26.5), 40 + (i * 30)));
-					//優先度を文字列に変換
-					std::string priority;
-					for (int cnt = 0; cnt < (i + 1) * (j + 1); cnt++)
+					//時間に合わせたマスを描画
+					ImVec2 uv[2];
+					uv[0].x = 0;
+					uv[1].x = 1;
+
+					//uvの設定
+					switch (VillagerMgr::GetInstance().m_villager[i]->GetSchedule()[j])
 					{
-						priority = priority + "         " + std::to_string((i + 1)) + std::to_string((j + 1));
-					}
-					ImGui::SetWindowFontScale(0.3);
-					bool ret = ImGui::Button(priority.c_str(), ImVec2(20, 20));
-					if (ret)
-					{
-						SoundMgr::GetInstance().XA_Play("assets/sound/SE/SelectClick00.wav");
-						if (VillagerMgr::GetInstance().m_villager[i]->GetWorkPriority()[j].priority < 5) {
-							VillagerMgr::GetInstance().m_villager[i]->SetWorkPriority(j, VillagerMgr::GetInstance().m_villager[i]->GetWorkPriority()[j].priority + 1);
-						}
-						else
-						{
-							VillagerMgr::GetInstance().m_villager[i]->SetWorkPriority(j,1);
-						}
-					}
-					ImGui::SetCursorPos(ImVec2(158 + (j * 26.5), 40 + (i * 30)));
-					ImVec4 priority_color = {1,1,1,1};
-
-					switch (VillagerMgr::GetInstance().m_villager[i]->GetWorkPriority()[j].priority)
-					{
-					case 1:
-						priority_color = { 0.8,1,0.8,1 };
+					case Player::Schedule::WORK:
+						uv[0].y = 0;
+						uv[1].y = 0.333;
 						break;
 
-					case 2:
-						priority_color = { 0.6,1,0.6,1 };
+					case Player::Schedule::SLEEP:
+						uv[0].y = 0.333;
+						uv[1].y = 0.666;
 						break;
 
-					case 3:
-						priority_color = { 0.4,1,0.4,1 };
-
-						break;
-
-					case 4:
-						priority_color = { 0.2,1,0.2,1 };
-						break;
-
-					case 5:
-						priority_color = { 0,1,0,1 };
-
+					case Player::Schedule::FREE:
+						uv[0].y = 0.666;
+						uv[1].y = 0.999;
 						break;
 
 					default:
 						break;
 					}
+					ImGui::SetCursorPos(ImVec2(153 + (j * 12), 80 + (i * 30)));
+					ImGui::ImageButton(m_schedule_list_texture[ScheduleButtonType::SCHEDULE_TIME], ImVec2(10, 20), uv[0], uv[1], 0, m_border_col, m_tint_col);
 
-					ImGui::TextColored(priority_color,std::to_string(VillagerMgr::GetInstance().m_villager[i]->GetWorkPriority()[j].priority).c_str());
+					//ホバーイベント
+					if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenOverlapped))
+					{
+						if (ImGui::IsMouseDown(0))
+						{
+							std::array<Player::Schedule, 24> schedule = VillagerMgr::GetInstance().m_villager[i]->GetSchedule();
 
-					ImGui::SetWindowFontScale(0.3);
+							if (schedule[j] != (Player::Schedule)corent_paint) {
+								SoundMgr::GetInstance().XA_Play("assets/sound/SE/SelectClick00.wav");
+
+								schedule[j] = (Player::Schedule)corent_paint;
+
+								VillagerMgr::GetInstance().m_villager[i]->SetSchedule(schedule);
+							}
+						}
+					}
 				}
-
 			}
-
 			ImGui::SetWindowFontScale(0.3);
 
 			ImGui::End();
@@ -1540,6 +1591,7 @@ void GameButton::Draw()
 			ImGui::End();
 		}
 	}
+	
 	//時間表示ウィンドウ
 	ImGui::SetCursorPos(ImVec2(1072, 5));
 	ImGui::Image(m_windowback_texture_view,ImVec2(150,32),ImVec2(0,0),ImVec2(1,1),m_tint_col,m_border_col);

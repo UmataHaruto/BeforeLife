@@ -87,6 +87,14 @@ public:
 		ROADBUTTON_NONE = -1,
 	};
 
+	enum ScheduleButtonType
+	{
+		SCHEDULE_BUTTON,
+		SCHEDULE_TIME,
+		SCHEDULE_TASK,
+		SCHEDULE_MAX,
+	};
+
 	struct ShadowParameter
 	{
 		float   LightPos[3];
@@ -192,6 +200,9 @@ private:
 	//住人リスト用テクスチャ
 	ID3D11ShaderResourceView* m_party_list_texture[(int)PartyListType::LIST_MAX];
 
+	//Scheduleリスト用テクスチャ
+	ID3D11ShaderResourceView* m_schedule_list_texture[(int)ScheduleButtonType::SCHEDULE_MAX];
+
 	//環境光バッファ
 	ID3D11Buffer* cb_Ambient;
 	//髪色バッファ
@@ -205,6 +216,7 @@ private:
 	HouseButtonType m_Build_House_HoverButton;
 	SoukoButtonType m_Build_Souko_HoverButton;
 	RoadButtonType m_Build_Road_HoverButton;
+	ScheduleButtonType m_Schedule_HoverButton;
 
 	//ボタン状態(トリガー)
 	bool m_TriggerButton[GAMEBUTTON_MAX];

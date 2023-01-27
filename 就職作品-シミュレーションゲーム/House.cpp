@@ -28,7 +28,7 @@ void House::Init(Data data, MODELID id)
 	}
 
 	m_obb.Init(m_model);
-	m_obb_entrance.CreateBox(20, 60, 20, XMFLOAT3(-10,0,-55));
+	m_obb_entrance.CreateBox(20, 60, 20, XMFLOAT3(-10,0,-75));
 
 	m_data = data;
 }
