@@ -60,7 +60,9 @@ public:
 		MINE,
 		SLEEP,
 		WALK,
+		TALK,
 		STOP,
+
 	};
 
 	enum class ActionType
@@ -326,6 +328,16 @@ public:
 	{
 		m_schedule = input;
 	}
+
+	std::vector<Resource*> GetResourceMemory()
+	{
+		return m_resource_memory;
+	}
+
+	void AddResourceMemory(Resource* resource)
+	{
+		m_resource_memory.push_back(resource);
+	}
 private:
 	void AnimationUpdate();
 
@@ -344,6 +356,9 @@ private:
 	bool at_entrance = false;
 	bool m_is_sleeping = false;//睡眠状態
 	bool m_is_talking = false;
+	Player* talk_target = nullptr;
+	//会話クールタイム
+	float m_talk_cooltime = 0;
 
 	//運搬アイテム
 	Souko::Item m_carry;

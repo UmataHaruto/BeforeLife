@@ -30,7 +30,7 @@ bool Player::Init(Data data) {
 	*model = *ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::PLAYER)].modelname);
 	m_model = model;
 	m_obb.Init(m_model);
-	m_obb.CreateBox(250, 1700, 250, XMFLOAT3(0, 0, 0));
+	m_obb.CreateBox(1000, 1700, 1000, XMFLOAT3(0, 0, 0));
 	m_perceptual_area.CreateBox(10000,700,10000, XMFLOAT3(0, 0, 0));
 	//髪モデル
 	m_hair = ModelMgr::GetInstance().GetModelPtr(ModelMgr::GetInstance().g_modellist[static_cast<int>(MODELID::HAIR_00)].modelname);
@@ -318,22 +318,47 @@ void Player::Update() {
 	ActionType action = m_action_priority[0].action;
 	WorkType work = m_work_priority[0].work;
 
+	//行動優先度の初期化
+	m_action_priority.clear();
+	for (int i = 0; i < (int)ActionType::ACTION_MAX; i++)
+	{
+		ActionPriority priority;
+		priority.action = (ActionType)i;
+		priority.priority = 1;
+		m_action_priority.push_back(priority);
+	}
+
 	//行動を確定(スケジュール参照)
 	{
 		int time = Application::GAME_TIME / 60;
 		switch (m_schedule[time])
 		{
 		case Schedule::WORK:
-			action = ActionType::WORK;
+			m_action_priority[(int)ActionType::WORK].priority = 5;
 			break;
 		case Schedule::SLEEP:
 			action = ActionType::SLEEP;
+			m_action_priority[(int)ActionType::SLEEP].priority = 5;
 			break;
 		case Schedule::FREE:
 			action = ActionType::REST;
+			m_action_priority[(int)ActionType::REST].priority = 5;
 			break;
 		default:
 			break;
+		}
+	}
+
+	//行動を確定
+	{
+		int index = 0;
+		for (int i = 0; i < m_action_priority.size(); i++)
+		{
+			if (m_action_priority[index].priority < m_action_priority[i].priority)
+			{
+				action = m_action_priority[i].action;
+				index = i;
+			}
 		}
 	}
 
@@ -408,10 +433,26 @@ void Player::Update() {
 		break;
 
 	case Player::ActionType::REST:
-		//家が無い場合は徘徊しない
-		if (timer > 5 && m_house != nullptr) {
-			timer = 0;
-			Rest();
+		//会話クールタイムが無い場合
+		if (m_talk_cooltime > 0)
+		{
+			m_talk_cooltime -= io.DeltaTime;
+			if (m_talk_cooltime < 0)
+			{
+				m_talk_cooltime = 0;
+			}
+		}
+		if (m_talk_cooltime == 0) {
+			//会話
+			Talk();
+		}
+		else
+		{
+			//家が無い場合は徘徊しない
+			if (timer > 5 && m_house != nullptr) {
+				timer = 0;
+				Rest();
+			}
 		}
 		break;
 
@@ -477,8 +518,8 @@ void Player::Update() {
 		axisZ.y = m_mtx._32;
 		axisZ.z = m_mtx._33;
 		axisX.w = 0.0f;
-		//睡眠時のみ行動不能
-		if (!m_is_sleeping)
+		//睡眠時,会話時のみ行動不能
+		if (!m_is_sleeping || !m_is_talking)
 		{
 
 		if (keyinput)
@@ -528,7 +569,7 @@ void Player::Update() {
 
 				//向く場所が移動先と同じ場合振り向きをOFF
 				XMVECTOR Pos = XMVectorSet(m_pos.x, m_pos.y, -m_pos.z, 0.0f);
-				XMVECTOR At = XMVectorSet(m_movepos.x, m_movepos.y, -m_movepos.z, 0.0f);;
+				XMVECTOR At = XMVectorSet(m_movepos.x, m_movepos.y, -m_movepos.z, 0.0f);
 				XMVECTOR Up = XMVectorSet(0, 1, 0, 0.0f);
 
 				//Y軸回転以外を切る
@@ -1322,64 +1363,181 @@ void Player::Sleep()
 
 void Player::Talk()
 {
+	ImGuiIO& io = ImGui::GetIO();
 	static int talk_start_time = 0;
-	Player* talk_target = nullptr;
-	//会話対象を設定
-	if (!m_is_talking)
-	{
-		WorkType work;
-		WorkType work_target;
-		ActionType action_target;
-		//優先作業を判別
-		{
-			int index = 0;
-			for (int i = 0; i < m_work_priority.size(); i++)
-			{
-				if (m_work_priority[index].priority < m_work_priority[i].priority)
-				{
-					work = m_work_priority[i].work;
-					index = i;
-				}
-			}
-		}
-		for (int i = 0; i < VillagerMgr::GetInstance().m_villager.size(); i++)
-		{
-			int index = 0;
-			//優先作業を判別
-			for (int j = 0; j < VillagerMgr::GetInstance().m_villager[i]->m_work_priority.size(); j++)
-			{
-				if (VillagerMgr::GetInstance().m_villager[index]->m_work_priority < VillagerMgr::GetInstance().m_villager[j]->m_work_priority)
-				{
-					work_target = VillagerMgr::GetInstance().m_villager[i]->m_work_priority[j].work;
-					index = j;
-				}
-			}
-			index = 0;
-			//優先作業を判別
-			for (int j = 0; j < VillagerMgr::GetInstance().m_villager[i]->m_action_priority.size(); j++)
-			{
-				if (VillagerMgr::GetInstance().m_villager[index]->m_action_priority < VillagerMgr::GetInstance().m_villager[j]->m_action_priority)
-				{
-					action_target = VillagerMgr::GetInstance().m_villager[i]->m_action_priority[j].action;
-					index = j;
-				}
-			}
 
-			//対象の行動優先が同じかつ休憩状態
-			if (work == work_target && action_target == ActionType::REST)
-			{
-				talk_target = VillagerMgr::GetInstance().m_villager[i];
-			}
-		}
-		//会話相手が存在する場合
-		if (talk_target != nullptr)
+	static float talk_interval = 0;
+    
+	talk_interval += io.DeltaTime;
+
+	//set animation
+	if (m_is_talking)
+	{
+		//会話対象が消えた場合は処理しない
+		if (talk_target == nullptr)
 		{
-			
+			return void();
 		}
+
+		m_animdata.animno = AnimationType::TALK;
+
+		//お互いを見る
+		XMVECTOR Pos = XMVectorSet(m_pos.x, m_pos.y, -m_pos.z, 0.0f);
+		XMVECTOR At = XMVectorSet(talk_target->GetPos().x, talk_target->GetPos().y, -talk_target->GetPos().z, 0.0f);
+		XMVECTOR Up = XMVectorSet(0, 1, 0, 0.0f);
+
+		//Y軸回転以外を切る
+		ALIGN16 XMMATRIX lookat;
+		XMFLOAT4X4 lotateX;
+		XMMATRIX LotateXMtx;
+		XMFLOAT4X4 lotateZ;
+		XMMATRIX LotateZMtx;
+
+		DX11MtxRotationX(0, lotateX);
+		LotateXMtx = XMLoadFloat4x4(&lotateX);
+		DX11MtxRotationZ(0, lotateZ);
+		LotateZMtx = XMLoadFloat4x4(&lotateZ);
+		lookat = XMMatrixMultiply(LotateXMtx, lookat);
+		lookat = XMMatrixMultiply(LotateZMtx, lookat);
+
+		XMMATRIX scale = XMMatrixScaling(0.03, 0.03, 0.03);
+		lookat = XMMatrixLookAtLH(Pos, At, Up);
+		lookat = XMMatrixMultiply(lookat, scale);
+
+		XMStoreFloat4x4(&m_mtx, lookat);
+
 	}
-	//会話状態
-	else
-	{
 
+	if (talk_interval > 3)
+	{
+		talk_interval = 0;
+		//会話対象を設定
+		if (!m_is_talking)
+		{
+			WorkType work = WorkType::WORK_MAX;
+			WorkType work_target = WorkType::WORK_MAX;
+			ActionType action_target = ActionType::ACTION_MAX;
+			//優先作業を判別
+			{
+				int index = 0;
+				for (int i = 0; i < m_work_priority.size(); i++)
+				{
+					if (m_work_priority[index].priority < m_work_priority[i].priority)
+					{
+						work = m_work_priority[i].work;
+						index = i;
+					}
+				}
+			}
+			for (int i = 0; i < VillagerMgr::GetInstance().m_villager.size(); i++)
+			{
+				int index = 0;
+				//優先作業を判別
+				for (int j = 0; j < VillagerMgr::GetInstance().m_villager[i]->m_work_priority.size(); j++)
+				{
+					if (VillagerMgr::GetInstance().m_villager[i]->m_work_priority[index].priority < VillagerMgr::GetInstance().m_villager[i]->m_work_priority[j].priority)
+					{
+						index = j;
+					}
+				}
+				work_target = VillagerMgr::GetInstance().m_villager[i]->m_work_priority[index].work;
+				index = 0;
+
+				//優先作業を判別
+				for (int j = 0; j < VillagerMgr::GetInstance().m_villager[i]->m_action_priority.size(); j++)
+				{
+					if (VillagerMgr::GetInstance().m_villager[i]->m_action_priority[index].priority < VillagerMgr::GetInstance().m_villager[i]->m_action_priority[j].priority)
+					{
+						index = j;
+					}
+				}
+				action_target = VillagerMgr::GetInstance().m_villager[i]->m_action_priority[index].action;
+
+				//対象の行動優先が同じかつ休憩状態
+				if (this->m_first_name != VillagerMgr::GetInstance().m_villager[i]->m_first_name && work == work_target && action_target == ActionType::REST)
+				{
+					talk_target = VillagerMgr::GetInstance().m_villager[i];
+				}
+			}
+			//会話相手が存在する場合
+			if (talk_target != nullptr)
+			{
+				//会話前の場合
+				if (!m_is_talking)
+				{
+					//移動地点を指定
+
+					m_ismoving = true;
+					m_movepos = talk_target->GetPos();
+
+					//移動先の指定
+					RouteSearch::GetInstance().InitStageCollider();
+					m_moveque = RouteSearch::GetInstance().SearchRoute(m_pos, m_movepos);
+					//最初の移動先をキューの最後にする
+					if (m_moveque.size() > 0) {
+						XMFLOAT2 backque = m_moveque[m_moveque.size() - 1];
+						m_moveque.pop_back();
+						m_movepos = XMFLOAT3(backque.x, m_pos.y, backque.y);
+
+						m_ismoving = true;
+					}
+
+					//目的地に到達した
+					if (m_obb.Collision(talk_target->GetOBB()))
+					{
+						m_ismoving = false;
+						m_is_talking = true;
+						m_moveque.clear();
+					}
+				}
+			}
+		}
+		//会話状態
+		else
+		{
+			Emotion(EMOTION::TALK);
+			//会話対象が消えた場合は処理しない
+			if (talk_target == nullptr)
+			{
+				return void();
+			}
+			//記憶の交換を行う
+			static int resource_memory_idx = 0;
+
+			for (int i = 0; i < 3; i++)
+			{
+				//idxをインクリメント
+				if (resource_memory_idx < m_resource_memory.size())
+				{
+					resource_memory_idx++;
+				}
+
+				int index = 0;
+				bool duplication = false;
+				for (int j = 0; j < talk_target->GetResourceMemory().size(); j++)
+				{
+					//相手側の記憶と照合
+					if (m_resource_memory[resource_memory_idx] == talk_target->GetResourceMemory()[j])
+					{
+						index = j;
+						duplication = true;
+					}
+				}
+				//１つも被っている要素が無い場合
+				if (!duplication)
+				{
+					Emotion(EMOTION::HEART);
+					AddResourceMemory(talk_target->GetResourceMemory()[index]);
+				}
+			}
+
+			//会話終了
+			if (resource_memory_idx >= m_resource_memory.size())
+			{
+				m_is_talking = false;
+				m_talk_cooltime = 20;
+			}
+
+		}
 	}
 }

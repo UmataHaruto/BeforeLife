@@ -693,6 +693,107 @@ void GameButton::Draw()
 	}
 	ImGui::PopStyleColor(3);
 
+	//仕事優先度
+		//ウィンドウ更新,１フレームのみ描画を切る
+	{
+		static int window_update_cnt = 0;
+		static bool window_update_flg = false;
+		if (!workpriority && window_update_flg)
+		{
+			window_update_cnt++;
+		}
+		//スクロール用にウィンドウを更新
+		if (workpriority || window_update_cnt > 1)
+		{
+			workpriority = true;
+			window_update_cnt = 0;
+			window_update_flg = false;
+			ImGui::SetNextWindowPos(ImVec2(200, 30), ImGuiCond_::ImGuiCond_Always);
+			ImGui::SetNextWindowSize(ImVec2(500, 300), ImGuiCond_::ImGuiCond_Always);
+			ImGuiWindowFlags window_flags = 0;
+			window_flags |= ImGuiWindowFlags_NoTitleBar;
+			window_flags |= ImGuiWindowFlags_NoMove;
+			window_flags |= ImGuiWindowFlags_NoResize;
+			window_flags |= ImGuiWindowFlags_NoBackground;
+			window_flags |= ImGuiWindowFlags_NoScrollbar;
+			static int characternum = VillagerMgr::GetInstance().m_villager.size();
+			if (characternum != VillagerMgr::GetInstance().m_villager.size())
+			{
+				characternum = VillagerMgr::GetInstance().m_villager.size();
+				workpriority = false;
+				window_update_flg = true;
+			}
+			characternum = VillagerMgr::GetInstance().m_villager.size();
+			std::unique_ptr<bool> active = std::make_unique<bool>();
+			ImGui::SetWindowFontScale(0.2);
+			ImGui::Begin(u8"アクション", active.get(), window_flags);
+			//ウィンドウ画像
+			ImGui::SetCursorPos(ImVec2(0, 0));
+			ImGui::Image(m_windowback_texture_view, ImVec2(500, 50 + (VillagerMgr::GetInstance().m_villager.size() * 30)), ImVec2(0, 0), ImVec2(1, 1), m_tint_col, m_border_col);
+			ImGui::SetCursorPos(ImVec2(153, 0));
+			ImGui::Image(m_action_priority_texture, ImVec2(200, 66), ImVec2(0, 0), ImVec2(1, 1), m_tint_col, m_border_col);
+			ImGui::SetCursorPos(ImVec2(10, 0));
+			ImGui::TextColored(ImVec4(1, 1, 1, 1), u8"アクション優先度");
+			//名前表示
+			for (int i = 0; i < VillagerMgr::GetInstance().m_villager.size(); i++) {
+				//名前
+				std::string name = VillagerMgr::GetInstance().m_villager[i]->GetName(NameGenerator::NAMETYPE::FAMILLY) + VillagerMgr::GetInstance().m_villager[i]->GetName(NameGenerator::NAMETYPE::MALE);
+				ImGui::SetCursorPos(ImVec2(10, 40 + (i * 30)));
+				ImGui::TextColored(ImVec4(1, 1, 1, 1), name.c_str());
+				//優先度変更
+				for (int j = 0; j < VillagerMgr::GetInstance().m_villager[i]->GetWorkPriority().size(); j++)
+				{
+					ImGui::SetCursorPos(ImVec2(153 + (j * 26.5), 40 + (i * 30)));
+					//優先度を文字列に変換
+					std::string priority;
+					for (int cnt = 0; cnt < (i + 1) * (j + 1); cnt++)
+					{
+						priority = priority + "         " + std::to_string((i + 1)) + std::to_string((j + 1));
+					}
+					ImGui::SetWindowFontScale(0.3);
+					bool ret = ImGui::Button(priority.c_str(), ImVec2(20, 20));
+					if (ret)
+					{
+						SoundMgr::GetInstance().XA_Play("assets/sound/SE/SelectClick00.wav");
+						if (VillagerMgr::GetInstance().m_villager[i]->GetWorkPriority()[j].priority < 5) {
+							VillagerMgr::GetInstance().m_villager[i]->SetWorkPriority(j, VillagerMgr::GetInstance().m_villager[i]->GetWorkPriority()[j].priority + 1);
+						}
+						else
+						{
+							VillagerMgr::GetInstance().m_villager[i]->SetWorkPriority(j, 1);
+						}
+					}
+					ImGui::SetCursorPos(ImVec2(158 + (j * 26.5), 40 + (i * 30)));
+					ImVec4 priority_color = { 1,1,1,1 };
+					switch (VillagerMgr::GetInstance().m_villager[i]->GetWorkPriority()[j].priority)
+					{
+					case 1:
+						priority_color = { 0.8,1,0.8,1 };
+						break;
+					case 2:
+						priority_color = { 0.6,1,0.6,1 };
+						break;
+					case 3:
+						priority_color = { 0.4,1,0.4,1 };
+						break;
+					case 4:
+						priority_color = { 0.2,1,0.2,1 };
+						break;
+					case 5:
+						priority_color = { 0,1,0,1 };
+						break;
+					default:
+						break;
+					}
+					ImGui::TextColored(priority_color, std::to_string(VillagerMgr::GetInstance().m_villager[i]->GetWorkPriority()[j].priority).c_str());
+					ImGui::SetWindowFontScale(0.3);
+				}
+			}
+			ImGui::SetWindowFontScale(0.3);
+			ImGui::End();
+		}
+	}
+
 	//ウィンドウ更新,１フレームのみ描画を切る
 	//仕事ジャンル
 	{
