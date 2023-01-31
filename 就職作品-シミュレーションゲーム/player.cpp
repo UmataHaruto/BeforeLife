@@ -1530,7 +1530,11 @@ void Player::Talk()
 					AddResourceMemory(talk_target->GetResourceMemory()[index]);
 				}
 			}
-
+			if (!talk_target->m_is_talking && !m_ismoving)
+			{
+				m_is_talking = false;
+				m_talk_cooltime = 20;
+			}
 			//‰ï˜bI—¹
 			if (resource_memory_idx >= m_resource_memory.size())
 			{
