@@ -1516,11 +1516,13 @@ void Player::Talk()
 				bool duplication = false;
 				for (int j = 0; j < talk_target->GetResourceMemory().size(); j++)
 				{
-					//‘Šè‘¤‚Ì‹L‰¯‚ÆÆ‡
-					if (m_resource_memory[resource_memory_idx] == talk_target->GetResourceMemory()[j])
-					{
-						index = j;
-						duplication = true;
+					if (m_resource_memory[resource_memory_idx] != nullptr && talk_target->GetResourceMemory()[j] != nullptr) {
+						//‘Šè‘¤‚Ì‹L‰¯‚ÆÆ‡
+						if (m_resource_memory[resource_memory_idx] == talk_target->GetResourceMemory()[j])
+						{
+							index = j;
+							duplication = true;
+						}
 					}
 				}
 				//‚P‚Â‚à”í‚Á‚Ä‚¢‚é—v‘f‚ª–³‚¢ê‡

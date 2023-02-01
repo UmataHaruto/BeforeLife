@@ -152,6 +152,12 @@ public:
 
 	};
 
+	struct ResourceMemory
+	{
+		Resource* memory;  //記憶
+		float time;        //記憶した時間
+	};
+
 	//初期配置
 	static PlayerInitData ObjectInitData[];
 

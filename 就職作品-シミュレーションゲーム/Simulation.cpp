@@ -46,7 +46,13 @@ DWORD starttime;
 DWORD endtime;
 DWORD timer;
 
+//動画撮影用
+bool draw_shadow = true;
+bool draw_sea = true;
+
+
 void RenderDepthMap(CLight& light);
+void ClearRenderBuffer();
 void SimulationUpdate();
 
 // 頂点シェーダー
@@ -303,7 +309,7 @@ void  SimulationInit() {
 			if (noise_array[i + (j * 200)] > 80 && noise_array[i + (j * 200)] < 85) {
 				resource_data.type = ItemType::ORE_IRON;
 				resource_data.pos = XMFLOAT3(i * 12.5, 0, -j * 12.5);
-				if (RouteSearch::GetInstance().IsHitBuilding(resource_data.pos))
+				if (!RouteSearch::GetInstance().IsHitBuilding(resource_data.pos))
 				{
 					resource_data.Endurance = endurance;
 					resource_data.EnduranceMax = endurancemax;
@@ -477,8 +483,10 @@ void  SimulationUpdate() {
 	}
 
 	if (CDirectInput::GetInstance().CheckKeyBufferTrigger(DIK_F8)) {
-		RouteSearch::GetInstance().InitStageCollider();
-		RouteSearch::GetInstance().SearchRoute(XMFLOAT3(300,0,300), XMFLOAT3(20, 0, 20));
+		draw_sea = 1 - draw_sea;
+	}
+	if (CDirectInput::GetInstance().CheckKeyBufferTrigger(DIK_F9)) {
+		draw_shadow = 1 - draw_shadow;
 	}
 	//スカイドーム更新
 	g_skybox.Update(XMFLOAT3(0,0,0));
@@ -578,8 +586,13 @@ void  SimulationDraw() {
 	//３D描画
 	TurnOnZbuffer();
 	CLight* light = GetDirectionallight();
-	RenderDepthMap(*light);
-
+	if (draw_shadow) {
+		RenderDepthMap(*light);
+	}
+	else
+	{
+		ClearRenderBuffer();
+	}
 	// デバイスコンテキスト取得
 	ID3D11DeviceContext* devcontext;
 	devcontext = CDirectXGraphics::GetInstance()->GetImmediateContext();
@@ -613,8 +626,9 @@ void  SimulationDraw() {
 	ID3D11PixelShader* psh;
 	psh = ShaderHashmap::GetInstance()->GetPixelShader(ps_shadowmap_filename[1]);
 
-	g_terrain.Draw();
-
+	if (draw_sea) {
+		g_terrain.Draw();
+	}
 	Stage::GetInstance().Draw();
 
 	//資源描画
@@ -841,4 +855,23 @@ void RenderDepthMap(CLight& light) {
 
 	//村人描画
 	VillagerMgr::GetInstance().DrawShadow(layout, vsh, psh);
+}
+
+void ClearRenderBuffer()
+{
+	// デバイスコンテキスト取得
+	ID3D11DeviceContext* devcontext;
+	devcontext = CDirectXGraphics::GetInstance()->GetImmediateContext();
+	// ターゲットバッファクリア	
+	float ClearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f }; //red,green,blue,alpha
+
+	// ターゲットバッファクリア
+	devcontext->ClearRenderTargetView(g_DepthMapRTV.Get(), ClearColor);
+	// Zバッファクリア
+	devcontext->ClearDepthStencilView(g_DSTexDSV.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+
+	// レンダリングターゲットビュー、デプスステンシルビューを設定
+	ID3D11RenderTargetView* rtv[] = { g_DepthMapRTV.Get() };
+	devcontext->OMSetRenderTargets(1, rtv, g_DSTexDSV.Get());
 }
